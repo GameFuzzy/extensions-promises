@@ -315,9 +315,9 @@ export class ComicExtra extends Source {
   async getHomePageSections(sectionCallback: (section: HomeSection) => void): Promise<void> {
 
     // Let the app know what the homesections are without filling in the data
-    let popularSection = createHomeSection({ id: 'popular_comics', title: 'POPULAR COMICS', view_more: false })
-    let latestSection = createHomeSection({ id: 'latest_updated_comics', title: 'RECENTLY ADDED COMICS', view_more: false })
-    let newTitlesSection = createHomeSection({ id: 'new_comics', title: 'LATEST COMICS', view_more: false })
+    let popularSection = createHomeSection({ id: 'popular_comics', title: 'POPULAR COMICS', view_more: true })
+    let latestSection = createHomeSection({ id: 'latest_updated_comics', title: 'RECENTLY ADDED COMICS', view_more: true })
+    let newTitlesSection = createHomeSection({ id: 'new_comics', title: 'LATEST COMICS', view_more: true })
     sectionCallback(popularSection)
     sectionCallback(latestSection)
     sectionCallback(newTitlesSection)
