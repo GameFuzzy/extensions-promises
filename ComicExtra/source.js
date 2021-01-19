@@ -333,7 +333,7 @@ class ComicExtra extends paperback_extensions_common_1.Source {
             const data = yield this.requestManager.schedule(request, 1);
             let manga = [];
             let $ = this.cheerio.load(data.data);
-            let titles = [$('.title-1', $('.mobile-hide')).text()];
+            let titles = [$('.title-1', $('.mobile-hide')).text().trimStart()];
             let image = $('img', $('.movie-l-img')).attr('src');
             let summary = $('#film-content', $('#film-content-wrapper')).text().trim();
             let status, author, released, views, rating = 0;
