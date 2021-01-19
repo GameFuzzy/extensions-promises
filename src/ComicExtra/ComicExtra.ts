@@ -351,12 +351,12 @@ export class ComicExtra extends Source {
 
     let latest: MangaTile[] = []
 
-    let latestRequest = createRequestObject({
+    request = createRequestObject({
       url: `${COMICEXTRA_DOMAIN}/recent-comic`,
       method: 'GET'
     })
 
-    const latestData = await this.requestManager.schedule(latestRequest, 1)
+    const latestData = await this.requestManager.schedule(request, 1)
     $ = this.cheerio.load(latestData.data)
 
     for(let obj of $('.cartoon-box').toArray()) {
@@ -374,15 +374,14 @@ export class ComicExtra extends Source {
     latestSection.items = latest
     sectionCallback(latestSection)
 
-
     let newTitles: MangaTile[] = []
 
-    let newRequest = createRequestObject({
+    request = createRequestObject({
       url: `${COMICEXTRA_DOMAIN}/new-comic`,
       method: 'GET'
     })
 
-    const newData = await this.requestManager.schedule(newRequest, 1)
+    const newData = await this.requestManager.schedule(request, 1)
     $ = this.cheerio.load(newData.data)
 
     for(let obj of $('.cartoon-box').toArray()) {
@@ -397,7 +396,7 @@ export class ComicExtra extends Source {
       }))
     }
 
-    newTitlesSection.items = latest
+    newTitlesSection.items = newTitles
     sectionCallback(newTitlesSection)
   }
   
