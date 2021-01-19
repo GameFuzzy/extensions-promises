@@ -418,9 +418,10 @@ class ComicExtra extends paperback_extensions_common_1.Source {
                     url: `${COMICEXTRA_DOMAIN}/comic/${mangaId}/${pagesLeft}`,
                     method: "GET"
                 });
+                let i = 0;
+                i += $('tr', $('#list')).toArray().length;
                 const pageData = yield this.requestManager.schedule(pageRequest, 1);
                 $ = this.cheerio.load(pageData.data);
-                let i = $('tr', $('#list')).toArray().length;
                 for (let obj of $('tr', $('#list')).toArray()) {
                     let chapterId = (_a = $('a', $(obj)).attr('href')) === null || _a === void 0 ? void 0 : _a.replace(`${COMICEXTRA_DOMAIN}/${mangaId}/`, '');
                     let chapNum = i;
