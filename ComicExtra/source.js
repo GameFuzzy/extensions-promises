@@ -306,7 +306,7 @@ exports.ComicExtra = exports.ComicExtraInfo = void 0;
 const paperback_extensions_common_1 = require("paperback-extensions-common");
 const COMICEXTRA_DOMAIN = 'https://www.comicextra.com';
 exports.ComicExtraInfo = {
-    version: '1.0.8',
+    version: '1.1.1',
     name: 'ComicExtra',
     description: 'Extension that pulls western comics from ComicExtra.com',
     author: 'GameFuzzy',
@@ -333,7 +333,7 @@ class ComicExtra extends paperback_extensions_common_1.Source {
             const data = yield this.requestManager.schedule(request, 1);
             let manga = [];
             let $ = this.cheerio.load(data.data);
-            let titles = [$('.title-1').text()];
+            let titles = [$('.title-1', $('.mobile-hide')).text()];
             let image = $('img', $('.movie-l-img')).attr('src');
             let summary = $('#film-content', $('#film-content-wrapper')).text().trim();
             let status, author, released, views, rating = 0;
@@ -413,26 +413,22 @@ class ComicExtra extends paperback_extensions_common_1.Source {
             let $ = this.cheerio.load(data.data);
             let chapters = [];
             let pagesLeft = $('a', $('.general-nav')).toArray().length;
+            pagesLeft = pagesLeft == 0 ? 1 : pagesLeft;
             while (pagesLeft > 0) {
                 let pageRequest = createRequestObject({
                     url: `${COMICEXTRA_DOMAIN}/comic/${mangaId}/${pagesLeft}`,
                     method: "GET"
                 });
-                let chaptersLeft = 50 * (pagesLeft - 1) + $('tr', $('#list')).toArray().length;
                 const pageData = yield this.requestManager.schedule(pageRequest, 1);
                 $ = this.cheerio.load(pageData.data);
                 for (let obj of $('tr', $('#list')).toArray()) {
                     let chapterId = (_a = $('a', $(obj)).attr('href')) === null || _a === void 0 ? void 0 : _a.replace(`${COMICEXTRA_DOMAIN}/${mangaId}/`, '');
-                    //let chapNum = chaptersLeft
                     let chapNum = Number(chapterId === null || chapterId === void 0 ? void 0 : chapterId.replace(`chapter-`, '').trim());
                     if (isNaN(chapNum)) {
-                        // Sorts all the chapters and filters duplicates
                         chapNum = 0;
-                        console.log(chapNum);
                     }
                     let chapName = $('a', $(obj)).text();
                     let time = $($('td', $(obj)).toArray()[1]).text();
-                    chaptersLeft--;
                     chapters.push(createChapter({
                         id: chapterId,
                         mangaId: mangaId,
@@ -445,8 +441,10 @@ class ComicExtra extends paperback_extensions_common_1.Source {
                 pagesLeft--;
             }
             let sortedChapters = [];
+            // Sorts all the chapters and filters duplicates
             chapters.forEach((c) => {
-                if (sortedChapters[sortedChapters.indexOf(c)].id !== c.id) {
+                var _a;
+                if (((_a = sortedChapters[sortedChapters.indexOf(c)]) === null || _a === void 0 ? void 0 : _a.id) !== (c === null || c === void 0 ? void 0 : c.id)) {
                     sortedChapters.push(c);
                 }
             });
