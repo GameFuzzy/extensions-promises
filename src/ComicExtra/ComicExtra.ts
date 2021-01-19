@@ -52,11 +52,15 @@ export class ComicExtra extends Source {
     let image = $('img', $('.movie-l-img')).attr('src')
 
     let summary = $('#film-content', $('#film-content-wrapper')).text().trim()
+    let relatedIds: string[] = []
+    for(let obj of $('.list-top-item').toArray()) {
+        relatedIds.push($('a', $(obj)).attr('href')?.replace(`${COMICEXTRA_DOMAIN}/comic/`, '')!.trim() || '')
+    }
 
-    let status, author, released, views, rating: number = 0
-    let tags: TagSection[] = [createTagSection({ id: 'genres', label: 'genres', tags: [] })]
+    let status, author, released, rating: number = 0
+    let tags: TagSection[] = [createTagSection({ id: '0', label: 'genres', tags: [] })]
     let i = 0
-    for (let item of $('dd', $('.movie-dl')).toArray()) {
+    for (let item of $('.movie-dd', $('.movie-dl')).toArray()) {
       switch (i) {
         case 0: {
           i++
@@ -64,7 +68,7 @@ export class ComicExtra extends Source {
         }
         case 1: {
           // Comic Status
-          if ($(item).text().toLowerCase().includes("ongoing")) {
+          if ($('a', $(item)).text().toLowerCase().includes("ongoing")) {
             status = MangaStatus.ONGOING
           }
           else {
@@ -96,7 +100,7 @@ export class ComicExtra extends Source {
           continue
           }
         case 5: {
-               // Genres
+          // Genres
           let genres = $(item).text().split(",")
           for(let genre in genres) {
             tags[0].tags.push(createTag({id: genre.trim(), label: genre.trim()}))
