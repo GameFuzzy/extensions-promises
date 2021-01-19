@@ -306,7 +306,7 @@ exports.ComicExtra = exports.ComicExtraInfo = void 0;
 const paperback_extensions_common_1 = require("paperback-extensions-common");
 const COMICEXTRA_DOMAIN = 'https://www.comicextra.com';
 exports.ComicExtraInfo = {
-    version: '1.1.4',
+    version: '1.1.5',
     name: 'ComicExtra',
     description: 'Extension that pulls western comics from ComicExtra.com',
     author: 'GameFuzzy',
@@ -341,13 +341,13 @@ class ComicExtra extends paperback_extensions_common_1.Source {
                 relatedIds.push(((_a = $('a', $(obj)).attr('href')) === null || _a === void 0 ? void 0 : _a.replace(`${COMICEXTRA_DOMAIN}/comic/`, '').trim()) || '');
             }
             let status, author, released, rating = 0;
-            let tags = [createTagSection({ id: '0', label: 'genres', tags: [] }),
+            let tagSections = [createTagSection({ id: '0', label: 'genres', tags: [] }),
                 createTagSection({ id: '1', label: 'format', tags: [] })];
             let i = 0;
             for (let item of $('.movie-dd', $('.movie-dl')).toArray()) {
                 switch (i) {
                     case 0: {
-                        tags[1].tags.push(createTag({ id: $(item).text().trim(), label: $(item).text().trim() }));
+                        tagSections[1].tags.push(createTag({ id: $(item).text().trim(), label: $(item).text().trim() }));
                         i++;
                         continue;
                     }
@@ -388,7 +388,8 @@ class ComicExtra extends paperback_extensions_common_1.Source {
                         // Genres
                         let genres = $(item).text().trim().split(', ');
                         genres.forEach(function (genre) {
-                            tags[0].tags.push(createTag({ id: genre.trim(), label: genre.trim() }));
+                            var _a, _b;
+                            tagSections[0].tags.push(createTag({ id: (_b = (_a = $(item).attr('href')) === null || _a === void 0 ? void 0 : _a.replace(`${COMICEXTRA_DOMAIN}/`, '').trim()) !== null && _b !== void 0 ? _b : genre.trim(), label: genre.trim() }));
                         });
                         i++;
                         continue;
@@ -405,7 +406,7 @@ class ComicExtra extends paperback_extensions_common_1.Source {
                 status: Number(status),
                 author: author,
                 lastUpdate: released,
-                tags: tags,
+                tags: tagSections,
                 desc: summary,
                 relatedIds: relatedIds
             });
@@ -432,16 +433,16 @@ class ComicExtra extends paperback_extensions_common_1.Source {
                 $ = this.cheerio.load(pageData.data);
                 for (let obj of $('tr', $('#list')).toArray()) {
                     let chapterId = (_a = $('a', $(obj)).attr('href')) === null || _a === void 0 ? void 0 : _a.replace(`${COMICEXTRA_DOMAIN}/${mangaId}/`, '');
-                    let chapNum = Number(chapterId === null || chapterId === void 0 ? void 0 : chapterId.replace(`chapter-`, '').trim());
-                    if (isNaN(chapNum)) {
-                        chapNum = 0;
+                    let chapNum = chapterId === null || chapterId === void 0 ? void 0 : chapterId.replace(`chapter-`, '').trim();
+                    if (isNaN(Number(chapNum))) {
+                        chapNum = `0.${chapNum === null || chapNum === void 0 ? void 0 : chapNum.replace(/^\D+/g, '')}`;
                     }
                     let chapName = $('a', $(obj)).text();
                     let time = $($('td', $(obj)).toArray()[1]).text();
                     chapters.push(createChapter({
                         id: chapterId,
                         mangaId: mangaId,
-                        chapNum: chapNum,
+                        chapNum: Number(chapNum),
                         langCode: paperback_extensions_common_1.LanguageCode.ENGLISH,
                         name: chapName,
                         time: new Date(time)
@@ -507,6 +508,26 @@ class ComicExtra extends paperback_extensions_common_1.Source {
             return createPagedResults({
                 results: mangaTiles
             });
+        });
+    }
+    getTags() {
+        var _a, _b;
+        return __awaiter(this, void 0, void 0, function* () {
+            const request = createRequestObject({
+                url: `${COMICEXTRA_DOMAIN}/comic-genres/`,
+                method: 'GET'
+            });
+            const data = yield this.requestManager.schedule(request, 1);
+            let $ = this.cheerio.load(data.data);
+            let tagSections = [createTagSection({ id: '0', label: 'genres', tags: [] }),
+                createTagSection({ id: '1', label: 'format', tags: [] })];
+            for (let obj of $('a', $('.home-list')).toArray()) {
+                let id = (_b = (_a = $(obj).attr('href')) === null || _a === void 0 ? void 0 : _a.replace(`${COMICEXTRA_DOMAIN}/`, '').trim()) !== null && _b !== void 0 ? _b : $(obj).text().trim();
+                let genre = $(obj).text().trim();
+                tagSections[0].tags.push(createTag({ id: id, label: genre }));
+            }
+            tagSections[1].tags.push(createTag({ id: 'comic/', label: 'Comic' }));
+            return tagSections;
         });
     }
     getHomePageSections(sectionCallback) {
