@@ -315,8 +315,12 @@ export class ComicExtra extends Source {
   async getHomePageSections(sectionCallback: (section: HomeSection) => void): Promise<void> {
 
     // Let the app know what the homesections are without filling in the data
-    let section1 = createHomeSection({ id: 'popular_comics', title: 'POPULAR COMICS', view_more: false })
-    sectionCallback(section1)
+    let popularSection = createHomeSection({ id: 'popular_comics', title: 'POPULAR COMICS', view_more: false })
+    let latestSection = createHomeSection({ id: 'latest_updated_comics', title: 'RECENTLY ADDED COMICS', view_more: false })
+    let newTitlesSection = createHomeSection({ id: 'new_comics', title: 'LATEST COMICS', view_more: false })
+    sectionCallback(popularSection)
+    sectionCallback(latestSection)
+    sectionCallback(newTitlesSection)
 
     // Make the request and fill out available titles
     let request = createRequestObject({
@@ -324,24 +328,76 @@ export class ComicExtra extends Source {
       method: 'GET'
     })
 
-    const data = await this.requestManager.schedule(request, 1)
+    const popularData = await this.requestManager.schedule(request, 1)
 
-    let popularComics: MangaTile[] = []
-    let $ = this.cheerio.load(data.data)
+    let popular: MangaTile[] = []
+    let $ = this.cheerio.load(popularData.data)
 
     for(let obj of $('.cartoon-box').toArray()) {
       let id = $('a', $(obj)).attr('href')?.replace(`${COMICEXTRA_DOMAIN}/comic/`, '')
       let title = $('h3', $(obj)).text().trim()
       let image = $('img', $(obj)).attr('src')
 
-      popularComics.push(createMangaTile({
+      popular.push(createMangaTile({
           id: id!,
           title: createIconText({text: title}),
           image: image!
       }))
   }
 
-    section1.items = popularComics
-    sectionCallback(section1)
+    popularSection.items = popular
+    sectionCallback(popularSection)
+
+
+    let latest: MangaTile[] = []
+
+    request = createRequestObject({
+      url: `${COMICEXTRA_DOMAIN}/recent-comic`,
+      method: 'GET'
+    })
+
+    const latestData = await this.requestManager.schedule(request, 1)
+    $ = this.cheerio.load(latestData.data)
+
+    for(let obj of $('.cartoon-box').toArray()) {
+      let id = $('a', $(obj)).attr('href')?.replace(`${COMICEXTRA_DOMAIN}/comic/`, '')
+      let title = $('h3', $(obj)).text().trim()
+      let image = $('img', $(obj)).attr('src')
+
+      latest.push(createMangaTile({
+          id: id!,
+          title: createIconText({text: title}),
+          image: image!
+      }))
   }
+
+    latestSection.items = latest
+    sectionCallback(latestSection)
+
+    let newTitles: MangaTile[] = []
+
+    request = createRequestObject({
+      url: `${COMICEXTRA_DOMAIN}/new-comic`,
+      method: 'GET'
+    })
+
+    const newData = await this.requestManager.schedule(request, 1)
+    $ = this.cheerio.load(newData.data)
+
+    for(let obj of $('.cartoon-box').toArray()) {
+      let id = $('a', $(obj)).attr('href')?.replace(`${COMICEXTRA_DOMAIN}/comic/`, '')
+      let title = $('h3', $(obj)).text().trim()
+      let image = $('img', $(obj)).attr('src')
+
+      newTitles.push(createMangaTile({
+          id: id!,
+          title: createIconText({text: title}),
+          image: image!
+      }))
+    }
+
+    newTitlesSection.items = latest
+    sectionCallback(newTitlesSection)
+  }
+  
 }
