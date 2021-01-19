@@ -306,7 +306,7 @@ exports.ComicExtra = exports.ComicExtraInfo = void 0;
 const paperback_extensions_common_1 = require("paperback-extensions-common");
 const COMICEXTRA_DOMAIN = 'https://www.comicextra.com';
 exports.ComicExtraInfo = {
-    version: '1.1.5',
+    version: '1.1.6',
     name: 'ComicExtra',
     description: 'Extension that pulls western comics from ComicExtra.com',
     author: 'GameFuzzy',
@@ -340,7 +340,7 @@ class ComicExtra extends paperback_extensions_common_1.Source {
             for (let obj of $('.list-top-item').toArray()) {
                 relatedIds.push(((_a = $('a', $(obj)).attr('href')) === null || _a === void 0 ? void 0 : _a.replace(`${COMICEXTRA_DOMAIN}/comic/`, '').trim()) || '');
             }
-            let status, author, released, rating = 0;
+            let status = paperback_extensions_common_1.MangaStatus.ONGOING, author, released, rating = 0;
             let tagSections = [createTagSection({ id: '0', label: 'genres', tags: [] }),
                 createTagSection({ id: '1', label: 'format', tags: [] })];
             let i = 0;
@@ -397,17 +397,16 @@ class ComicExtra extends paperback_extensions_common_1.Source {
                 }
                 i = 0;
             }
-            console.log(author);
             return createManga({
                 id: mangaId,
-                rating: 0,
+                rating: rating,
                 titles: titles,
                 image: image,
-                status: Number(status),
+                status: status,
                 author: author,
-                lastUpdate: released,
                 tags: tagSections,
                 desc: summary,
+                lastUpdate: released,
                 relatedIds: relatedIds
             });
         });
