@@ -10,13 +10,14 @@ import {
   LanguageCode,
   TagSection,
   PagedResults,
-  SourceInfo
+  SourceInfo,
+  TagType
 } from "paperback-extensions-common"
 
 const COMICEXTRA_DOMAIN = 'https://www.comicextra.com'
 
 export const ComicExtraInfo: SourceInfo = {
-  version: '1.0.0',
+  version: '1.0.1',
   name: 'ComicExtra',
   description: 'Extension that pulls western comics from ComicExtra.com',
   author: 'GameFuzzy',
@@ -24,6 +25,12 @@ export const ComicExtraInfo: SourceInfo = {
   icon: "icon.png",
   hentaiSource: false,
   websiteBaseURL: COMICEXTRA_DOMAIN,
+  sourceTags: [
+    {
+      text: "Work in progress",
+      type: TagType.RED
+    }
+  ]
 }
 
 export class ComicExtra extends Source {
@@ -68,11 +75,11 @@ export class ComicExtra extends Source {
         }
         case 2: {
           // Alt Titles
-          if($(item).text().toLowerCase().trim() == "-") {
-            i++
-            continue
-          }
-          titles.push($(item).text().trim())
+          // if($(item).text().toLowerCase().trim() == "-") {
+          //  i++
+          //  continue
+          // }
+          // titles.push($(item).text().trim())
           i++
           continue
         }
@@ -89,7 +96,6 @@ export class ComicExtra extends Source {
           continue
           }
         case 5: {
-          // Genres (Cannot be parsed due to ::before and ::after tags, look into this later)
                // Genres
                let genres = $(item).text().split(",")
                for(let genre in genres) {
@@ -212,13 +218,13 @@ export class ComicExtra extends Source {
 
   async getHomePageSections(sectionCallback: (section: HomeSection) => void): Promise<void> {
 
-    // Let the app know what the homsections are without filling in the data
-    let latest_comics = createHomeSection({ id: 'latest_comics', title: 'LATEST COMICS' })
-    sectionCallback(latest_comics)
+    // Let the app know what the homesections are without filling in the data
+    let section1 = createHomeSection({ id: 'popular_comics', title: 'POPULAR COMICS', view_more: false })
+    sectionCallback(section1)
 
     // Make the request and fill out available titles
     let request = createRequestObject({
-      url: `${COMICEXTRA_DOMAIN}`,
+      url: `${COMICEXTRA_DOMAIN}/popular-comic`,
       method: 'GET'
     })
 
@@ -239,8 +245,7 @@ export class ComicExtra extends Source {
       }))
   }
 
-    latest_comics.items = popularComics
-
-    sectionCallback(latest_comics)
+    section1.items = popularComics
+    sectionCallback(section1)
   }
 }
