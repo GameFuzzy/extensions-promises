@@ -11,6 +11,7 @@ import {
   TagSection,
   PagedResults,
   SourceInfo,
+  MangaUpdates,
   TagType
 } from "paperback-extensions-common"
 
@@ -208,6 +209,53 @@ export class ComicExtra extends Source {
     })
   }
 
+  async filterUpdatedManga(mangaUpdatesFoundCallback: (updates: MangaUpdates) => void, time: Date, ids: string[]): Promise<void> {
+
+    let loadNextPage: boolean = true
+    let currPageNum: number = 1
+
+    while (loadNextPage) {
+
+      let request = createRequestObject({
+        url: `${COMICEXTRA_DOMAIN}/comic-updates/`,
+        method: 'GET',
+        param: String(currPageNum)
+      })
+
+      let data = await this.requestManager.schedule(request, 1)
+
+      let $ = this.cheerio.load(data.data)
+
+      let foundIds: string[] = []
+
+      let passedReferenceTime = false
+      for (let item of $('.hlb-t').toArray()) {
+        let id = ($('a', item).first().attr('href') ?? '')?.replace(`${COMICEXTRA_DOMAIN}/comic/`, '')!.trim() ?? ''
+        let mangaTime = new Date($('.date').first().text())
+
+        passedReferenceTime = mangaTime <= time
+        if (!passedReferenceTime) {
+          if (ids.includes(id)) {
+            foundIds.push(id)
+          }
+        }
+        else break
+      }
+
+      if (!passedReferenceTime) {
+        currPageNum++
+      }
+
+      else {
+        loadNextPage = false
+      }
+
+      mangaUpdatesFoundCallback(createMangaUpdates({
+        ids: foundIds
+      }))
+    }
+  }
+  
   async searchRequest(query: SearchRequest, metadata: any): Promise<PagedResults> {
 
     let request = createRequestObject({
