@@ -364,11 +364,11 @@ class ComicExtra extends paperback_extensions_common_1.Source {
                     }
                     case 2: {
                         // Alt Titles
-                        // if($(item).text().toLowerCase().trim() == "-") {
-                        //  i++
-                        //  continue
-                        // }
-                        // titles.push($(item).text().trim())
+                        if ($(item).text().toLowerCase().trim() == "-") {
+                            i++;
+                            continue;
+                        }
+                        titles.push($(item).text().trim());
                         i++;
                         continue;
                     }
