@@ -132,23 +132,23 @@ export class ComicExtra extends Source {
 
     let chapters: Chapter[] = []
     let pagesLeft = $('a', $('.general-nav')).toArray().length
+    let chaptersLeft = 0
     while(pagesLeft > 0)
     {
       let pageRequest = createRequestObject({
         url: `${COMICEXTRA_DOMAIN}/comic/${mangaId}/${pagesLeft}`,
         method: "GET"
       })
-      let i = 0
-      i += $('tr', $('#list')).toArray().length
+      chaptersLeft += $('tr', $('#list')).toArray().length
       const pageData = await this.requestManager.schedule(pageRequest, 1)
       $ = this.cheerio.load(pageData.data)
       for(let obj of $('tr', $('#list')).toArray()) {
           let chapterId = $('a', $(obj)).attr('href')?.replace(`${COMICEXTRA_DOMAIN}/${mangaId}/`, '')
-          let chapNum = i
+          let chapNum = chaptersLeft
           let chapName = $('a', $(obj)).text()
           let time = $($('td', $(obj)).toArray()[1]).text()
   
-          i--
+          chaptersLeft--
           chapters.push(createChapter({
               id: chapterId!,
               mangaId: mangaId,
