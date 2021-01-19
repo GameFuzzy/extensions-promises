@@ -306,7 +306,7 @@ exports.ComicExtra = exports.ComicExtraInfo = void 0;
 const paperback_extensions_common_1 = require("paperback-extensions-common");
 const COMICEXTRA_DOMAIN = 'https://www.comicextra.com';
 exports.ComicExtraInfo = {
-    version: '1.0.6',
+    version: '1.0.8',
     name: 'ComicExtra',
     description: 'Extension that pulls western comics from ComicExtra.com',
     author: 'GameFuzzy',
@@ -424,9 +424,9 @@ class ComicExtra extends paperback_extensions_common_1.Source {
                 for (let obj of $('tr', $('#list')).toArray()) {
                     let chapterId = (_a = $('a', $(obj)).attr('href')) === null || _a === void 0 ? void 0 : _a.replace(`${COMICEXTRA_DOMAIN}/${mangaId}/`, '');
                     //let chapNum = chaptersLeft
-                    let chapNum = 0;
-                    if (Number(chapterId === null || chapterId === void 0 ? void 0 : chapterId.replace(`chapter-`, '').trim()) != NaN) {
-                        chapNum = Number(chapterId === null || chapterId === void 0 ? void 0 : chapterId.replace(`chapter-`, ''));
+                    let chapNum = Number(chapterId === null || chapterId === void 0 ? void 0 : chapterId.replace(`chapter-`, '').trim());
+                    if (isNaN(chapNum)) {
+                        chapNum = 0;
                     }
                     let chapName = $('a', $(obj)).text();
                     let time = $($('td', $(obj)).toArray()[1]).text();
