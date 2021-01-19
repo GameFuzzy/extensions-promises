@@ -306,7 +306,7 @@ exports.ComicExtra = exports.ComicExtraInfo = void 0;
 const paperback_extensions_common_1 = require("paperback-extensions-common");
 const COMICEXTRA_DOMAIN = 'https://www.comicextra.com';
 exports.ComicExtraInfo = {
-    version: '1.0.0',
+    version: '1.0.1',
     name: 'ComicExtra',
     description: 'Extension that pulls western comics from ComicExtra.com',
     author: 'GameFuzzy',
@@ -314,6 +314,12 @@ exports.ComicExtraInfo = {
     icon: "icon.png",
     hentaiSource: false,
     websiteBaseURL: COMICEXTRA_DOMAIN,
+    sourceTags: [
+        {
+            text: "Work in progress",
+            type: paperback_extensions_common_1.TagType.RED
+        }
+    ]
 };
 class ComicExtra extends paperback_extensions_common_1.Source {
     getMangaShareUrl(mangaId) { return `${COMICEXTRA_DOMAIN}/comic/${mangaId}`; }
@@ -352,11 +358,11 @@ class ComicExtra extends paperback_extensions_common_1.Source {
                     }
                     case 2: {
                         // Alt Titles
-                        if ($(item).text().toLowerCase().trim() == "-") {
-                            i++;
-                            continue;
-                        }
-                        titles.push($(item).text().trim());
+                        // if($(item).text().toLowerCase().trim() == "-") {
+                        //  i++
+                        //  continue
+                        // }
+                        // titles.push($(item).text().trim())
                         i++;
                         continue;
                     }
@@ -373,7 +379,6 @@ class ComicExtra extends paperback_extensions_common_1.Source {
                         continue;
                     }
                     case 5: {
-                        // Genres (Cannot be parsed due to ::before and ::after tags, look into this later)
                         // Genres
                         let genres = $(item).text().split(",");
                         for (let genre in genres) {
@@ -479,12 +484,12 @@ class ComicExtra extends paperback_extensions_common_1.Source {
     getHomePageSections(sectionCallback) {
         var _a;
         return __awaiter(this, void 0, void 0, function* () {
-            // Let the app know what the homsections are without filling in the data
-            let latest_comics = createHomeSection({ id: 'latest_comics', title: 'LATEST COMICS' });
-            sectionCallback(latest_comics);
+            // Let the app know what the homesections are without filling in the data
+            let section1 = createHomeSection({ id: 'popular_comics', title: 'POPULAR COMICS', view_more: false });
+            sectionCallback(section1);
             // Make the request and fill out available titles
             let request = createRequestObject({
-                url: `${COMICEXTRA_DOMAIN}`,
+                url: `${COMICEXTRA_DOMAIN}/popular-comic`,
                 method: 'GET'
             });
             const data = yield this.requestManager.schedule(request, 1);
@@ -500,8 +505,8 @@ class ComicExtra extends paperback_extensions_common_1.Source {
                     image: image
                 }));
             }
-            latest_comics.items = popularComics;
-            sectionCallback(latest_comics);
+            section1.items = popularComics;
+            sectionCallback(section1);
         });
     }
 }
