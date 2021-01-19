@@ -17,7 +17,7 @@ import {
 const COMICEXTRA_DOMAIN = 'https://www.comicextra.com'
 
 export const ComicExtraInfo: SourceInfo = {
-  version: '1.1.5',
+  version: '1.1.6',
   name: 'ComicExtra',
   description: 'Extension that pulls western comics from ComicExtra.com',
   author: 'GameFuzzy',
@@ -57,7 +57,7 @@ export class ComicExtra extends Source {
         relatedIds.push($('a', $(obj)).attr('href')?.replace(`${COMICEXTRA_DOMAIN}/comic/`, '')!.trim() || '')
     }
 
-    let status, author, released, rating: number = 0
+    let status = MangaStatus.ONGOING, author, released, rating: number = 0
     let tagSections: TagSection[] = [createTagSection({ id: '0', label: 'genres', tags: [] }),
     createTagSection({ id: '1', label: 'format', tags: [] })]
     let i = 0
@@ -113,17 +113,16 @@ export class ComicExtra extends Source {
       }
       i = 0
     }
-    console.log(author)
     return createManga({
       id: mangaId,
-      rating: 0,
+      rating: rating,
       titles: titles,
       image: image!,
-      status: Number(status),
+      status: status,
       author: author,
-      lastUpdate: released,
       tags: tagSections,
       desc: summary,
+      lastUpdate: released,
       relatedIds: relatedIds
     })
   }
