@@ -413,21 +413,21 @@ class ComicExtra extends paperback_extensions_common_1.Source {
             let $ = this.cheerio.load(data.data);
             let chapters = [];
             let pagesLeft = $('a', $('.general-nav')).toArray().length;
+            let chaptersLeft = 0;
             while (pagesLeft > 0) {
                 let pageRequest = createRequestObject({
                     url: `${COMICEXTRA_DOMAIN}/comic/${mangaId}/${pagesLeft}`,
                     method: "GET"
                 });
-                let i = 0;
-                i += $('tr', $('#list')).toArray().length;
+                chaptersLeft += $('tr', $('#list')).toArray().length;
                 const pageData = yield this.requestManager.schedule(pageRequest, 1);
                 $ = this.cheerio.load(pageData.data);
                 for (let obj of $('tr', $('#list')).toArray()) {
                     let chapterId = (_a = $('a', $(obj)).attr('href')) === null || _a === void 0 ? void 0 : _a.replace(`${COMICEXTRA_DOMAIN}/${mangaId}/`, '');
-                    let chapNum = i;
+                    let chapNum = chaptersLeft;
                     let chapName = $('a', $(obj)).text();
                     let time = $($('td', $(obj)).toArray()[1]).text();
-                    i--;
+                    chaptersLeft--;
                     chapters.push(createChapter({
                         id: chapterId,
                         mangaId: mangaId,
