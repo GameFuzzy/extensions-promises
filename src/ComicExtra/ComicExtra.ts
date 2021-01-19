@@ -97,13 +97,10 @@ export class ComicExtra extends Source {
           }
         case 5: {
                // Genres
-               let genres = $(item).text().split(",")
-               for(let genre in genres) {
-                   tags[0].tags.push(createTag({id: genre.trim(), label: genre.trim()}))
-               }
-               i++
-               continue
-          
+          let genres = $(item).text().split(",")
+          for(let genre in genres) {
+            tags[0].tags.push(createTag({id: genre.trim(), label: genre.trim()}))
+          }
           i++
           continue
         }
@@ -125,34 +122,45 @@ export class ComicExtra extends Source {
 
 
   async getChapters(mangaId: string): Promise<Chapter[]> {
-
     let request = createRequestObject({
       url: `${COMICEXTRA_DOMAIN}/comic/${mangaId}`,
       method: "GET"
     })
 
     const data = await this.requestManager.schedule(request, 1)
-
     let $ = this.cheerio.load(data.data)
 
     let chapters: Chapter[] = []
-    let i = $('tr', $('#list')).toArray().length
-    for(let obj of $('tr', $('#list')).toArray()) {
-        let chapterId = $('a', $(obj)).attr('href')?.replace(`${COMICEXTRA_DOMAIN}/${mangaId}/`, '')
-        let chapNum = i
-        let chapName = $('a', $(obj)).text()
-        let time = $($('td', $(obj)).toArray()[1]).text()
+    let pagesLeft = $('a', $('.general-nav')).toArray().length
+    while(pagesLeft > 0)
+    {
+      let pageRequest = createRequestObject({
+        url: `${COMICEXTRA_DOMAIN}/comic/${mangaId}/${pagesLeft}`,
+        method: "GET"
+      })
+  
+      const pageData = await this.requestManager.schedule(pageRequest, 1)
+      $ = this.cheerio.load(pageData.data)
 
-        i--
-        chapters.push(createChapter({
-            id: chapterId!,
-            mangaId: mangaId,
-            chapNum: chapNum,
-            langCode: LanguageCode.ENGLISH,
-            name: chapName,
-            time: new Date(time)
-        }))
-    }
+      let i = $('tr', $('#list')).toArray().length
+      for(let obj of $('tr', $('#list')).toArray()) {
+          let chapterId = $('a', $(obj)).attr('href')?.replace(`${COMICEXTRA_DOMAIN}/${mangaId}/`, '')
+          let chapNum = i
+          let chapName = $('a', $(obj)).text()
+          let time = $($('td', $(obj)).toArray()[1]).text()
+  
+          i--
+          chapters.push(createChapter({
+              id: chapterId!,
+              mangaId: mangaId,
+              chapNum: chapNum,
+              langCode: LanguageCode.ENGLISH,
+              name: chapName,
+              time: new Date(time)
+          }))
+      }
+      pagesLeft--
+    } 
     return chapters
   }
 
