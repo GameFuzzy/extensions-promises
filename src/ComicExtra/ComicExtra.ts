@@ -143,7 +143,11 @@ export class ComicExtra extends Source {
       $ = this.cheerio.load(pageData.data)
       for(let obj of $('tr', $('#list')).toArray()) {
           let chapterId = $('a', $(obj)).attr('href')?.replace(`${COMICEXTRA_DOMAIN}/${mangaId}/`, '')
-          let chapNum = chaptersLeft
+          //let chapNum = chaptersLeft
+          let chapNum = 0
+          if(Number(chapterId?.replace(`chapter-`, '').trim()) != NaN){
+            chapNum = Number(chapterId?.replace(`chapter-`, ''))
+          }
           let chapName = $('a', $(obj)).text()
           let time = $($('td', $(obj)).toArray()[1]).text()
   
