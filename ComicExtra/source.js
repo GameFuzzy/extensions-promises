@@ -599,11 +599,11 @@ class ComicExtra extends paperback_extensions_common_1.Source {
             popularSection.items = popular;
             sectionCallback(popularSection);
             let latest = [];
-            let latestRequest = createRequestObject({
+            request = createRequestObject({
                 url: `${COMICEXTRA_DOMAIN}/recent-comic`,
                 method: 'GET'
             });
-            const latestData = yield this.requestManager.schedule(latestRequest, 1);
+            const latestData = yield this.requestManager.schedule(request, 1);
             $ = this.cheerio.load(latestData.data);
             for (let obj of $('.cartoon-box').toArray()) {
                 let id = (_b = $('a', $(obj)).attr('href')) === null || _b === void 0 ? void 0 : _b.replace(`${COMICEXTRA_DOMAIN}/comic/`, '');
@@ -618,11 +618,11 @@ class ComicExtra extends paperback_extensions_common_1.Source {
             latestSection.items = latest;
             sectionCallback(latestSection);
             let newTitles = [];
-            let newRequest = createRequestObject({
+            request = createRequestObject({
                 url: `${COMICEXTRA_DOMAIN}/new-comic`,
                 method: 'GET'
             });
-            const newData = yield this.requestManager.schedule(newRequest, 1);
+            const newData = yield this.requestManager.schedule(request, 1);
             $ = this.cheerio.load(newData.data);
             for (let obj of $('.cartoon-box').toArray()) {
                 let id = (_c = $('a', $(obj)).attr('href')) === null || _c === void 0 ? void 0 : _c.replace(`${COMICEXTRA_DOMAIN}/comic/`, '');
@@ -634,7 +634,7 @@ class ComicExtra extends paperback_extensions_common_1.Source {
                     image: image
                 }));
             }
-            newTitlesSection.items = latest;
+            newTitlesSection.items = newTitles;
             sectionCallback(newTitlesSection);
         });
     }
