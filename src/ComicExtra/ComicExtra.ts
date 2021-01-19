@@ -17,7 +17,7 @@ import {
 const COMICEXTRA_DOMAIN = 'https://www.comicextra.com'
 
 export const ComicExtraInfo: SourceInfo = {
-  version: '1.0.8',
+  version: '1.1.1',
   name: 'ComicExtra',
   description: 'Extension that pulls western comics from ComicExtra.com',
   author: 'GameFuzzy',
@@ -48,7 +48,7 @@ export class ComicExtra extends Source {
     let manga: Manga[] = []
     let $ = this.cheerio.load(data.data)
 
-    let titles = [$('.title-1').text()]
+    let titles = [$('.title-1', $('.mobile-hide')).text()]
     let image = $('img', $('.movie-l-img')).attr('src')
 
     let summary = $('#film-content', $('#film-content-wrapper')).text().trim()
@@ -132,28 +132,25 @@ export class ComicExtra extends Source {
 
     let chapters: Chapter[] = []
     let pagesLeft = $('a', $('.general-nav')).toArray().length
+    pagesLeft = pagesLeft == 0 ? 1 : pagesLeft
+
     while(pagesLeft > 0)
     {
       let pageRequest = createRequestObject({
         url: `${COMICEXTRA_DOMAIN}/comic/${mangaId}/${pagesLeft}`,
         method: "GET"
       })
-      let chaptersLeft = 50*(pagesLeft-1) + $('tr', $('#list')).toArray().length
       const pageData = await this.requestManager.schedule(pageRequest, 1)
       $ = this.cheerio.load(pageData.data)
       for(let obj of $('tr', $('#list')).toArray()) {
           let chapterId = $('a', $(obj)).attr('href')?.replace(`${COMICEXTRA_DOMAIN}/${mangaId}/`, '')
-          //let chapNum = chaptersLeft
           let chapNum = Number(chapterId?.replace(`chapter-`, '').trim())
           if(isNaN(chapNum)){
-            // Sorts all the chapters and filters duplicates
             chapNum = 0
-            console.log(chapNum)
           }
           let chapName = $('a', $(obj)).text()
           let time = $($('td', $(obj)).toArray()[1]).text()
-  
-          chaptersLeft--
+
           chapters.push(createChapter({
               id: chapterId!,
               mangaId: mangaId,
@@ -166,9 +163,10 @@ export class ComicExtra extends Source {
       pagesLeft--
     }
     let sortedChapters: Chapter[] = []
-
+    
+    // Sorts all the chapters and filters duplicates
     chapters.forEach((c) => {
-      if (sortedChapters[sortedChapters.indexOf(c)].id !== c.id) {
+      if (sortedChapters[sortedChapters.indexOf(c)]?.id !== c?.id) {
         sortedChapters.push(c);
       }
     })
