@@ -482,6 +482,45 @@ class ComicExtra extends paperback_extensions_common_1.Source {
             });
         });
     }
+    filterUpdatedManga(mangaUpdatesFoundCallback, time, ids) {
+        var _a, _b, _c;
+        return __awaiter(this, void 0, void 0, function* () {
+            let loadNextPage = true;
+            let currPageNum = 1;
+            while (loadNextPage) {
+                let request = createRequestObject({
+                    url: `${COMICEXTRA_DOMAIN}/comic-updates/`,
+                    method: 'GET',
+                    param: String(currPageNum)
+                });
+                let data = yield this.requestManager.schedule(request, 1);
+                let $ = this.cheerio.load(data.data);
+                let foundIds = [];
+                let passedReferenceTime = false;
+                for (let item of $('.hlb-t').toArray()) {
+                    let id = (_c = (_b = ((_a = $('a', item).first().attr('href')) !== null && _a !== void 0 ? _a : '')) === null || _b === void 0 ? void 0 : _b.replace(`${COMICEXTRA_DOMAIN}/comic/`, '').trim()) !== null && _c !== void 0 ? _c : '';
+                    let mangaTime = new Date($('.date').first().text());
+                    passedReferenceTime = mangaTime <= time;
+                    if (!passedReferenceTime) {
+                        if (ids.includes(id)) {
+                            foundIds.push(id);
+                        }
+                    }
+                    else
+                        break;
+                }
+                if (!passedReferenceTime) {
+                    currPageNum++;
+                }
+                else {
+                    loadNextPage = false;
+                }
+                mangaUpdatesFoundCallback(createMangaUpdates({
+                    ids: foundIds
+                }));
+            }
+        });
+    }
     searchRequest(query, metadata) {
         var _a;
         return __awaiter(this, void 0, void 0, function* () {
