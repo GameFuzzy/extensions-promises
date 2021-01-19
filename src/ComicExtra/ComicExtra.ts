@@ -138,11 +138,10 @@ export class ComicExtra extends Source {
         url: `${COMICEXTRA_DOMAIN}/comic/${mangaId}/${pagesLeft}`,
         method: "GET"
       })
-  
+      let i = 0
+      i += $('tr', $('#list')).toArray().length
       const pageData = await this.requestManager.schedule(pageRequest, 1)
       $ = this.cheerio.load(pageData.data)
-
-      let i = $('tr', $('#list')).toArray().length
       for(let obj of $('tr', $('#list')).toArray()) {
           let chapterId = $('a', $(obj)).attr('href')?.replace(`${COMICEXTRA_DOMAIN}/${mangaId}/`, '')
           let chapNum = i
