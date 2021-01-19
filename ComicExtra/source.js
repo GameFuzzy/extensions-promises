@@ -569,31 +569,73 @@ class ComicExtra extends paperback_extensions_common_1.Source {
         });
     }
     getHomePageSections(sectionCallback) {
-        var _a;
+        var _a, _b, _c;
         return __awaiter(this, void 0, void 0, function* () {
             // Let the app know what the homesections are without filling in the data
-            let section1 = createHomeSection({ id: 'popular_comics', title: 'POPULAR COMICS', view_more: false });
-            sectionCallback(section1);
+            let popularSection = createHomeSection({ id: 'popular_comics', title: 'POPULAR COMICS', view_more: false });
+            let latestSection = createHomeSection({ id: 'latest_updated_comics', title: 'RECENTLY ADDED COMICS', view_more: false });
+            let newTitlesSection = createHomeSection({ id: 'new_comics', title: 'LATEST COMICS', view_more: false });
+            sectionCallback(popularSection);
+            sectionCallback(latestSection);
+            sectionCallback(newTitlesSection);
             // Make the request and fill out available titles
             let request = createRequestObject({
                 url: `${COMICEXTRA_DOMAIN}/popular-comic`,
                 method: 'GET'
             });
-            const data = yield this.requestManager.schedule(request, 1);
-            let popularComics = [];
-            let $ = this.cheerio.load(data.data);
+            const popularData = yield this.requestManager.schedule(request, 1);
+            let popular = [];
+            let $ = this.cheerio.load(popularData.data);
             for (let obj of $('.cartoon-box').toArray()) {
                 let id = (_a = $('a', $(obj)).attr('href')) === null || _a === void 0 ? void 0 : _a.replace(`${COMICEXTRA_DOMAIN}/comic/`, '');
                 let title = $('h3', $(obj)).text().trim();
                 let image = $('img', $(obj)).attr('src');
-                popularComics.push(createMangaTile({
+                popular.push(createMangaTile({
                     id: id,
                     title: createIconText({ text: title }),
                     image: image
                 }));
             }
-            section1.items = popularComics;
-            sectionCallback(section1);
+            popularSection.items = popular;
+            sectionCallback(popularSection);
+            let latest = [];
+            request = createRequestObject({
+                url: `${COMICEXTRA_DOMAIN}/recent-comic`,
+                method: 'GET'
+            });
+            const latestData = yield this.requestManager.schedule(request, 1);
+            $ = this.cheerio.load(latestData.data);
+            for (let obj of $('.cartoon-box').toArray()) {
+                let id = (_b = $('a', $(obj)).attr('href')) === null || _b === void 0 ? void 0 : _b.replace(`${COMICEXTRA_DOMAIN}/comic/`, '');
+                let title = $('h3', $(obj)).text().trim();
+                let image = $('img', $(obj)).attr('src');
+                latest.push(createMangaTile({
+                    id: id,
+                    title: createIconText({ text: title }),
+                    image: image
+                }));
+            }
+            latestSection.items = latest;
+            sectionCallback(latestSection);
+            let newTitles = [];
+            request = createRequestObject({
+                url: `${COMICEXTRA_DOMAIN}/new-comic`,
+                method: 'GET'
+            });
+            const newData = yield this.requestManager.schedule(request, 1);
+            $ = this.cheerio.load(newData.data);
+            for (let obj of $('.cartoon-box').toArray()) {
+                let id = (_c = $('a', $(obj)).attr('href')) === null || _c === void 0 ? void 0 : _c.replace(`${COMICEXTRA_DOMAIN}/comic/`, '');
+                let title = $('h3', $(obj)).text().trim();
+                let image = $('img', $(obj)).attr('src');
+                newTitles.push(createMangaTile({
+                    id: id,
+                    title: createIconText({ text: title }),
+                    image: image
+                }));
+            }
+            newTitlesSection.items = latest;
+            sectionCallback(newTitlesSection);
         });
     }
 }
