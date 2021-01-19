@@ -572,9 +572,9 @@ class ComicExtra extends paperback_extensions_common_1.Source {
         var _a, _b, _c;
         return __awaiter(this, void 0, void 0, function* () {
             // Let the app know what the homesections are without filling in the data
-            let popularSection = createHomeSection({ id: 'popular_comics', title: 'POPULAR COMICS', view_more: true });
-            let latestSection = createHomeSection({ id: 'latest_updated_comics', title: 'RECENTLY ADDED COMICS', view_more: true });
-            let newTitlesSection = createHomeSection({ id: 'new_comics', title: 'LATEST COMICS', view_more: true });
+            let popularSection = createHomeSection({ id: 'popular_comics', title: 'POPULAR COMICS', view_more: false });
+            let latestSection = createHomeSection({ id: 'latest_updated_comics', title: 'RECENTLY ADDED COMICS', view_more: false });
+            let newTitlesSection = createHomeSection({ id: 'new_comics', title: 'LATEST COMICS', view_more: false });
             sectionCallback(popularSection);
             sectionCallback(latestSection);
             sectionCallback(newTitlesSection);
@@ -599,11 +599,11 @@ class ComicExtra extends paperback_extensions_common_1.Source {
             popularSection.items = popular;
             sectionCallback(popularSection);
             let latest = [];
-            request = createRequestObject({
+            let latestRequest = createRequestObject({
                 url: `${COMICEXTRA_DOMAIN}/recent-comic`,
                 method: 'GET'
             });
-            const latestData = yield this.requestManager.schedule(request, 1);
+            const latestData = yield this.requestManager.schedule(latestRequest, 1);
             $ = this.cheerio.load(latestData.data);
             for (let obj of $('.cartoon-box').toArray()) {
                 let id = (_b = $('a', $(obj)).attr('href')) === null || _b === void 0 ? void 0 : _b.replace(`${COMICEXTRA_DOMAIN}/comic/`, '');
@@ -618,11 +618,11 @@ class ComicExtra extends paperback_extensions_common_1.Source {
             latestSection.items = latest;
             sectionCallback(latestSection);
             let newTitles = [];
-            request = createRequestObject({
+            let newRequest = createRequestObject({
                 url: `${COMICEXTRA_DOMAIN}/new-comic`,
                 method: 'GET'
             });
-            const newData = yield this.requestManager.schedule(request, 1);
+            const newData = yield this.requestManager.schedule(newRequest, 1);
             $ = this.cheerio.load(newData.data);
             for (let obj of $('.cartoon-box').toArray()) {
                 let id = (_c = $('a', $(obj)).attr('href')) === null || _c === void 0 ? void 0 : _c.replace(`${COMICEXTRA_DOMAIN}/comic/`, '');
