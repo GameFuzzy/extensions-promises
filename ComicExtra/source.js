@@ -386,8 +386,6 @@ class ComicExtra extends paperback_extensions_common_1.Source {
                         }
                         i++;
                         continue;
-                        i++;
-                        continue;
                     }
                 }
                 i = 0;
@@ -414,21 +412,31 @@ class ComicExtra extends paperback_extensions_common_1.Source {
             const data = yield this.requestManager.schedule(request, 1);
             let $ = this.cheerio.load(data.data);
             let chapters = [];
-            let i = $('tr', $('#list')).toArray().length;
-            for (let obj of $('tr', $('#list')).toArray()) {
-                let chapterId = (_a = $('a', $(obj)).attr('href')) === null || _a === void 0 ? void 0 : _a.replace(`${COMICEXTRA_DOMAIN}/${mangaId}/`, '');
-                let chapNum = i;
-                let chapName = $('a', $(obj)).text();
-                let time = $($('td', $(obj)).toArray()[1]).text();
-                i--;
-                chapters.push(createChapter({
-                    id: chapterId,
-                    mangaId: mangaId,
-                    chapNum: chapNum,
-                    langCode: paperback_extensions_common_1.LanguageCode.ENGLISH,
-                    name: chapName,
-                    time: new Date(time)
-                }));
+            let pagesLeft = $('a', $('.general-nav')).toArray().length;
+            while (pagesLeft > 0) {
+                let pageRequest = createRequestObject({
+                    url: `${COMICEXTRA_DOMAIN}/comic/${mangaId}/${pagesLeft}`,
+                    method: "GET"
+                });
+                const pageData = yield this.requestManager.schedule(pageRequest, 1);
+                $ = this.cheerio.load(pageData.data);
+                let i = $('tr', $('#list')).toArray().length;
+                for (let obj of $('tr', $('#list')).toArray()) {
+                    let chapterId = (_a = $('a', $(obj)).attr('href')) === null || _a === void 0 ? void 0 : _a.replace(`${COMICEXTRA_DOMAIN}/${mangaId}/`, '');
+                    let chapNum = i;
+                    let chapName = $('a', $(obj)).text();
+                    let time = $($('td', $(obj)).toArray()[1]).text();
+                    i--;
+                    chapters.push(createChapter({
+                        id: chapterId,
+                        mangaId: mangaId,
+                        chapNum: chapNum,
+                        langCode: paperback_extensions_common_1.LanguageCode.ENGLISH,
+                        name: chapName,
+                        time: new Date(time)
+                    }));
+                }
+                pagesLeft--;
             }
             return chapters;
         });
