@@ -101,26 +101,28 @@ export class ComicExtra extends Source {
           }
         case 5: {
           // Genres
-          let genres = $(item).text().split(",")
-          for(let genre in genres) {
+          let genres = $(item).text().trim().split(', ')
+          genres.forEach(function(genre) {
             tags[0].tags.push(createTag({id: genre.trim(), label: genre.trim()}))
-          }
+          })
           i++
           continue
         }
       }
       i = 0
     }
-
+    console.log(author)
     return createManga({
       id: mangaId,
-      rating: rating,
+      rating: 0,
       titles: titles,
-      image: `${image!}`,
+      image: image!,
       status: Number(status),
+      author: author,
       lastUpdate: released,
       tags: tags,
-      desc: summary
+      desc: summary,
+      relatedIds: relatedIds
     })
   }
 
