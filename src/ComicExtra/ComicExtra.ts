@@ -17,7 +17,7 @@ import {
 const COMICEXTRA_DOMAIN = 'https://www.comicextra.com'
 
 export const ComicExtraInfo: SourceInfo = {
-  version: '1.0.6',
+  version: '1.0.8',
   name: 'ComicExtra',
   description: 'Extension that pulls western comics from ComicExtra.com',
   author: 'GameFuzzy',
@@ -144,9 +144,9 @@ export class ComicExtra extends Source {
       for(let obj of $('tr', $('#list')).toArray()) {
           let chapterId = $('a', $(obj)).attr('href')?.replace(`${COMICEXTRA_DOMAIN}/${mangaId}/`, '')
           //let chapNum = chaptersLeft
-          let chapNum = 0
-          if(Number(chapterId?.replace(`chapter-`, '').trim()) != NaN){
-            chapNum = Number(chapterId?.replace(`chapter-`, ''))
+          let chapNum = Number(chapterId?.replace(`chapter-`, '').trim())
+          if(isNaN(chapNum)){
+            chapNum = 0
           }
           let chapName = $('a', $(obj)).text()
           let time = $($('td', $(obj)).toArray()[1]).text()
