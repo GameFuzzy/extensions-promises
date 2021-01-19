@@ -306,7 +306,7 @@ exports.ComicExtra = exports.ComicExtraInfo = void 0;
 const paperback_extensions_common_1 = require("paperback-extensions-common");
 const COMICEXTRA_DOMAIN = 'https://www.comicextra.com';
 exports.ComicExtraInfo = {
-    version: '1.1.2',
+    version: '1.1.3',
     name: 'ComicExtra',
     description: 'Extension that pulls western comics from ComicExtra.com',
     author: 'GameFuzzy',
@@ -341,11 +341,13 @@ class ComicExtra extends paperback_extensions_common_1.Source {
                 relatedIds.push(((_a = $('a', $(obj)).attr('href')) === null || _a === void 0 ? void 0 : _a.replace(`${COMICEXTRA_DOMAIN}/comic/`, '').trim()) || '');
             }
             let status, author, released, rating = 0;
-            let tags = [createTagSection({ id: '0', label: 'genres', tags: [] })];
+            let tags = [createTagSection({ id: '0', label: 'genres', tags: [] }),
+                createTagSection({ id: '1', label: 'format', tags: [] })];
             let i = 0;
             for (let item of $('.movie-dd', $('.movie-dl')).toArray()) {
                 switch (i) {
                     case 0: {
+                        tags[1].tags.push(createTag({ id: $(item).text().trim(), label: $(item).text().trim() }));
                         i++;
                         continue;
                     }
