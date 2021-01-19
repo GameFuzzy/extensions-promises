@@ -48,7 +48,7 @@ export class ComicExtra extends Source {
     let manga: Manga[] = []
     let $ = this.cheerio.load(data.data)
 
-    let titles = [$('.title-1', $('.mobile-hide')).text()]
+    let titles = [$('.title-1', $('.mobile-hide')).text().trimStart()]
     let image = $('img', $('.movie-l-img')).attr('src')
 
     let summary = $('#film-content', $('#film-content-wrapper')).text().trim()
