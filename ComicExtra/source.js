@@ -324,7 +324,7 @@ exports.ComicExtraInfo = {
 class ComicExtra extends paperback_extensions_common_1.Source {
     getMangaShareUrl(mangaId) { return `${COMICEXTRA_DOMAIN}/comic/${mangaId}`; }
     getMangaDetails(mangaId) {
-        var _a, _b;
+        var _a, _b, _c;
         return __awaiter(this, void 0, void 0, function* () {
             let request = createRequestObject({
                 url: `${COMICEXTRA_DOMAIN}/comic/${mangaId}`,
@@ -336,10 +336,14 @@ class ComicExtra extends paperback_extensions_common_1.Source {
             let titles = [$('.title-1', $('.mobile-hide')).text().trimStart()];
             let image = $('img', $('.movie-l-img')).attr('src');
             let summary = $('#film-content', $('#film-content-wrapper')).text().trim();
-            let status, author, released, views, rating = 0;
-            let tags = [createTagSection({ id: 'genres', label: 'genres', tags: [] })];
+            let relatedIds = [];
+            for (let obj of $('.list-top-item').toArray()) {
+                relatedIds.push(((_a = $('a', $(obj)).attr('href')) === null || _a === void 0 ? void 0 : _a.replace(`${COMICEXTRA_DOMAIN}/comic/`, '').trim()) || '');
+            }
+            let status, author, released, rating = 0;
+            let tags = [createTagSection({ id: '0', label: 'genres', tags: [] })];
             let i = 0;
-            for (let item of $('dd', $('.movie-dl')).toArray()) {
+            for (let item of $('.movie-dd', $('.movie-dl')).toArray()) {
                 switch (i) {
                     case 0: {
                         i++;
@@ -347,7 +351,7 @@ class ComicExtra extends paperback_extensions_common_1.Source {
                     }
                     case 1: {
                         // Comic Status
-                        if ($(item).text().toLowerCase().includes("ongoing")) {
+                        if ($('a', $(item)).text().toLowerCase().includes("ongoing")) {
                             status = paperback_extensions_common_1.MangaStatus.ONGOING;
                         }
                         else {
@@ -368,13 +372,13 @@ class ComicExtra extends paperback_extensions_common_1.Source {
                     }
                     case 3: {
                         // Date of release
-                        released = (_a = ($(item).text().trim())) !== null && _a !== void 0 ? _a : undefined;
+                        released = (_b = ($(item).text().trim())) !== null && _b !== void 0 ? _b : undefined;
                         i++;
                         continue;
                     }
                     case 4: {
                         // Author
-                        author = (_b = ($(item).text().trim())) !== null && _b !== void 0 ? _b : undefined;
+                        author = (_c = ($(item).text().trim())) !== null && _c !== void 0 ? _c : undefined;
                         i++;
                         continue;
                     }
