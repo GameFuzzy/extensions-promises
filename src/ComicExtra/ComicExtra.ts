@@ -17,7 +17,7 @@ import {
 const COMICEXTRA_DOMAIN = 'https://www.comicextra.com'
 
 export const ComicExtraInfo: SourceInfo = {
-  version: '1.1.2',
+  version: '1.1.3',
   name: 'ComicExtra',
   description: 'Extension that pulls western comics from ComicExtra.com',
   author: 'GameFuzzy',
@@ -58,11 +58,13 @@ export class ComicExtra extends Source {
     }
 
     let status, author, released, rating: number = 0
-    let tags: TagSection[] = [createTagSection({ id: '0', label: 'genres', tags: [] })]
+    let tags: TagSection[] = [createTagSection({ id: '0', label: 'genres', tags: [] }),
+    createTagSection({ id: '1', label: 'format', tags: [] })]
     let i = 0
     for (let item of $('.movie-dd', $('.movie-dl')).toArray()) {
       switch (i) {
         case 0: {
+          tags[1].tags.push(createTag({id: $(item).text().trim(), label: $(item).text().trim()}))
           i++
           continue
         }
