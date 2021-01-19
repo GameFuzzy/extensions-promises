@@ -426,7 +426,9 @@ class ComicExtra extends paperback_extensions_common_1.Source {
                     //let chapNum = chaptersLeft
                     let chapNum = Number(chapterId === null || chapterId === void 0 ? void 0 : chapterId.replace(`chapter-`, '').trim());
                     if (isNaN(chapNum)) {
+                        // Sorts all the chapters and filters duplicates
                         chapNum = 0;
+                        console.log(chapNum);
                     }
                     let chapName = $('a', $(obj)).text();
                     let time = $($('td', $(obj)).toArray()[1]).text();
@@ -442,7 +444,14 @@ class ComicExtra extends paperback_extensions_common_1.Source {
                 }
                 pagesLeft--;
             }
-            return chapters;
+            let sortedChapters = [];
+            chapters.forEach((c) => {
+                if (sortedChapters[sortedChapters.indexOf(c)].id !== c.id) {
+                    sortedChapters.push(c);
+                }
+            });
+            sortedChapters.sort((a, b) => (a.id > b.id) ? 1 : -1);
+            return sortedChapters;
         });
     }
     getChapterDetails(mangaId, chapterId) {
