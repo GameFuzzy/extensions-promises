@@ -17,7 +17,7 @@ import {
 const COMICEXTRA_DOMAIN = 'https://www.comicextra.com'
 
 export const ComicExtraInfo: SourceInfo = {
-  version: '1.1.4',
+  version: '1.1.5',
   name: 'ComicExtra',
   description: 'Extension that pulls western comics from ComicExtra.com',
   author: 'GameFuzzy',
@@ -58,13 +58,13 @@ export class ComicExtra extends Source {
     }
 
     let status, author, released, rating: number = 0
-    let tags: TagSection[] = [createTagSection({ id: '0', label: 'genres', tags: [] }),
+    let tagSections: TagSection[] = [createTagSection({ id: '0', label: 'genres', tags: [] }),
     createTagSection({ id: '1', label: 'format', tags: [] })]
     let i = 0
     for (let item of $('.movie-dd', $('.movie-dl')).toArray()) {
       switch (i) {
         case 0: {
-          tags[1].tags.push(createTag({id: $(item).text().trim(), label: $(item).text().trim()}))
+          tagSections[1].tags.push(createTag({id: $(item).text().trim(), label: $(item).text().trim()}))
           i++
           continue
         }
@@ -103,9 +103,9 @@ export class ComicExtra extends Source {
           }
         case 5: {
           // Genres
-          let genres = $(item).text().trim().split(', ')
+          let genres = $(item).text().trim().split(', ')          
           genres.forEach(function(genre) {
-            tags[0].tags.push(createTag({id: genre.trim(), label: genre.trim()}))
+            tagSections[0].tags.push(createTag({id: $(item).attr('href')?.replace(`${COMICEXTRA_DOMAIN}/`, '')!.trim() ?? genre.trim(), label: genre.trim()}))
           })
           i++
           continue
@@ -122,7 +122,7 @@ export class ComicExtra extends Source {
       status: Number(status),
       author: author,
       lastUpdate: released,
-      tags: tags,
+      tags: tagSections,
       desc: summary,
       relatedIds: relatedIds
     })
@@ -152,9 +152,9 @@ export class ComicExtra extends Source {
       $ = this.cheerio.load(pageData.data)
       for(let obj of $('tr', $('#list')).toArray()) {
           let chapterId = $('a', $(obj)).attr('href')?.replace(`${COMICEXTRA_DOMAIN}/${mangaId}/`, '')
-          let chapNum = Number(chapterId?.replace(`chapter-`, '').trim())
-          if(isNaN(chapNum)){
-            chapNum = 0
+          let chapNum = chapterId?.replace(`chapter-`, '').trim()
+          if(isNaN(Number(chapNum))){
+            chapNum = `0.${chapNum?.replace( /^\D+/g, '')}`
           }
           let chapName = $('a', $(obj)).text()
           let time = $($('td', $(obj)).toArray()[1]).text()
@@ -162,7 +162,7 @@ export class ComicExtra extends Source {
           chapters.push(createChapter({
               id: chapterId!,
               mangaId: mangaId,
-              chapNum: chapNum,
+              chapNum: Number(chapNum),
               langCode: LanguageCode.ENGLISH,
               name: chapName,
               time: new Date(time)
@@ -239,6 +239,29 @@ export class ComicExtra extends Source {
       results: mangaTiles
     })
 
+  }
+
+
+  async getTags(): Promise<TagSection[] | null> {
+    const request = createRequestObject({
+      url: `${COMICEXTRA_DOMAIN}/comic-genres/`,
+      method: 'GET'
+    })
+
+    const data = await this.requestManager.schedule(request, 1)
+    let $ = this.cheerio.load(data.data)
+
+    let tagSections: TagSection[] = [createTagSection({ id: '0', label: 'genres', tags: [] }),
+    createTagSection({ id: '1', label: 'format', tags: [] })]
+
+    for(let obj of $('a', $('.home-list')).toArray()) {
+      let id = $(obj).attr('href')?.replace(`${COMICEXTRA_DOMAIN}/`, '')!.trim() ?? $(obj).text().trim()
+      let genre = $(obj).text().trim()
+      tagSections[0].tags.push(createTag({id: id, label: genre}))
+    }
+    tagSections[1].tags.push(createTag({id: 'comic/', label: 'Comic'}))
+
+    return tagSections
   }
 
 
