@@ -17,7 +17,7 @@ import {
 const COMICEXTRA_DOMAIN = 'https://www.comicextra.com'
 
 export const ComicExtraInfo: SourceInfo = {
-  version: '1.0.5',
+  version: '1.0.6',
   name: 'ComicExtra',
   description: 'Extension that pulls western comics from ComicExtra.com',
   author: 'GameFuzzy',
@@ -138,7 +138,7 @@ export class ComicExtra extends Source {
         url: `${COMICEXTRA_DOMAIN}/comic/${mangaId}/${pagesLeft}`,
         method: "GET"
       })
-      let chaptersLeft = 50*pagesLeft + $('tr', $('#list')).toArray().length
+      let chaptersLeft = 50*(pagesLeft-1) + $('tr', $('#list')).toArray().length
       const pageData = await this.requestManager.schedule(pageRequest, 1)
       $ = this.cheerio.load(pageData.data)
       for(let obj of $('tr', $('#list')).toArray()) {
