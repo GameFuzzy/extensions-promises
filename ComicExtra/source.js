@@ -306,7 +306,7 @@ exports.ComicExtra = exports.ComicExtraInfo = void 0;
 const paperback_extensions_common_1 = require("paperback-extensions-common");
 const COMICEXTRA_DOMAIN = 'https://www.comicextra.com';
 exports.ComicExtraInfo = {
-    version: '1.2.0',
+    version: '1.2.1',
     name: 'ComicExtra',
     description: 'Extension that pulls western comics from ComicExtra.com',
     author: 'GameFuzzy',
@@ -572,9 +572,9 @@ class ComicExtra extends paperback_extensions_common_1.Source {
         var _a, _b, _c;
         return __awaiter(this, void 0, void 0, function* () {
             // Let the app know what the homesections are without filling in the data
-            let popularSection = createHomeSection({ id: 'popular_comics', title: 'POPULAR COMICS', view_more: false });
-            let latestSection = createHomeSection({ id: 'latest_updated_comics', title: 'RECENTLY ADDED COMICS', view_more: false });
-            let newTitlesSection = createHomeSection({ id: 'new_comics', title: 'LATEST COMICS', view_more: false });
+            let popularSection = createHomeSection({ id: 'popular_comics', title: 'POPULAR COMICS', view_more: true });
+            let latestSection = createHomeSection({ id: 'latest_updated_comics', title: 'RECENTLY ADDED COMICS', view_more: true });
+            let newTitlesSection = createHomeSection({ id: 'new_comics', title: 'LATEST COMICS', view_more: true });
             sectionCallback(popularSection);
             sectionCallback(latestSection);
             sectionCallback(newTitlesSection);
