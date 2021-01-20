@@ -199,7 +199,7 @@ export class ComicExtra extends Source {
 
     // Get all of the pages
     for(let obj of $('.chapter_img').toArray()) {
-      pages.push($(obj).attr('src')!)
+      pages.push($(obj).attr('src') ?? 'fallback.png')
   }
 
     return createChapterDetails({
