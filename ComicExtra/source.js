@@ -306,7 +306,7 @@ exports.ComicExtra = exports.ComicExtraInfo = void 0;
 const paperback_extensions_common_1 = require("paperback-extensions-common");
 const COMICEXTRA_DOMAIN = 'https://www.comicextra.com';
 exports.ComicExtraInfo = {
-    version: '1.3.4',
+    version: '1.3.5',
     name: 'ComicExtra',
     description: 'Extension that pulls western comics from ComicExtra.com',
     author: 'GameFuzzy',
@@ -347,7 +347,8 @@ class ComicExtra extends paperback_extensions_common_1.Source {
             for (let item of $('.movie-dd', $('.movie-dl')).toArray()) {
                 switch (i) {
                     case 0: {
-                        tagSections[1].tags.push(createTag({ id: $(item).text().trim(), label: $(item).text().trim() }));
+                        //tagSections[1].tags.push(createTag({id: $(item).text().trim(), label: $(item).text().trim()}))
+                        [...tagSections[1].tags, createTag({ id: $(item).text().trim(), label: $(item).text().trim() })];
                         i++;
                         continue;
                     }
@@ -387,7 +388,8 @@ class ComicExtra extends paperback_extensions_common_1.Source {
                     case 5: {
                         // Genres
                         for (let obj of $('a', $(item)).toArray()) {
-                            tagSections[0].tags.push(createTag({ id: (_d = $(obj).attr('href')) === null || _d === void 0 ? void 0 : _d.replace(`${COMICEXTRA_DOMAIN}/`, '').trim(), label: $(obj).text().trim() }));
+                            //tagSections[0].tags.push(createTag({id: $(obj).attr('href')?.replace(`${COMICEXTRA_DOMAIN}/`, '').trim()!, label: $(obj).text().trim()}))
+                            [...tagSections[0].tags, createTag({ id: (_d = $(obj).attr('href')) === null || _d === void 0 ? void 0 : _d.replace(`${COMICEXTRA_DOMAIN}/`, '').trim(), label: $(obj).text().trim() })];
                         }
                         i++;
                         continue;
