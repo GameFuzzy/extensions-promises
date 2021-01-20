@@ -18,7 +18,7 @@ import {
 const COMICEXTRA_DOMAIN = 'https://www.comicextra.com'
 
 export const ComicExtraInfo: SourceInfo = {
-  version: '1.2.1',
+  version: '1.2.3',
   name: 'ComicExtra',
   description: 'Extension that pulls western comics from ComicExtra.com',
   author: 'GameFuzzy',
@@ -30,6 +30,10 @@ export const ComicExtraInfo: SourceInfo = {
     {
       text: "Work in progress",
       type: TagType.RED
+    },
+    {
+      text: "Notifications",
+      type: TagType.GREEN
     }
   ]
 }
@@ -217,9 +221,8 @@ export class ComicExtra extends Source {
     while (loadNextPage) {
 
       let request = createRequestObject({
-        url: `${COMICEXTRA_DOMAIN}/comic-updates/`,
-        method: 'GET',
-        param: String(currPageNum)
+        url: `${COMICEXTRA_DOMAIN}/comic-updates/${String(currPageNum)}`,
+        method: 'GET'
       })
 
       let data = await this.requestManager.schedule(request, 1)
@@ -227,12 +230,17 @@ export class ComicExtra extends Source {
       let $ = this.cheerio.load(data.data)
 
       let foundIds: string[] = []
-
       let passedReferenceTime = false
       for (let item of $('.hlb-t').toArray()) {
         let id = ($('a', item).first().attr('href') ?? '')?.replace(`${COMICEXTRA_DOMAIN}/comic/`, '')!.trim() ?? ''
-        let mangaTime = new Date($('.date').first().text())
-
+        let mangaTime = new Date(time)
+        if($('.date', item).first().text().trim().toLowerCase() === "yesterday") {
+          mangaTime = new Date(Date.now())
+          mangaTime.setDate(new Date(Date.now()).getDate() - 1)
+        }
+        else {
+          mangaTime = new Date($('.date', item).first().text()) 
+        }
         passedReferenceTime = mangaTime <= time
         if (!passedReferenceTime) {
           if (ids.includes(id)) {
@@ -255,7 +263,7 @@ export class ComicExtra extends Source {
       }))
     }
   }
-  
+
   async searchRequest(query: SearchRequest, metadata: any): Promise<PagedResults> {
 
     let request = createRequestObject({
