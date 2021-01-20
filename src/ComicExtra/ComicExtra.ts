@@ -67,7 +67,7 @@ export class ComicExtra extends Source {
       switch (i) {
         case 0: {
           //tagSections[1].tags.push(createTag({id: $(item).text().trim(), label: $(item).text().trim()}))
-          [...tagArray0, createTag({id: $(item).text().trim(), label: $(item).text().trim()})]
+          tagArray1 = [...tagArray1, createTag({id: $(item).text().trim(), label: $(item).text().trim()})]
           i++
           continue
         }
@@ -108,7 +108,7 @@ export class ComicExtra extends Source {
           // Genres
           for(let obj of $('a',$(item)).toArray()){
             //tagSections[0].tags.push(createTag({id: $(obj).attr('href')?.replace(`${COMICEXTRA_DOMAIN}/`, '').trim()!, label: $(obj).text().trim()}))
-            [...tagArray1, createTag({id: $(obj).attr('href')?.replace(`${COMICEXTRA_DOMAIN}/`, '').trim()!, label: $(obj).text().trim()})]
+            tagArray0 = [...tagArray0, createTag({id: $(obj).attr('href')?.replace(`${COMICEXTRA_DOMAIN}/`, '').trim()!, label: $(obj).text().trim()})]
           }    
           i++
           continue
