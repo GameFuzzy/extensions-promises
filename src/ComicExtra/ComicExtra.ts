@@ -18,7 +18,7 @@ import {
 const COMICEXTRA_DOMAIN = 'https://www.comicextra.com'
 
 export const ComicExtraInfo: SourceInfo = {
-  version: '1.2.3',
+  version: '1.2.4',
   name: 'ComicExtra',
   description: 'Extension that pulls western comics from ComicExtra.com',
   author: 'GameFuzzy',
@@ -319,15 +319,67 @@ export class ComicExtra extends Source {
     return tagSections
   }
 
+  async getViewMoreItems(homepageSectionId: string, metadata: any): Promise<PagedResults | null> {
+    let page = ''
+    switch (homepageSectionId) {
+      case 'popular_comics': {
+        page = `/popular-comic/${metadata.page ? metadata.page : 1}`
+        break
+      }
+      case 'recently_released_comics': {
+        page = `/recent-comic/${metadata.page ? metadata.page : 1}`
+        break
+      }
+      case 'new_comics': {
+        page = `/new-comic/${metadata.page ? metadata.page : 1}`
+        break
+      }
+      default: return Promise.resolve(null)
+    }
 
+    let request = createRequestObject({
+      url: `${COMICEXTRA_DOMAIN}${page}`,
+      method: 'GET',
+      metadata: metadata
+    })
+
+    let data = await this.requestManager.schedule(request, 1)
+
+    let $ = this.cheerio.load(data.data)
+    let manga: MangaTile[] = []
+
+    for(let obj of $('.cartoon-box').toArray()) {
+      let id = $('a', $(obj)).attr('href')?.replace(`${COMICEXTRA_DOMAIN}/comic/`, '')
+      let title = $('h3', $(obj)).text().trim()
+      let image = $('img', $(obj)).attr('src')
+
+      manga.push(createMangaTile({
+          id: id!,
+          title: createIconText({text: title}),
+          image: image!
+      }))
+    }
+
+    /*if (!this.isLastPage($)) {
+      metadata.page ? metadata.page++ : metadata.page = 2
+    }
+    else {
+      metadata = undefined  // There are no more pages to continue on to, do not provide page metadata
+    }*/
+
+    return createPagedResults({
+      results: manga,
+      metadata: metadata
+    })
+  }
   async getHomePageSections(sectionCallback: (section: HomeSection) => void): Promise<void> {
 
     // Let the app know what the homesections are without filling in the data
-    let popularSection = createHomeSection({ id: 'popular_comics', title: 'POPULAR COMICS', view_more: false })
-    let latestSection = createHomeSection({ id: 'latest_updated_comics', title: 'RECENTLY ADDED COMICS', view_more: false })
-    let newTitlesSection = createHomeSection({ id: 'new_comics', title: 'LATEST COMICS', view_more: false })
+    let popularSection = createHomeSection({ id: 'popular_comics', title: 'POPULAR COMICS', view_more: true })
+    let recentSection = createHomeSection({ id: 'recently_released_comics', title: 'RECENTLY ADDED COMICS', view_more: true })
+    let newTitlesSection = createHomeSection({ id: 'new_comics', title: 'LATEST COMICS', view_more: true })
     sectionCallback(popularSection)
-    sectionCallback(latestSection)
+    sectionCallback(recentSection)
     sectionCallback(newTitlesSection)
 
     // Make the request and fill out available titles
@@ -357,7 +409,7 @@ export class ComicExtra extends Source {
     sectionCallback(popularSection)
 
 
-    let latest: MangaTile[] = []
+    let recent: MangaTile[] = []
 
     request = createRequestObject({
       url: `${COMICEXTRA_DOMAIN}/recent-comic`,
@@ -372,15 +424,15 @@ export class ComicExtra extends Source {
       let title = $('h3', $(obj)).text().trim()
       let image = $('img', $(obj)).attr('src')
 
-      latest.push(createMangaTile({
+      recent.push(createMangaTile({
           id: id!,
           title: createIconText({text: title}),
           image: image!
       }))
   }
 
-    latestSection.items = latest
-    sectionCallback(latestSection)
+    recentSection.items = recent
+    sectionCallback(recentSection)
 
     let newTitles: MangaTile[] = []
 
