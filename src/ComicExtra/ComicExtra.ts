@@ -18,7 +18,7 @@ import {
 const COMICEXTRA_DOMAIN = 'https://www.comicextra.com'
 
 export const ComicExtraInfo: SourceInfo = {
-  version: '1.2.6',
+  version: '1.2.7',
   name: 'ComicExtra',
   description: 'Extension that pulls western comics from ComicExtra.com',
   author: 'GameFuzzy',
@@ -322,15 +322,15 @@ export class ComicExtra extends Source {
   async getViewMoreItems(homepageSectionId: string, metadata: any): Promise<PagedResults | null> {
     let page = ''
     switch (homepageSectionId) {
-      case 'popular_comics': {
+      case '2': {
         page = `/popular-comic/${metadata.page ? metadata.page : 1}`
         break
       }
-      case 'recently_released_comics': {
+      case '1': {
         page = `/recent-comic/${metadata.page ? metadata.page : 1}`
         break
       }
-      case 'new_comics': {
+      case '0': {
         page = `/new-comic/${metadata.page ? metadata.page : 1}`
         break
       }
@@ -375,9 +375,9 @@ export class ComicExtra extends Source {
   async getHomePageSections(sectionCallback: (section: HomeSection) => void): Promise<void> {
 
     // Let the app know what the homesections are without filling in the data
-    let popularSection = createHomeSection({ id: 'popular_comics', title: 'POPULAR COMICS', view_more: true })
-    let recentSection = createHomeSection({ id: 'recently_released_comics', title: 'RECENTLY ADDED COMICS', view_more: true })
-    let newTitlesSection = createHomeSection({ id: 'new_comics', title: 'LATEST COMICS', view_more: true })
+    let popularSection = createHomeSection({ id: '2', title: 'POPULAR COMICS', view_more: true })
+    let recentSection = createHomeSection({ id: '1', title: 'RECENTLY ADDED COMICS', view_more: true })
+    let newTitlesSection = createHomeSection({ id: '0', title: 'LATEST COMICS', view_more: true })
     sectionCallback(popularSection)
     sectionCallback(recentSection)
     sectionCallback(newTitlesSection)
@@ -416,8 +416,8 @@ export class ComicExtra extends Source {
       method: 'GET'
     })
 
-    const latestData = await this.requestManager.schedule(request, 1)
-    $ = this.cheerio.load(latestData.data)
+    const recentData = await this.requestManager.schedule(request, 1)
+    $ = this.cheerio.load(recentData.data)
 
     for(let obj of $('.cartoon-box').toArray()) {
       let id = $('a', $(obj)).attr('href')?.replace(`${COMICEXTRA_DOMAIN}/comic/`, '')
