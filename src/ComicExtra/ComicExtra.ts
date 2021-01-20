@@ -18,7 +18,7 @@ import {
 const COMICEXTRA_DOMAIN = 'https://www.comicextra.com'
 
 export const ComicExtraInfo: SourceInfo = {
-  version: '1.2.7',
+  version: '1.2.8',
   name: 'ComicExtra',
   description: 'Extension that pulls western comics from ComicExtra.com',
   author: 'GameFuzzy',
@@ -462,6 +462,9 @@ export class ComicExtra extends Source {
   */
 
  async getHomePageSections(sectionCallback: (section: HomeSection) => void): Promise<void> {
+
+const ML_DOMAIN = 'https://manga4life.com'
+let ML_IMAGE_DOMAIN = 'https://cover.mangabeast01.com/cover'
   const request = createRequestObject({
     url: `${ML_DOMAIN}`,
     method: 'GET'
