@@ -462,6 +462,7 @@ class ComicExtra extends paperback_extensions_common_1.Source {
         });
     }
     getChapterDetails(mangaId, chapterId) {
+        var _a;
         return __awaiter(this, void 0, void 0, function* () {
             let request = createRequestObject({
                 url: `${COMICEXTRA_DOMAIN}/${mangaId}/${chapterId}/full`,
@@ -472,7 +473,7 @@ class ComicExtra extends paperback_extensions_common_1.Source {
             let pages = [];
             // Get all of the pages
             for (let obj of $('.chapter_img').toArray()) {
-                pages.push($(obj).attr('src'));
+                pages.push((_a = $(obj).attr('src')) !== null && _a !== void 0 ? _a : 'fallback.png');
             }
             return createChapterDetails({
                 id: chapterId,
