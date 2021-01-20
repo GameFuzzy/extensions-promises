@@ -306,7 +306,7 @@ exports.ComicExtra = exports.ComicExtraInfo = void 0;
 const paperback_extensions_common_1 = require("paperback-extensions-common");
 const COMICEXTRA_DOMAIN = 'https://www.comicextra.com';
 exports.ComicExtraInfo = {
-    version: '1.2.8',
+    version: '1.2.9',
     name: 'ComicExtra',
     description: 'Extension that pulls western comics from ComicExtra.com',
     author: 'GameFuzzy',
@@ -680,11 +680,13 @@ class ComicExtra extends paperback_extensions_common_1.Source {
                 let id = (_a = $('a', $(obj)).attr('href')) === null || _a === void 0 ? void 0 : _a.replace(`${COMICEXTRA_DOMAIN}/comic/`, '');
                 let title = $('h3', $(obj)).text().trim();
                 let image = $('img', $(obj)).attr('src');
+                console.log(`ADDING ${id}`);
                 manga.add(createMangaTile({
                     id: id,
                     title: createIconText({ text: title }),
                     image: image
                 }));
+                console.log(manga);
             }
             /*if (!this.isLastPage($)) {
               metadata.page ? metadata.page++ : metadata.page = 2
