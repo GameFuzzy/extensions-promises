@@ -306,7 +306,7 @@ exports.ComicExtra = exports.ComicExtraInfo = void 0;
 const paperback_extensions_common_1 = require("paperback-extensions-common");
 const COMICEXTRA_DOMAIN = 'https://www.comicextra.com';
 exports.ComicExtraInfo = {
-    version: '1.3.2',
+    version: '1.3.3',
     name: 'ComicExtra',
     description: 'Extension that pulls western comics from ComicExtra.com',
     author: 'GameFuzzy',
