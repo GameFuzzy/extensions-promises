@@ -306,7 +306,7 @@ exports.ComicExtra = exports.ComicExtraInfo = void 0;
 const paperback_extensions_common_1 = require("paperback-extensions-common");
 const COMICEXTRA_DOMAIN = 'https://www.comicextra.com';
 exports.ComicExtraInfo = {
-    version: '1.2.1',
+    version: '1.2.3',
     name: 'ComicExtra',
     description: 'Extension that pulls western comics from ComicExtra.com',
     author: 'GameFuzzy',
@@ -318,6 +318,10 @@ exports.ComicExtraInfo = {
         {
             text: "Work in progress",
             type: paperback_extensions_common_1.TagType.RED
+        },
+        {
+            text: "Notifications",
+            type: paperback_extensions_common_1.TagType.GREEN
         }
     ]
 };
@@ -489,9 +493,8 @@ class ComicExtra extends paperback_extensions_common_1.Source {
             let currPageNum = 1;
             while (loadNextPage) {
                 let request = createRequestObject({
-                    url: `${COMICEXTRA_DOMAIN}/comic-updates/`,
-                    method: 'GET',
-                    param: String(currPageNum)
+                    url: `${COMICEXTRA_DOMAIN}/comic-updates/${String(currPageNum)}`,
+                    method: 'GET'
                 });
                 let data = yield this.requestManager.schedule(request, 1);
                 let $ = this.cheerio.load(data.data);
@@ -499,7 +502,14 @@ class ComicExtra extends paperback_extensions_common_1.Source {
                 let passedReferenceTime = false;
                 for (let item of $('.hlb-t').toArray()) {
                     let id = (_c = (_b = ((_a = $('a', item).first().attr('href')) !== null && _a !== void 0 ? _a : '')) === null || _b === void 0 ? void 0 : _b.replace(`${COMICEXTRA_DOMAIN}/comic/`, '').trim()) !== null && _c !== void 0 ? _c : '';
-                    let mangaTime = new Date($('.date').first().text());
+                    let mangaTime = new Date(time);
+                    if ($('.date', item).first().text().trim().toLowerCase() === "yesterday") {
+                        mangaTime = new Date(Date.now());
+                        mangaTime.setDate(new Date(Date.now()).getDate() - 1);
+                    }
+                    else {
+                        mangaTime = new Date($('.date', item).first().text());
+                    }
                     passedReferenceTime = mangaTime <= time;
                     if (!passedReferenceTime) {
                         if (ids.includes(id)) {
