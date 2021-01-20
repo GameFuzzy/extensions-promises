@@ -307,7 +307,7 @@ const paperback_extensions_common_1 = require("paperback-extensions-common");
 const Parser_1 = require("./Parser");
 const COMICEXTRA_DOMAIN = 'https://www.comicextra.com';
 exports.ComicExtraInfo = {
-    version: '1.3.7',
+    version: '1.3.8',
     name: 'ComicExtra',
     description: 'Extension that pulls western comics from ComicExtra.com',
     author: 'GameFuzzy',
@@ -336,7 +336,7 @@ class ComicExtra extends paperback_extensions_common_1.Source {
             });
             const data = yield this.requestManager.schedule(request, 1);
             let $ = this.cheerio.load(data.data);
-            return this.parser.parseMangaDetails($, mangaId)[0];
+            return this.parser.parseMangaDetails($, mangaId);
         });
     }
     getChapters(mangaId) {
@@ -519,17 +519,10 @@ class Parser {
         }
         let status = paperback_extensions_common_1.MangaStatus.ONGOING, author, released, rating = 0;
         let tagArray0 = [];
-        let tagArray1 = [];
         let i = 0;
         for (let item of $('.movie-dd', $('.movie-dl')).toArray()) {
             switch (i) {
                 case 0: {
-                    //tagSections[1].tags.push(createTag({id: $(item).text().trim(), label: $(item).text().trim()}))
-                    tagArray1 = [...tagArray1, createTag({ id: $(item).text().trim(), label: $(item).text().trim() })];
-                    i++;
-                    continue;
-                }
-                case 1: {
                     // Comic Status
                     if ($('a', $(item)).text().toLowerCase().includes("ongoing")) {
                         status = paperback_extensions_common_1.MangaStatus.ONGOING;
@@ -540,7 +533,7 @@ class Parser {
                     i++;
                     continue;
                 }
-                case 2: {
+                case 1: {
                     // Alt Titles
                     if ($(item).text().toLowerCase().trim() == "-") {
                         i++;
@@ -550,21 +543,22 @@ class Parser {
                     i++;
                     continue;
                 }
-                case 3: {
+                case 2: {
                     // Date of release
                     released = (_b = ($(item).text().trim())) !== null && _b !== void 0 ? _b : undefined;
                     i++;
                     continue;
                 }
-                case 4: {
+                case 3: {
                     // Author
                     author = (_c = ($(item).text().trim())) !== null && _c !== void 0 ? _c : undefined;
                     i++;
                     continue;
                 }
-                case 5: {
+                case 4: {
                     // Genres
                     for (let obj of $('a', $(item)).toArray()) {
+                        console.log($(obj).text().trim());
                         //tagSections[0].tags.push(createTag({id: $(obj).attr('href')?.replace(`${COMICEXTRA_DOMAIN}/`, '').trim()!, label: $(obj).text().trim()}))
                         tagArray0 = [...tagArray0, createTag({ id: (_d = $(obj).attr('href')) === null || _d === void 0 ? void 0 : _d.replace(`${COMICEXTRA_DOMAIN}/`, '').trim(), label: $(obj).text().trim() })];
                     }
@@ -574,20 +568,20 @@ class Parser {
             }
             i = 0;
         }
-        let tagSections = [createTagSection({ id: '0', label: 'genres', tags: tagArray0 }),
-            createTagSection({ id: '1', label: 'format', tags: tagArray1 })];
-        return [createManga({
-                id: mangaId,
-                rating: rating,
-                titles: titles,
-                image: image,
-                status: status,
-                author: author,
-                tags: tagSections,
-                desc: summary,
-                lastUpdate: released,
-                relatedIds: relatedIds
-            })];
+        let tagSections = [createTagSection({ id: '0', label: 'genres', tags: tagArray0 })];
+        console.log(tagArray0[0]);
+        return createManga({
+            id: mangaId,
+            rating: rating,
+            titles: titles,
+            image: image,
+            status: status,
+            author: author,
+            tags: tagSections,
+            desc: summary,
+            lastUpdate: released,
+            relatedIds: relatedIds
+        });
     }
     parseChapterList(data, mangaId) {
         var _a;
