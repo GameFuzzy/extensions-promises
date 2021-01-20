@@ -116,8 +116,8 @@ export class ComicExtra extends Source {
       }
       i = 0
     }
-    let tagSections: TagSection[] = [createTagSection({ id: '0', label: 'genres', tags: [] }),
-    createTagSection({ id: '1', label: 'format', tags: [] })]
+    let tagSections: TagSection[] = [createTagSection({ id: '0', label: 'genres', tags: tagArray0 }),
+    createTagSection({ id: '1', label: 'format', tags: tagArray1 })]
     console.log(tagSections[0].tags)
     console.log(tagSections[1].tags)
     return createManga({
