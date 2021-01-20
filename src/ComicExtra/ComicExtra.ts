@@ -319,59 +319,7 @@ export class ComicExtra extends Source {
     return tagSections
   }
 
-/*  async getViewMoreItems(homepageSectionId: string, metadata: any): Promise<PagedResults | null> {
-    let page = ''
-    switch (homepageSectionId) {
-      case '2': {
-        page = `/popular-comic/${metadata.page ? metadata.page : 1}`
-        break
-      }
-      case '1': {
-        page = `/recent-comic/${metadata.page ? metadata.page : 1}`
-        break
-      }
-      case '0': {
-        page = `/new-comic/${metadata.page ? metadata.page : 1}`
-        break
-      }
-      default: return Promise.resolve(null)
-    }
 
-    let request = createRequestObject({
-      url: `${COMICEXTRA_DOMAIN}${page}`,
-      method: 'GET',
-      metadata: metadata
-    })
-
-    let data = await this.requestManager.schedule(request, 1)
-
-    let $ = this.cheerio.load(data.data)
-    let manga: MangaTile[] = []
-
-    for(let obj of $('.cartoon-box').toArray()) {
-      let id = $('a', $(obj)).attr('href')?.replace(`${COMICEXTRA_DOMAIN}/comic/`, '')
-      let title = $('h3', $(obj)).text().trim()
-      let image = $('img', $(obj)).attr('src')
-
-      manga.push(createMangaTile({
-          id: id!,
-          title: createIconText({text: title}),
-          image: image!
-      }))
-    }
-
-    /*if (!this.isLastPage($)) {
-      metadata.page ? metadata.page++ : metadata.page = 2
-    }
-    else {
-      metadata = undefined  // There are no more pages to continue on to, do not provide page metadata
-    }*//*
-
-    return createPagedResults({
-      results: manga,
-      metadata: metadata
-    })
-  }
   async getHomePageSections(sectionCallback: (section: HomeSection) => void): Promise<void> {
 
     // Let the app know what the homesections are without filling in the data
@@ -459,198 +407,60 @@ export class ComicExtra extends Source {
     newTitlesSection.items = newTitles
     sectionCallback(newTitlesSection)
   }
-  */
+  
+  async getViewMoreItems(homepageSectionId: string, metadata: any): Promise<PagedResults | null> {
+    let page = ''
+    switch (homepageSectionId) {
+      case '2': {
+        page = `/popular-comic/${metadata.page ? metadata.page : 1}`
+        break
+      }
+      case '1': {
+        page = `/recent-comic/${metadata.page ? metadata.page : 1}`
+        break
+      }
+      case '0': {
+        page = `/new-comic/${metadata.page ? metadata.page : 1}`
+        break
+      }
+      default: return Promise.resolve(null)
+    }
 
- async getHomePageSections(sectionCallback: (section: HomeSection) => void): Promise<void> {
+    let request = createRequestObject({
+      url: `${COMICEXTRA_DOMAIN}${page}`,
+      method: 'GET',
+      metadata: metadata
+    })
 
-const ML_DOMAIN = 'https://manga4life.com'
-let ML_IMAGE_DOMAIN = 'https://cover.mangabeast01.com/cover'
-  const request = createRequestObject({
-    url: `${ML_DOMAIN}`,
-    method: 'GET'
-  })
+    let data = await this.requestManager.schedule(request, 1)
 
-  const data = await this.requestManager.schedule(request, 1)
+    let $ = this.cheerio.load(data.data)
+    //let manga: MangaTile[] = []
+    let manga: Set<MangaTile> = new Set<MangaTile>()
 
-  const hotSection = createHomeSection({ id: 'hot_update', title: 'HOT UPDATES', view_more: true })
-  const latestSection = createHomeSection({ id: 'latest', title: 'LATEST UPDATES', view_more: true })
-  const newTitlesSection = createHomeSection({ id: 'new_titles', title: 'NEW TITLES', view_more: true })
-  const recommendedSection = createHomeSection({ id: 'recommended', title: 'RECOMMENDATIONS', view_more: true })
-  sectionCallback(hotSection)
-  sectionCallback(latestSection)
-  sectionCallback(newTitlesSection)
-  sectionCallback(recommendedSection)
-
-  const $ = this.cheerio.load(data.data)
-  const hot = (JSON.parse((data.data.match(/vm.HotUpdateJSON = (.*);/) ?? [])[1])).slice(0, 15)
-  const latest = (JSON.parse((data.data.match(/vm.LatestJSON = (.*);/) ?? [])[1])).slice(0, 15)
-  const newTitles = (JSON.parse((data.data.match(/vm.NewSeriesJSON = (.*);/) ?? [])[1])).slice(0, 15)
-  const recommended = JSON.parse((data.data.match(/vm.RecommendationJSON = (.*);/) ?? [])[1])
-
-  let imgSource = ($('.ImageHolder').html()?.match(/ng-src="(.*)\//) ?? [])[1]
-  if (imgSource !== ML_IMAGE_DOMAIN)
-    ML_IMAGE_DOMAIN = imgSource
-
-  let hotManga: MangaTile[] = []
-  hot.forEach((elem: any) => {
-    let id = elem.IndexName
-    let title = elem.SeriesName
-    let image = `${ML_IMAGE_DOMAIN}/${id}.jpg`
-    let time = (new Date(elem.Date)).toDateString()
-    time = time.slice(0, time.length - 5)
-    time = time.slice(4, time.length)
-
-    hotManga.push(createMangaTile({
-      id: id,
-      image: image,
-      title: createIconText({ text: title }),
-      secondaryText: createIconText({ text: time, icon: 'clock.fill' })
-    }))
-  })
-  hotSection.items = hotManga
-  sectionCallback(hotSection)
-
-  let latestManga: MangaTile[] = []
-  latest.forEach((elem: any) => {
-    let id = elem.IndexName
-    let title = elem.SeriesName
-    let image = `${ML_IMAGE_DOMAIN}/${id}.jpg`
-    let time = (new Date(elem.Date)).toDateString()
-    time = time.slice(0, time.length - 5)
-    time = time.slice(4, time.length)
-
-    latestManga.push(createMangaTile({
-      id: id,
-      image: image,
-      title: createIconText({ text: title }),
-      secondaryText: createIconText({ text: time, icon: 'clock.fill' })
-    }))
-  })
-  latestSection.items = latestManga
-  sectionCallback(latestSection)
-
-  let newManga: MangaTile[] = []
-  newTitles.forEach((elem: any) => {
-    let id = elem.IndexName
-    let title = elem.SeriesName
-    let image = `${ML_IMAGE_DOMAIN}/${id}.jpg`
-
-    newManga.push(createMangaTile({
-      id: id,
-      image: image,
-      title: createIconText({ text: title })
-    }))
-  })
-  newTitlesSection.items = newManga
-  sectionCallback(newTitlesSection)
-
-  let recManga: MangaTile[] = []
-  recommended.forEach((elem: any) => {
-    let id = elem.IndexName
-    let title = elem.SeriesName
-    let image = `${ML_IMAGE_DOMAIN}/${id}.jpg`
-    let time = (new Date(elem.Date)).toDateString()
-
-    recManga.push(createMangaTile({
-      id: id,
-      image: image,
-      title: createIconText({ text: title })
-    }))
-  })
-
-  recommendedSection.items = recManga
-  sectionCallback(recommendedSection)
-}
-
-
-async getViewMoreItems(homepageSectionId: string, metadata: any): Promise<PagedResults | null> {
-
-const ML_DOMAIN = 'https://manga4life.com'
-let ML_IMAGE_DOMAIN = 'https://cover.mangabeast01.com/cover'
-  const request = createRequestObject({
-    url: ML_DOMAIN,
-    method: 'GET'
-  })
-
-  const data = await this.requestManager.schedule(request, 1)
-  //let manga: MangaTile[] = []
-  let manga: Set<MangaTile> = new Set<MangaTile>()
-  if (homepageSectionId == 'hot_update') {
-    let hot = JSON.parse((data.data.match(/vm.HotUpdateJSON = (.*);/) ?? [])[1]).slice(15)
-    hot.forEach((elem: any) => {
-      let id = elem.IndexName
-      let title = elem.SeriesName
-      let image = `${ML_IMAGE_DOMAIN}/${id}.jpg`
-      let time = (new Date(elem.Date)).toDateString()
-      time = time.slice(0, time.length - 5)
-      time = time.slice(4, time.length)
+    for(let obj of $('.cartoon-box').toArray()) {
+      let id = $('a', $(obj)).attr('href')?.replace(`${COMICEXTRA_DOMAIN}/comic/`, '')
+      let title = $('h3', $(obj)).text().trim()
+      let image = $('img', $(obj)).attr('src')
 
       manga.add(createMangaTile({
-        id: id,
-        image: image,
-        title: createIconText({ text: title }),
-        secondaryText: createIconText({ text: time, icon: 'clock.fill' })
+          id: id!,
+          title: createIconText({text: title}),
+          image: image!
       }))
+    }
+
+    /*if (!this.isLastPage($)) {
+      metadata.page ? metadata.page++ : metadata.page = 2
+    }
+    else {
+      metadata = undefined  // There are no more pages to continue on to, do not provide page metadata
+    }*/
+
+    return createPagedResults({
+      results: Array.from(manga),
+      metadata: metadata
     })
   }
-  else if (homepageSectionId == 'latest') {
-    let latest = JSON.parse((data.data.match(/vm.LatestJSON = (.*);/) ?? [])[1]).slice(15)
-    latest.forEach((elem: any) => {
-      let id = elem.IndexName
-      let title = elem.SeriesName
-      let image = `${ML_IMAGE_DOMAIN}/${id}.jpg`
-      let time = (new Date(elem.Date)).toDateString()
-      time = time.slice(0, time.length - 5)
-      time = time.slice(4, time.length)
 
-      manga.add(createMangaTile({
-        id: id,
-        image: image,
-        title: createIconText({ text: title }),
-        secondaryText: createIconText({ text: time, icon: 'clock.fill' })
-      }))
-    })
-  }
-  else if (homepageSectionId == 'recommended') {
-    let latest = JSON.parse((data.data.match(/vm.RecommendationJSON = (.*);/) ?? [])[1])
-    latest.forEach((elem: any) => {
-      let id = elem.IndexName
-      let title = elem.SeriesName
-      let image = `${ML_IMAGE_DOMAIN}/${id}.jpg`
-      let time = (new Date(elem.Date)).toDateString()
-      time = time.slice(0, time.length - 5)
-      time = time.slice(4, time.length)
-
-      manga.add(createMangaTile({
-        id: id,
-        image: image,
-        title: createIconText({ text: title }),
-        secondaryText: createIconText({ text: time, icon: 'clock.fill' })
-      }))
-    })
-  }
-  else if (homepageSectionId == 'new_titles') {
-    let newTitles = JSON.parse((data.data.match(/vm.NewSeriesJSON = (.*);/) ?? [])[1]).slice(15)
-    newTitles.forEach((elem: any) => {
-      let id = elem.IndexName
-      let title = elem.SeriesName
-      let image = `${ML_IMAGE_DOMAIN}/${id}.jpg`
-      let time = (new Date(elem.Date)).toDateString()
-      time = time.slice(0, time.length - 5)
-      time = time.slice(4, time.length)
-
-      manga.add(createMangaTile({
-        id: id,
-        image: image,
-        title: createIconText({ text: title })
-      }))
-    })
-  }
-  else return null
-
-  // This source parses JSON and never requires additional pages
-  return createPagedResults({
-    results: Array.from(manga)
-  })
-}
 }
