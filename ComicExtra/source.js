@@ -306,7 +306,7 @@ exports.ComicExtra = exports.ComicExtraInfo = void 0;
 const paperback_extensions_common_1 = require("paperback-extensions-common");
 const COMICEXTRA_DOMAIN = 'https://www.comicextra.com';
 exports.ComicExtraInfo = {
-    version: '1.2.6',
+    version: '1.2.7',
     name: 'ComicExtra',
     description: 'Extension that pulls western comics from ComicExtra.com',
     author: 'GameFuzzy',
@@ -583,15 +583,15 @@ class ComicExtra extends paperback_extensions_common_1.Source {
         return __awaiter(this, void 0, void 0, function* () {
             let page = '';
             switch (homepageSectionId) {
-                case 'popular_comics': {
+                case '2': {
                     page = `/popular-comic/${metadata.page ? metadata.page : 1}`;
                     break;
                 }
-                case 'recently_released_comics': {
+                case '1': {
                     page = `/recent-comic/${metadata.page ? metadata.page : 1}`;
                     break;
                 }
-                case 'new_comics': {
+                case '0': {
                     page = `/new-comic/${metadata.page ? metadata.page : 1}`;
                     break;
                 }
@@ -631,9 +631,9 @@ class ComicExtra extends paperback_extensions_common_1.Source {
         var _a, _b, _c;
         return __awaiter(this, void 0, void 0, function* () {
             // Let the app know what the homesections are without filling in the data
-            let popularSection = createHomeSection({ id: 'popular_comics', title: 'POPULAR COMICS', view_more: true });
-            let recentSection = createHomeSection({ id: 'recently_released_comics', title: 'RECENTLY ADDED COMICS', view_more: true });
-            let newTitlesSection = createHomeSection({ id: 'new_comics', title: 'LATEST COMICS', view_more: true });
+            let popularSection = createHomeSection({ id: '2', title: 'POPULAR COMICS', view_more: true });
+            let recentSection = createHomeSection({ id: '1', title: 'RECENTLY ADDED COMICS', view_more: true });
+            let newTitlesSection = createHomeSection({ id: '0', title: 'LATEST COMICS', view_more: true });
             sectionCallback(popularSection);
             sectionCallback(recentSection);
             sectionCallback(newTitlesSection);
@@ -662,8 +662,8 @@ class ComicExtra extends paperback_extensions_common_1.Source {
                 url: `${COMICEXTRA_DOMAIN}/recent-comic`,
                 method: 'GET'
             });
-            const latestData = yield this.requestManager.schedule(request, 1);
-            $ = this.cheerio.load(latestData.data);
+            const recentData = yield this.requestManager.schedule(request, 1);
+            $ = this.cheerio.load(recentData.data);
             for (let obj of $('.cartoon-box').toArray()) {
                 let id = (_b = $('a', $(obj)).attr('href')) === null || _b === void 0 ? void 0 : _b.replace(`${COMICEXTRA_DOMAIN}/comic/`, '');
                 let title = $('h3', $(obj)).text().trim();
