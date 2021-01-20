@@ -306,7 +306,7 @@ exports.ComicExtra = exports.ComicExtraInfo = void 0;
 const paperback_extensions_common_1 = require("paperback-extensions-common");
 const COMICEXTRA_DOMAIN = 'https://www.comicextra.com';
 exports.ComicExtraInfo = {
-    version: '1.3.1',
+    version: '1.3.2',
     name: 'ComicExtra',
     description: 'Extension that pulls western comics from ComicExtra.com',
     author: 'GameFuzzy',
@@ -462,7 +462,6 @@ class ComicExtra extends paperback_extensions_common_1.Source {
         });
     }
     getChapterDetails(mangaId, chapterId) {
-        var _a;
         return __awaiter(this, void 0, void 0, function* () {
             let request = createRequestObject({
                 url: `${COMICEXTRA_DOMAIN}/${mangaId}/${chapterId}/full`,
@@ -471,9 +470,15 @@ class ComicExtra extends paperback_extensions_common_1.Source {
             const data = yield this.requestManager.schedule(request, 1);
             let $ = this.cheerio.load(data.data);
             let pages = [];
-            // Get all of the pages
-            for (let obj of $('.chapter_img').toArray()) {
-                pages.push((_a = $(obj).attr('src')) !== null && _a !== void 0 ? _a : 'fallback.png');
+            if ($('.chapter_img').toArray().length < 1) {
+                // Fallback to error image
+                pages.push('fallback.png');
+            }
+            else {
+                // Get all of the pages
+                for (let obj of $('.chapter_img').toArray()) {
+                    pages.push($(obj).attr('src'));
+                }
             }
             return createChapterDetails({
                 id: chapterId,
