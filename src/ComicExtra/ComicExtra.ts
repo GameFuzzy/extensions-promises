@@ -18,7 +18,7 @@ import {
 const COMICEXTRA_DOMAIN = 'https://www.comicextra.com'
 
 export const ComicExtraInfo: SourceInfo = {
-  version: '1.2.8',
+  version: '1.2.9',
   name: 'ComicExtra',
   description: 'Extension that pulls western comics from ComicExtra.com',
   author: 'GameFuzzy',
@@ -442,12 +442,13 @@ export class ComicExtra extends Source {
       let id = $('a', $(obj)).attr('href')?.replace(`${COMICEXTRA_DOMAIN}/comic/`, '')
       let title = $('h3', $(obj)).text().trim()
       let image = $('img', $(obj)).attr('src')
-
+      console.log(`ADDING ${id!}`)
       manga.add(createMangaTile({
           id: id!,
           title: createIconText({text: title}),
           image: image!
       }))
+      console.log(manga)
     }
 
     /*if (!this.isLastPage($)) {
