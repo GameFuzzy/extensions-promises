@@ -306,7 +306,7 @@ exports.ComicExtra = exports.ComicExtraInfo = void 0;
 const paperback_extensions_common_1 = require("paperback-extensions-common");
 const COMICEXTRA_DOMAIN = 'https://www.comicextra.com';
 exports.ComicExtraInfo = {
-    version: '1.3.3',
+    version: '1.3.4',
     name: 'ComicExtra',
     description: 'Extension that pulls western comics from ComicExtra.com',
     author: 'GameFuzzy',
@@ -472,7 +472,7 @@ class ComicExtra extends paperback_extensions_common_1.Source {
             let pages = [];
             if ($('.chapter_img').toArray().length < 1) {
                 // Fallback to error image
-                pages.push('fallback.png');
+                pages.push('https://2.bp.blogspot.com/-Vc_P29M_7yk/WdSYg9e6F9I/AAAAAAAAEUI/3K5wt1yFlWEXfMZ6m6-haWMhN1HbjCWSACHMYCw/s0/RCO001.jpg');
             }
             else {
                 // Get all of the pages
