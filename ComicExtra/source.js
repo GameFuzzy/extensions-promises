@@ -307,7 +307,7 @@ const paperback_extensions_common_1 = require("paperback-extensions-common");
 const Parser_1 = require("./Parser");
 const COMICEXTRA_DOMAIN = 'https://www.comicextra.com';
 exports.ComicExtraInfo = {
-    version: '1.3.8',
+    version: '1.3.9',
     name: 'ComicExtra',
     description: 'Extension that pulls western comics from ComicExtra.com',
     author: 'GameFuzzy',
@@ -485,12 +485,12 @@ class ComicExtra extends paperback_extensions_common_1.Source {
             let data = yield this.requestManager.schedule(request, 1);
             let $ = this.cheerio.load(data.data);
             let manga = this.parser.parseHomePageSection($);
-            /*if (!this.isLastPage($)) {
-              metadata.page ? metadata.page++ : metadata.page = 2
+            if (!this.parser.isLastPage($)) {
+                metadata.page ? metadata.page++ : metadata.page = 2;
             }
             else {
-              metadata = undefined  // There are no more pages to continue on to, do not provide page metadata
-            }*/
+                metadata = undefined; // There are no more pages to continue on to, do not provide page metadata
+            }
             return createPagedResults({
                 results: Array.from(manga),
                 metadata: metadata
@@ -507,9 +507,8 @@ exports.Parser = void 0;
 const paperback_extensions_common_1 = require("paperback-extensions-common");
 const COMICEXTRA_DOMAIN = 'https://www.comicextra.com';
 class Parser {
-    parseMangaDetails(data, mangaId) {
+    parseMangaDetails($, mangaId) {
         var _a, _b, _c, _d;
-        let $ = data;
         let titles = [$('.title-1', $('.mobile-hide')).text().trimStart()];
         let image = $('img', $('.movie-l-img')).attr('src');
         let summary = $('#film-content', $('#film-content-wrapper')).text().trim();
@@ -583,9 +582,8 @@ class Parser {
             relatedIds: relatedIds
         });
     }
-    parseChapterList(data, mangaId) {
+    parseChapterList($, mangaId) {
         var _a;
-        let $ = data;
         let chapters = [];
         for (let obj of $('tr', $('#list')).toArray()) {
             let chapterId = (_a = $('a', $(obj)).attr('href')) === null || _a === void 0 ? void 0 : _a.replace(`${COMICEXTRA_DOMAIN}/${mangaId}/`, '');
@@ -617,8 +615,7 @@ class Parser {
         sortedChapters.sort((a, b) => (a.id > b.id) ? 1 : -1);
         return sortedChapters;
     }
-    parseChapterDetails(data, mangaId, chapterId) {
-        let $ = data;
+    parseChapterDetails($, mangaId, chapterId) {
         let pages = [];
         if ($('img', $('.chapter-container')).toArray().length < 1) {
             // Fallback to error image
@@ -637,9 +634,8 @@ class Parser {
             longStrip: false
         });
     }
-    filterUpdatedManga(data, time, ids) {
+    filterUpdatedManga($, time, ids) {
         var _a, _b, _c;
-        let $ = data;
         let foundIds = [];
         let passedReferenceTime = false;
         for (let item of $('.hlb-t').toArray()) {
@@ -668,9 +664,8 @@ class Parser {
             return { updates: foundIds, loadNextPage: false };
         }
     }
-    parseSearchResults(data) {
+    parseSearchResults($) {
         var _a;
-        let $ = data;
         let mangaTiles = [];
         for (let obj of $('.cartoon-box').toArray()) {
             let id = (_a = $('a', $(obj)).attr('href')) === null || _a === void 0 ? void 0 : _a.replace(`${COMICEXTRA_DOMAIN}/comic/`, '');
@@ -686,9 +681,8 @@ class Parser {
         }
         return mangaTiles;
     }
-    parseTags(data) {
+    parseTags($) {
         var _a, _b;
-        let $ = data;
         let tagSections = [createTagSection({ id: '0', label: 'genres', tags: [] }),
             createTagSection({ id: '1', label: 'format', tags: [] })];
         for (let obj of $('a', $('.home-list')).toArray()) {
@@ -699,9 +693,8 @@ class Parser {
         tagSections[1].tags.push(createTag({ id: 'comic/', label: 'Comic' }));
         return tagSections;
     }
-    parseHomePageSection(data) {
+    parseHomePageSection($) {
         var _a;
-        let $ = data;
         let tiles = [];
         for (let obj of $('.cartoon-box').toArray()) {
             let id = (_a = $('a', $(obj)).attr('href')) === null || _a === void 0 ? void 0 : _a.replace(`${COMICEXTRA_DOMAIN}/comic/`, '');
@@ -714,6 +707,15 @@ class Parser {
             }));
         }
         return tiles;
+    }
+    isLastPage($) {
+        let current = $('.title-list-index').text();
+        for (let obj of $('.general-nav').toArray()) {
+            if ($(obj).text().trim() == "Last") {
+                return false;
+            }
+        }
+        return true;
     }
 }
 exports.Parser = Parser;
