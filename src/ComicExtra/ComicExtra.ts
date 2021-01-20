@@ -4,7 +4,6 @@ import {
   Chapter,
   ChapterDetails,
   HomeSection,
-  MangaTile,
   SearchRequest,
   TagSection,
   PagedResults,
@@ -20,7 +19,7 @@ import {
 const COMICEXTRA_DOMAIN = 'https://www.comicextra.com'
 
 export const ComicExtraInfo: SourceInfo = {
-  version: '1.3.6',
+  version: '1.3.7',
   name: 'ComicExtra',
   description: 'Extension that pulls western comics from ComicExtra.com',
   author: 'GameFuzzy',
