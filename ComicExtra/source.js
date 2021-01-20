@@ -306,7 +306,7 @@ exports.ComicExtra = exports.ComicExtraInfo = void 0;
 const paperback_extensions_common_1 = require("paperback-extensions-common");
 const COMICEXTRA_DOMAIN = 'https://www.comicextra.com';
 exports.ComicExtraInfo = {
-    version: '1.2.9',
+    version: '1.3.0',
     name: 'ComicExtra',
     description: 'Extension that pulls western comics from ComicExtra.com',
     author: 'GameFuzzy',
@@ -328,7 +328,7 @@ exports.ComicExtraInfo = {
 class ComicExtra extends paperback_extensions_common_1.Source {
     getMangaShareUrl(mangaId) { return `${COMICEXTRA_DOMAIN}/comic/${mangaId}`; }
     getMangaDetails(mangaId) {
-        var _a, _b, _c;
+        var _a, _b, _c, _d;
         return __awaiter(this, void 0, void 0, function* () {
             let request = createRequestObject({
                 url: `${COMICEXTRA_DOMAIN}/comic/${mangaId}`,
@@ -390,17 +390,17 @@ class ComicExtra extends paperback_extensions_common_1.Source {
                     }
                     case 5: {
                         // Genres
-                        let genres = $(item).text().trim().split(', ');
-                        genres.forEach(function (genre) {
-                            var _a, _b;
-                            tagSections[0].tags.push(createTag({ id: (_b = (_a = $(item).attr('href')) === null || _a === void 0 ? void 0 : _a.replace(`${COMICEXTRA_DOMAIN}/`, '').trim()) !== null && _b !== void 0 ? _b : genre.trim(), label: genre.trim() }));
-                        });
+                        for (let obj of $('a', $(item)).toArray()) {
+                            tagSections[0].tags.push(createTag({ id: (_d = $(obj).attr('href')) === null || _d === void 0 ? void 0 : _d.replace(`${COMICEXTRA_DOMAIN}/`, '').trim(), label: $(obj).text().trim() }));
+                        }
                         i++;
                         continue;
                     }
                 }
                 i = 0;
             }
+            console.log(tagSections[0].tags);
+            console.log(tagSections[1].tags);
             return createManga({
                 id: mangaId,
                 rating: rating,
