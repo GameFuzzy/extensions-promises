@@ -306,7 +306,7 @@ exports.ComicExtra = exports.ComicExtraInfo = void 0;
 const paperback_extensions_common_1 = require("paperback-extensions-common");
 const COMICEXTRA_DOMAIN = 'https://www.comicextra.com';
 exports.ComicExtraInfo = {
-    version: '1.2.5',
+    version: '1.2.6',
     name: 'ComicExtra',
     description: 'Extension that pulls western comics from ComicExtra.com',
     author: 'GameFuzzy',
@@ -532,17 +532,17 @@ class ComicExtra extends paperback_extensions_common_1.Source {
         });
     }
     searchRequest(query, metadata) {
-        var _a;
+        var _a, _b;
         return __awaiter(this, void 0, void 0, function* () {
             let request = createRequestObject({
-                url: `${COMICEXTRA_DOMAIN}/comic-search?key=${query.title}`,
+                url: `${COMICEXTRA_DOMAIN}/comic-search?key=${(_a = query.title) === null || _a === void 0 ? void 0 : _a.replace(' ', '+')}`,
                 method: "GET"
             });
             const data = yield this.requestManager.schedule(request, 1);
             let $ = this.cheerio.load(data.data);
             let mangaTiles = [];
             for (let obj of $('.cartoon-box').toArray()) {
-                let id = (_a = $('a', $(obj)).attr('href')) === null || _a === void 0 ? void 0 : _a.replace(`${COMICEXTRA_DOMAIN}/comic/`, '');
+                let id = (_b = $('a', $(obj)).attr('href')) === null || _b === void 0 ? void 0 : _b.replace(`${COMICEXTRA_DOMAIN}/comic/`, '');
                 let titleText = $('h3', $(obj)).text();
                 let image = $('img', $(obj)).attr('src');
                 if (titleText == "Not found")
