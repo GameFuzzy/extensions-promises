@@ -306,7 +306,7 @@ exports.ComicExtra = exports.ComicExtraInfo = void 0;
 const paperback_extensions_common_1 = require("paperback-extensions-common");
 const COMICEXTRA_DOMAIN = 'https://www.comicextra.com';
 exports.ComicExtraInfo = {
-    version: '1.2.7',
+    version: '1.2.8',
     name: 'ComicExtra',
     description: 'Extension that pulls western comics from ComicExtra.com',
     author: 'GameFuzzy',
@@ -722,6 +722,8 @@ class ComicExtra extends paperback_extensions_common_1.Source {
     getHomePageSections(sectionCallback) {
         var _a, _b, _c, _d, _e, _f;
         return __awaiter(this, void 0, void 0, function* () {
+            const ML_DOMAIN = 'https://manga4life.com';
+            let ML_IMAGE_DOMAIN = 'https://cover.mangabeast01.com/cover';
             const request = createRequestObject({
                 url: `${ML_DOMAIN}`,
                 method: 'GET'
