@@ -18,7 +18,7 @@ import {
 const COMICEXTRA_DOMAIN = 'https://www.comicextra.com'
 
 export const ComicExtraInfo: SourceInfo = {
-  version: '1.2.5',
+  version: '1.2.6',
   name: 'ComicExtra',
   description: 'Extension that pulls western comics from ComicExtra.com',
   author: 'GameFuzzy',
@@ -267,7 +267,7 @@ export class ComicExtra extends Source {
   async searchRequest(query: SearchRequest, metadata: any): Promise<PagedResults> {
 
     let request = createRequestObject({
-      url: `${COMICEXTRA_DOMAIN}/comic-search?key=${query.title}`,
+      url: `${COMICEXTRA_DOMAIN}/comic-search?key=${query.title?.replace(' ', '+')}`,
       method: "GET"
     })
 
