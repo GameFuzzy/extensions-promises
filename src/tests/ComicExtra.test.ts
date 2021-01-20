@@ -15,7 +15,7 @@ describe('ComicExtra Tests', function () {
      * Try to choose a manga which is updated frequently, so that the historical checking test can 
      * return proper results, as it is limited to searching 30 days back due to extremely long processing times otherwise.
      */
-    var mangaId = "batman-2016";
+    var mangaId = "all-star-batman";
 
     it("Retrieve Manga Details", async () => {
         let details = await wrapper.getMangaDetails(source, mangaId);
@@ -46,8 +46,8 @@ describe('ComicExtra Tests', function () {
     it("Get Chapter Details", async () => {
 
         let chapters = await wrapper.getChapters(source, mangaId);
-        let data = await wrapper.getChapterDetails(source, mangaId, chapters[0].id);
-
+        let data = await wrapper.getChapterDetails(source, mangaId, chapters[4].id);
+        console.log(data.pages[0])
         expect(data, "No server response").to.exist;
         expect(data, "Empty server response").to.not.be.empty;
 

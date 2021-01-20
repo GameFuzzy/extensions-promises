@@ -58,7 +58,6 @@ export class Parser {
         case 4: {
           // Genres
           for(let obj of $('a',$(item)).toArray()){
-            console.log($(obj).text().trim())
             //tagSections[0].tags.push(createTag({id: $(obj).attr('href')?.replace(`${COMICEXTRA_DOMAIN}/`, '').trim()!, label: $(obj).text().trim()}))
             tagArray0 = [...tagArray0, createTag({id: $(obj).attr('href')?.replace(`${COMICEXTRA_DOMAIN}/`, '').trim()!, label: $(obj).text().trim()})]
           }    
@@ -69,7 +68,6 @@ export class Parser {
       i = 0
     }
     let tagSections: TagSection[] = [createTagSection({ id: '0', label: 'genres', tags: tagArray0 })]
-      console.log(tagArray0[0])
       return createManga({
         id: mangaId,
         rating: rating,
@@ -228,8 +226,6 @@ export class Parser {
         return tiles
     }
     isLastPage($: CheerioSelector): boolean {
-      let current = $('.title-list-index').text()
-      
       for(let obj of $('.general-nav').toArray()) {
         if($(obj).text().trim() == "Last") {
           return false
