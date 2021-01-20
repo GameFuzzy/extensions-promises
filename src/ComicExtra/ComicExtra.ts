@@ -19,7 +19,7 @@ import {
 const COMICEXTRA_DOMAIN = 'https://www.comicextra.com'
 
 export const ComicExtraInfo: SourceInfo = {
-  version: '1.3.8',
+  version: '1.3.9',
   name: 'ComicExtra',
   description: 'Extension that pulls western comics from ComicExtra.com',
   author: 'GameFuzzy',
@@ -228,12 +228,12 @@ export class ComicExtra extends Source {
     let $ = this.cheerio.load(data.data)
     let manga = this.parser.parseHomePageSection($)
 
-    /*if (!this.isLastPage($)) {
+    if (!this.parser.isLastPage($)) {
       metadata.page ? metadata.page++ : metadata.page = 2
     }
     else {
       metadata = undefined  // There are no more pages to continue on to, do not provide page metadata
-    }*/
+    }
 
     return createPagedResults({
       results: Array.from(manga),

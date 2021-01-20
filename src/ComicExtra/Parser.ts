@@ -5,8 +5,8 @@ const COMICEXTRA_DOMAIN = 'https://www.comicextra.com'
 export class Parser {
 
     
-    parseMangaDetails(data: CheerioSelector, mangaId: string): Manga {
-    let $ = data
+    parseMangaDetails($: CheerioSelector, mangaId: string): Manga {
+    
 
     let titles = [$('.title-1', $('.mobile-hide')).text().trimStart()]
     let image = $('img', $('.movie-l-img')).attr('src')
@@ -85,8 +85,8 @@ export class Parser {
     }
 
 
-    parseChapterList(data: CheerioSelector, mangaId: string) : Chapter[] { 
-    let $ = data
+    parseChapterList($: CheerioSelector, mangaId: string) : Chapter[] { 
+    
     let chapters: Chapter[] = []
 
       for(let obj of $('tr', $('#list')).toArray()) {
@@ -123,8 +123,8 @@ export class Parser {
     }
 
 
-    parseChapterDetails(data: CheerioSelector, mangaId: string, chapterId: string) : ChapterDetails {
-        let $ = data
+    parseChapterDetails($: CheerioSelector, mangaId: string, chapterId: string) : ChapterDetails {
+        
         let pages: string[] = []
         if($('img',$('.chapter-container')).toArray().length < 1)
         {
@@ -146,8 +146,8 @@ export class Parser {
         })
     }
 
-    filterUpdatedManga(data: CheerioSelector, time: Date, ids: string[] ) : {updates: string[], loadNextPage : boolean} {
-    let $ = data
+    filterUpdatedManga($: CheerioSelector, time: Date, ids: string[] ) : {updates: string[], loadNextPage : boolean} {
+    
     let foundIds: string[] = []
     let passedReferenceTime = false
     for (let item of $('.hlb-t').toArray()) {
@@ -178,9 +178,8 @@ export class Parser {
     
 }
 
-    parseSearchResults(data: CheerioSelector): MangaTile[] { 
-        let $ = data
-
+    parseSearchResults($: CheerioSelector): MangaTile[] { 
+        
         let mangaTiles: MangaTile[] = []
         for(let obj of $('.cartoon-box').toArray()) {
             let id = $('a', $(obj)).attr('href')?.replace(`${COMICEXTRA_DOMAIN}/comic/`, '')
@@ -198,8 +197,8 @@ export class Parser {
     return mangaTiles
     }
 
-    parseTags(data: CheerioSelector): TagSection[] {
-        let $ = data
+    parseTags($: CheerioSelector): TagSection[] {
+        
         let tagSections: TagSection[] = [createTagSection({ id: '0', label: 'genres', tags: [] }),
         createTagSection({ id: '1', label: 'format', tags: [] })]
     
@@ -212,8 +211,8 @@ export class Parser {
         return tagSections
     }
 
-    parseHomePageSection(data : CheerioSelector): MangaTile[]{
-        let $ = data
+    parseHomePageSection($ : CheerioSelector): MangaTile[]{
+        
         let tiles: MangaTile[] = []
         for(let obj of $('.cartoon-box').toArray()) {
             let id = $('a', $(obj)).attr('href')?.replace(`${COMICEXTRA_DOMAIN}/comic/`, '')
@@ -227,5 +226,15 @@ export class Parser {
             }))
         }
         return tiles
+    }
+    isLastPage($: CheerioSelector): boolean {
+      let current = $('.title-list-index').text()
+      
+      for(let obj of $('.general-nav').toArray()) {
+        if($(obj).text().trim() == "Last") {
+          return false
+        }
+      }
+      return true
     }
 }
