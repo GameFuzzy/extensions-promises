@@ -18,7 +18,7 @@ import {
 const COMICEXTRA_DOMAIN = 'https://www.comicextra.com'
 
 export const ComicExtraInfo: SourceInfo = {
-  version: '1.3.1',
+  version: '1.3.2',
   name: 'ComicExtra',
   description: 'Extension that pulls western comics from ComicExtra.com',
   author: 'GameFuzzy',
@@ -197,10 +197,17 @@ export class ComicExtra extends Source {
     let $ = this.cheerio.load(data.data)
     let pages: string[] = []
 
-    // Get all of the pages
-    for(let obj of $('.chapter_img').toArray()) {
-      pages.push($(obj).attr('src') ?? 'fallback.png')
-  }
+    if($('.chapter_img').toArray().length < 1)
+    {
+      // Fallback to error image
+      pages.push('fallback.png')
+    }
+    else {
+      // Get all of the pages
+      for(let obj of $('.chapter_img').toArray()) {
+        pages.push($(obj).attr('src')!)
+      }
+    }
 
     return createChapterDetails({
       id: chapterId,
