@@ -12,13 +12,14 @@ import {
   PagedResults,
   SourceInfo,
   MangaUpdates,
-  TagType
+  TagType,
+  Tag
 } from "paperback-extensions-common"
 
 const COMICEXTRA_DOMAIN = 'https://www.comicextra.com'
 
 export const ComicExtraInfo: SourceInfo = {
-  version: '1.3.5',
+  version: '1.3.6',
   name: 'ComicExtra',
   description: 'Extension that pulls western comics from ComicExtra.com',
   author: 'GameFuzzy',
@@ -59,14 +60,14 @@ export class ComicExtra extends Source {
     }
 
     let status = MangaStatus.ONGOING, author, released, rating: number = 0
-    let tagSections: TagSection[] = [createTagSection({ id: '0', label: 'genres', tags: [] }),
-    createTagSection({ id: '1', label: 'format', tags: [] })]
+    let tagArray0 : Tag[] = []
+    let tagArray1 : Tag[] = []
     let i = 0
     for (let item of $('.movie-dd', $('.movie-dl')).toArray()) {
       switch (i) {
         case 0: {
           //tagSections[1].tags.push(createTag({id: $(item).text().trim(), label: $(item).text().trim()}))
-          [...tagSections[1].tags, createTag({id: $(item).text().trim(), label: $(item).text().trim()})]
+          [...tagArray0, createTag({id: $(item).text().trim(), label: $(item).text().trim()})]
           i++
           continue
         }
@@ -107,7 +108,7 @@ export class ComicExtra extends Source {
           // Genres
           for(let obj of $('a',$(item)).toArray()){
             //tagSections[0].tags.push(createTag({id: $(obj).attr('href')?.replace(`${COMICEXTRA_DOMAIN}/`, '').trim()!, label: $(obj).text().trim()}))
-            [...tagSections[0].tags, createTag({id: $(obj).attr('href')?.replace(`${COMICEXTRA_DOMAIN}/`, '').trim()!, label: $(obj).text().trim()})]
+            [...tagArray1, createTag({id: $(obj).attr('href')?.replace(`${COMICEXTRA_DOMAIN}/`, '').trim()!, label: $(obj).text().trim()})]
           }    
           i++
           continue
@@ -115,6 +116,8 @@ export class ComicExtra extends Source {
       }
       i = 0
     }
+    let tagSections: TagSection[] = [createTagSection({ id: '0', label: 'genres', tags: [] }),
+    createTagSection({ id: '1', label: 'format', tags: [] })]
     console.log(tagSections[0].tags)
     console.log(tagSections[1].tags)
     return createManga({
