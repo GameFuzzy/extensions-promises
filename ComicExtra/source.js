@@ -399,8 +399,6 @@ class ComicExtra extends paperback_extensions_common_1.Source {
             }
             let tagSections = [createTagSection({ id: '0', label: 'genres', tags: tagArray0 }),
                 createTagSection({ id: '1', label: 'format', tags: tagArray1 })];
-            console.log(tagSections[0].tags);
-            console.log(tagSections[1].tags);
             return createManga({
                 id: mangaId,
                 rating: rating,
@@ -474,13 +472,15 @@ class ComicExtra extends paperback_extensions_common_1.Source {
             const data = yield this.requestManager.schedule(request, 1);
             let $ = this.cheerio.load(data.data);
             let pages = [];
-            if ($('.chapter_img').toArray().length < 1) {
+            console.log($('img', $('.chapter-container')).first().attr('src'));
+            if ($('img', $('.chapter-container')).toArray().length < 1) {
                 // Fallback to error image
                 pages.push('https://2.bp.blogspot.com/-Vc_P29M_7yk/WdSYg9e6F9I/AAAAAAAAEUI/3K5wt1yFlWEXfMZ6m6-haWMhN1HbjCWSACHMYCw/s0/RCO001.jpg');
+                console.log(`Fallback: ${pages[0]}`);
             }
             else {
                 // Get all of the pages
-                for (let obj of $('.chapter_img').toArray()) {
+                for (let obj of $('img', $('.chapter-container')).toArray()) {
                     pages.push($(obj).attr('src'));
                 }
             }
