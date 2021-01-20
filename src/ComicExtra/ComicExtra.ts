@@ -108,16 +108,17 @@ export class ComicExtra extends Source {
           }
         case 5: {
           // Genres
-          let genres = $(item).text().trim().split(', ')          
-          genres.forEach(function(genre) {
-            tagSections[0].tags.push(createTag({id: $(item).attr('href')?.replace(`${COMICEXTRA_DOMAIN}/`, '')!.trim() ?? genre.trim(), label: genre.trim()}))
-          })
+          for(let obj of $('a',$(item)).toArray()){
+            tagSections[0].tags.push(createTag({id: $(obj).attr('href')?.replace(`${COMICEXTRA_DOMAIN}/`, '').trim()!, label: $(obj).text().trim()}))
+          }    
           i++
           continue
         }
       }
       i = 0
     }
+    console.log(tagSections[0].tags)
+    console.log(tagSections[1].tags)
     return createManga({
       id: mangaId,
       rating: rating,
