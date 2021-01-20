@@ -5,7 +5,7 @@ const COMICEXTRA_DOMAIN = 'https://www.comicextra.com'
 export class Parser {
 
     
-    parseMangaDetails(data: CheerioSelector, mangaId: string): Manga[] {
+    parseMangaDetails(data: CheerioSelector, mangaId: string): Manga {
     let $ = data
 
     let titles = [$('.title-1', $('.mobile-hide')).text().trimStart()]
@@ -19,17 +19,10 @@ export class Parser {
 
     let status = MangaStatus.ONGOING, author, released, rating: number = 0
     let tagArray0 : Tag[] = []
-    let tagArray1 : Tag[] = []
     let i = 0
     for (let item of $('.movie-dd', $('.movie-dl')).toArray()) {
       switch (i) {
         case 0: {
-          //tagSections[1].tags.push(createTag({id: $(item).text().trim(), label: $(item).text().trim()}))
-          tagArray1 = [...tagArray1, createTag({id: $(item).text().trim(), label: $(item).text().trim()})]
-          i++
-          continue
-        }
-        case 1: {
           // Comic Status
           if ($('a', $(item)).text().toLowerCase().includes("ongoing")) {
             status = MangaStatus.ONGOING
@@ -40,7 +33,7 @@ export class Parser {
           i++
           continue
         }
-        case 2: {
+        case 1: {
           // Alt Titles
            if($(item).text().toLowerCase().trim() == "-") {
             i++
@@ -50,33 +43,34 @@ export class Parser {
           i++
           continue
         }
-        case 3: {
+        case 2: {
           // Date of release
           released = ($(item).text().trim()) ?? undefined
           i++
           continue
         }
-        case 4: {
+        case 3: {
           // Author
           author = ($(item).text().trim()) ?? undefined
           i++
           continue
           }
-          case 5: {
-            // Genres
-            for(let obj of $('a',$(item)).toArray()){
-              //tagSections[0].tags.push(createTag({id: $(obj).attr('href')?.replace(`${COMICEXTRA_DOMAIN}/`, '').trim()!, label: $(obj).text().trim()}))
-              tagArray0 = [...tagArray0, createTag({id: $(obj).attr('href')?.replace(`${COMICEXTRA_DOMAIN}/`, '').trim()!, label: $(obj).text().trim()})]
-            }    
-            i++
-            continue
-          }
+        case 4: {
+          // Genres
+          for(let obj of $('a',$(item)).toArray()){
+            console.log($(obj).text().trim())
+            //tagSections[0].tags.push(createTag({id: $(obj).attr('href')?.replace(`${COMICEXTRA_DOMAIN}/`, '').trim()!, label: $(obj).text().trim()}))
+            tagArray0 = [...tagArray0, createTag({id: $(obj).attr('href')?.replace(`${COMICEXTRA_DOMAIN}/`, '').trim()!, label: $(obj).text().trim()})]
+          }    
+          i++
+          continue
         }
-        i = 0
       }
-      let tagSections: TagSection[] = [createTagSection({ id: '0', label: 'genres', tags: tagArray0 }),
-      createTagSection({ id: '1', label: 'format', tags: tagArray1 })]
-      return [createManga({
+      i = 0
+    }
+    let tagSections: TagSection[] = [createTagSection({ id: '0', label: 'genres', tags: tagArray0 })]
+      console.log(tagArray0[0])
+      return createManga({
         id: mangaId,
         rating: rating,
         titles: titles,
@@ -87,7 +81,7 @@ export class Parser {
         desc: summary,
         lastUpdate: released,
         relatedIds: relatedIds
-      })]
+      })
     }
 
 
