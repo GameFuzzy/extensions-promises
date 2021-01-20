@@ -18,7 +18,7 @@ import {
 const COMICEXTRA_DOMAIN = 'https://www.comicextra.com'
 
 export const ComicExtraInfo: SourceInfo = {
-  version: '1.3.0',
+  version: '1.3.1',
   name: 'ComicExtra',
   description: 'Extension that pulls western comics from ComicExtra.com',
   author: 'GameFuzzy',
@@ -27,10 +27,6 @@ export const ComicExtraInfo: SourceInfo = {
   hentaiSource: false,
   websiteBaseURL: COMICEXTRA_DOMAIN,
   sourceTags: [
-    {
-      text: "Work in progress",
-      type: TagType.RED
-    },
     {
       text: "Notifications",
       type: TagType.GREEN
