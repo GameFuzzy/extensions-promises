@@ -307,7 +307,7 @@ const paperback_extensions_common_1 = require("paperback-extensions-common");
 const Parser_1 = require("./Parser");
 const COMICEXTRA_DOMAIN = 'https://www.comicextra.com';
 exports.ComicExtraInfo = {
-    version: '1.3.9',
+    version: '1.4.0',
     name: 'ComicExtra',
     description: 'Extension that pulls western comics from ComicExtra.com',
     author: 'GameFuzzy',
@@ -557,7 +557,6 @@ class Parser {
                 case 4: {
                     // Genres
                     for (let obj of $('a', $(item)).toArray()) {
-                        console.log($(obj).text().trim());
                         //tagSections[0].tags.push(createTag({id: $(obj).attr('href')?.replace(`${COMICEXTRA_DOMAIN}/`, '').trim()!, label: $(obj).text().trim()}))
                         tagArray0 = [...tagArray0, createTag({ id: (_d = $(obj).attr('href')) === null || _d === void 0 ? void 0 : _d.replace(`${COMICEXTRA_DOMAIN}/`, '').trim(), label: $(obj).text().trim() })];
                     }
@@ -568,7 +567,6 @@ class Parser {
             i = 0;
         }
         let tagSections = [createTagSection({ id: '0', label: 'genres', tags: tagArray0 })];
-        console.log(tagArray0[0]);
         return createManga({
             id: mangaId,
             rating: rating,
@@ -709,7 +707,6 @@ class Parser {
         return tiles;
     }
     isLastPage($) {
-        let current = $('.title-list-index').text();
         for (let obj of $('.general-nav').toArray()) {
             if ($(obj).text().trim() == "Last") {
                 return false;
