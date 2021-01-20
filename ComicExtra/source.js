@@ -578,123 +578,319 @@ class ComicExtra extends paperback_extensions_common_1.Source {
             return tagSections;
         });
     }
-    getViewMoreItems(homepageSectionId, metadata) {
-        var _a;
+    /*  async getViewMoreItems(homepageSectionId: string, metadata: any): Promise<PagedResults | null> {
+        let page = ''
+        switch (homepageSectionId) {
+          case '2': {
+            page = `/popular-comic/${metadata.page ? metadata.page : 1}`
+            break
+          }
+          case '1': {
+            page = `/recent-comic/${metadata.page ? metadata.page : 1}`
+            break
+          }
+          case '0': {
+            page = `/new-comic/${metadata.page ? metadata.page : 1}`
+            break
+          }
+          default: return Promise.resolve(null)
+        }
+    
+        let request = createRequestObject({
+          url: `${COMICEXTRA_DOMAIN}${page}`,
+          method: 'GET',
+          metadata: metadata
+        })
+    
+        let data = await this.requestManager.schedule(request, 1)
+    
+        let $ = this.cheerio.load(data.data)
+        let manga: MangaTile[] = []
+    
+        for(let obj of $('.cartoon-box').toArray()) {
+          let id = $('a', $(obj)).attr('href')?.replace(`${COMICEXTRA_DOMAIN}/comic/`, '')
+          let title = $('h3', $(obj)).text().trim()
+          let image = $('img', $(obj)).attr('src')
+    
+          manga.push(createMangaTile({
+              id: id!,
+              title: createIconText({text: title}),
+              image: image!
+          }))
+        }
+    
+        /*if (!this.isLastPage($)) {
+          metadata.page ? metadata.page++ : metadata.page = 2
+        }
+        else {
+          metadata = undefined  // There are no more pages to continue on to, do not provide page metadata
+        }*/ /*
+
+    return createPagedResults({
+      results: manga,
+      metadata: metadata
+    })
+  }
+  async getHomePageSections(sectionCallback: (section: HomeSection) => void): Promise<void> {
+
+    // Let the app know what the homesections are without filling in the data
+    let popularSection = createHomeSection({ id: '2', title: 'POPULAR COMICS', view_more: true })
+    let recentSection = createHomeSection({ id: '1', title: 'RECENTLY ADDED COMICS', view_more: true })
+    let newTitlesSection = createHomeSection({ id: '0', title: 'LATEST COMICS', view_more: true })
+    sectionCallback(popularSection)
+    sectionCallback(recentSection)
+    sectionCallback(newTitlesSection)
+
+    // Make the request and fill out available titles
+    let request = createRequestObject({
+      url: `${COMICEXTRA_DOMAIN}/popular-comic`,
+      method: 'GET'
+    })
+
+    const popularData = await this.requestManager.schedule(request, 1)
+
+    let popular: MangaTile[] = []
+    let $ = this.cheerio.load(popularData.data)
+
+    for(let obj of $('.cartoon-box').toArray()) {
+      let id = $('a', $(obj)).attr('href')?.replace(`${COMICEXTRA_DOMAIN}/comic/`, '')
+      let title = $('h3', $(obj)).text().trim()
+      let image = $('img', $(obj)).attr('src')
+
+      popular.push(createMangaTile({
+          id: id!,
+          title: createIconText({text: title}),
+          image: image!
+      }))
+  }
+
+    popularSection.items = popular
+    sectionCallback(popularSection)
+
+
+    let recent: MangaTile[] = []
+
+    request = createRequestObject({
+      url: `${COMICEXTRA_DOMAIN}/recent-comic`,
+      method: 'GET'
+    })
+
+    const recentData = await this.requestManager.schedule(request, 1)
+    $ = this.cheerio.load(recentData.data)
+
+    for(let obj of $('.cartoon-box').toArray()) {
+      let id = $('a', $(obj)).attr('href')?.replace(`${COMICEXTRA_DOMAIN}/comic/`, '')
+      let title = $('h3', $(obj)).text().trim()
+      let image = $('img', $(obj)).attr('src')
+
+      recent.push(createMangaTile({
+          id: id!,
+          title: createIconText({text: title}),
+          image: image!
+      }))
+  }
+
+    recentSection.items = recent
+    sectionCallback(recentSection)
+
+    let newTitles: MangaTile[] = []
+
+    request = createRequestObject({
+      url: `${COMICEXTRA_DOMAIN}/new-comic`,
+      method: 'GET'
+    })
+
+    const newData = await this.requestManager.schedule(request, 1)
+    $ = this.cheerio.load(newData.data)
+
+    for(let obj of $('.cartoon-box').toArray()) {
+      let id = $('a', $(obj)).attr('href')?.replace(`${COMICEXTRA_DOMAIN}/comic/`, '')
+      let title = $('h3', $(obj)).text().trim()
+      let image = $('img', $(obj)).attr('src')
+
+      newTitles.push(createMangaTile({
+          id: id!,
+          title: createIconText({text: title}),
+          image: image!
+      }))
+    }
+
+    newTitlesSection.items = newTitles
+    sectionCallback(newTitlesSection)
+  }
+  */
+    getHomePageSections(sectionCallback) {
+        var _a, _b, _c, _d, _e, _f;
         return __awaiter(this, void 0, void 0, function* () {
-            let page = '';
-            switch (homepageSectionId) {
-                case '2': {
-                    page = `/popular-comic/${metadata.page ? metadata.page : 1}`;
-                    break;
-                }
-                case '1': {
-                    page = `/recent-comic/${metadata.page ? metadata.page : 1}`;
-                    break;
-                }
-                case '0': {
-                    page = `/new-comic/${metadata.page ? metadata.page : 1}`;
-                    break;
-                }
-                default: return Promise.resolve(null);
-            }
-            let request = createRequestObject({
-                url: `${COMICEXTRA_DOMAIN}${page}`,
-                method: 'GET',
-                metadata: metadata
+            const request = createRequestObject({
+                url: `${ML_DOMAIN}`,
+                method: 'GET'
             });
-            let data = yield this.requestManager.schedule(request, 1);
-            let $ = this.cheerio.load(data.data);
-            let manga = [];
-            for (let obj of $('.cartoon-box').toArray()) {
-                let id = (_a = $('a', $(obj)).attr('href')) === null || _a === void 0 ? void 0 : _a.replace(`${COMICEXTRA_DOMAIN}/comic/`, '');
-                let title = $('h3', $(obj)).text().trim();
-                let image = $('img', $(obj)).attr('src');
-                manga.push(createMangaTile({
+            const data = yield this.requestManager.schedule(request, 1);
+            const hotSection = createHomeSection({ id: 'hot_update', title: 'HOT UPDATES', view_more: true });
+            const latestSection = createHomeSection({ id: 'latest', title: 'LATEST UPDATES', view_more: true });
+            const newTitlesSection = createHomeSection({ id: 'new_titles', title: 'NEW TITLES', view_more: true });
+            const recommendedSection = createHomeSection({ id: 'recommended', title: 'RECOMMENDATIONS', view_more: true });
+            sectionCallback(hotSection);
+            sectionCallback(latestSection);
+            sectionCallback(newTitlesSection);
+            sectionCallback(recommendedSection);
+            const $ = this.cheerio.load(data.data);
+            const hot = (JSON.parse(((_a = data.data.match(/vm.HotUpdateJSON = (.*);/)) !== null && _a !== void 0 ? _a : [])[1])).slice(0, 15);
+            const latest = (JSON.parse(((_b = data.data.match(/vm.LatestJSON = (.*);/)) !== null && _b !== void 0 ? _b : [])[1])).slice(0, 15);
+            const newTitles = (JSON.parse(((_c = data.data.match(/vm.NewSeriesJSON = (.*);/)) !== null && _c !== void 0 ? _c : [])[1])).slice(0, 15);
+            const recommended = JSON.parse(((_d = data.data.match(/vm.RecommendationJSON = (.*);/)) !== null && _d !== void 0 ? _d : [])[1]);
+            let imgSource = ((_f = (_e = $('.ImageHolder').html()) === null || _e === void 0 ? void 0 : _e.match(/ng-src="(.*)\//)) !== null && _f !== void 0 ? _f : [])[1];
+            if (imgSource !== ML_IMAGE_DOMAIN)
+                ML_IMAGE_DOMAIN = imgSource;
+            let hotManga = [];
+            hot.forEach((elem) => {
+                let id = elem.IndexName;
+                let title = elem.SeriesName;
+                let image = `${ML_IMAGE_DOMAIN}/${id}.jpg`;
+                let time = (new Date(elem.Date)).toDateString();
+                time = time.slice(0, time.length - 5);
+                time = time.slice(4, time.length);
+                hotManga.push(createMangaTile({
                     id: id,
+                    image: image,
                     title: createIconText({ text: title }),
-                    image: image
+                    secondaryText: createIconText({ text: time, icon: 'clock.fill' })
                 }));
-            }
-            /*if (!this.isLastPage($)) {
-              metadata.page ? metadata.page++ : metadata.page = 2
-            }
-            else {
-              metadata = undefined  // There are no more pages to continue on to, do not provide page metadata
-            }*/
-            return createPagedResults({
-                results: manga,
-                metadata: metadata
             });
+            hotSection.items = hotManga;
+            sectionCallback(hotSection);
+            let latestManga = [];
+            latest.forEach((elem) => {
+                let id = elem.IndexName;
+                let title = elem.SeriesName;
+                let image = `${ML_IMAGE_DOMAIN}/${id}.jpg`;
+                let time = (new Date(elem.Date)).toDateString();
+                time = time.slice(0, time.length - 5);
+                time = time.slice(4, time.length);
+                latestManga.push(createMangaTile({
+                    id: id,
+                    image: image,
+                    title: createIconText({ text: title }),
+                    secondaryText: createIconText({ text: time, icon: 'clock.fill' })
+                }));
+            });
+            latestSection.items = latestManga;
+            sectionCallback(latestSection);
+            let newManga = [];
+            newTitles.forEach((elem) => {
+                let id = elem.IndexName;
+                let title = elem.SeriesName;
+                let image = `${ML_IMAGE_DOMAIN}/${id}.jpg`;
+                newManga.push(createMangaTile({
+                    id: id,
+                    image: image,
+                    title: createIconText({ text: title })
+                }));
+            });
+            newTitlesSection.items = newManga;
+            sectionCallback(newTitlesSection);
+            let recManga = [];
+            recommended.forEach((elem) => {
+                let id = elem.IndexName;
+                let title = elem.SeriesName;
+                let image = `${ML_IMAGE_DOMAIN}/${id}.jpg`;
+                let time = (new Date(elem.Date)).toDateString();
+                recManga.push(createMangaTile({
+                    id: id,
+                    image: image,
+                    title: createIconText({ text: title })
+                }));
+            });
+            recommendedSection.items = recManga;
+            sectionCallback(recommendedSection);
         });
     }
-    getHomePageSections(sectionCallback) {
-        var _a, _b, _c;
+    getViewMoreItems(homepageSectionId, metadata) {
+        var _a, _b, _c, _d;
         return __awaiter(this, void 0, void 0, function* () {
-            // Let the app know what the homesections are without filling in the data
-            let popularSection = createHomeSection({ id: '2', title: 'POPULAR COMICS', view_more: true });
-            let recentSection = createHomeSection({ id: '1', title: 'RECENTLY ADDED COMICS', view_more: true });
-            let newTitlesSection = createHomeSection({ id: '0', title: 'LATEST COMICS', view_more: true });
-            sectionCallback(popularSection);
-            sectionCallback(recentSection);
-            sectionCallback(newTitlesSection);
-            // Make the request and fill out available titles
-            let request = createRequestObject({
-                url: `${COMICEXTRA_DOMAIN}/popular-comic`,
+            const ML_DOMAIN = 'https://manga4life.com';
+            let ML_IMAGE_DOMAIN = 'https://cover.mangabeast01.com/cover';
+            const request = createRequestObject({
+                url: ML_DOMAIN,
                 method: 'GET'
             });
-            const popularData = yield this.requestManager.schedule(request, 1);
-            let popular = [];
-            let $ = this.cheerio.load(popularData.data);
-            for (let obj of $('.cartoon-box').toArray()) {
-                let id = (_a = $('a', $(obj)).attr('href')) === null || _a === void 0 ? void 0 : _a.replace(`${COMICEXTRA_DOMAIN}/comic/`, '');
-                let title = $('h3', $(obj)).text().trim();
-                let image = $('img', $(obj)).attr('src');
-                popular.push(createMangaTile({
-                    id: id,
-                    title: createIconText({ text: title }),
-                    image: image
-                }));
+            const data = yield this.requestManager.schedule(request, 1);
+            //let manga: MangaTile[] = []
+            let manga = new Set();
+            if (homepageSectionId == 'hot_update') {
+                let hot = JSON.parse(((_a = data.data.match(/vm.HotUpdateJSON = (.*);/)) !== null && _a !== void 0 ? _a : [])[1]).slice(15);
+                hot.forEach((elem) => {
+                    let id = elem.IndexName;
+                    let title = elem.SeriesName;
+                    let image = `${ML_IMAGE_DOMAIN}/${id}.jpg`;
+                    let time = (new Date(elem.Date)).toDateString();
+                    time = time.slice(0, time.length - 5);
+                    time = time.slice(4, time.length);
+                    manga.add(createMangaTile({
+                        id: id,
+                        image: image,
+                        title: createIconText({ text: title }),
+                        secondaryText: createIconText({ text: time, icon: 'clock.fill' })
+                    }));
+                });
             }
-            popularSection.items = popular;
-            sectionCallback(popularSection);
-            let recent = [];
-            request = createRequestObject({
-                url: `${COMICEXTRA_DOMAIN}/recent-comic`,
-                method: 'GET'
+            else if (homepageSectionId == 'latest') {
+                let latest = JSON.parse(((_b = data.data.match(/vm.LatestJSON = (.*);/)) !== null && _b !== void 0 ? _b : [])[1]).slice(15);
+                latest.forEach((elem) => {
+                    let id = elem.IndexName;
+                    let title = elem.SeriesName;
+                    let image = `${ML_IMAGE_DOMAIN}/${id}.jpg`;
+                    let time = (new Date(elem.Date)).toDateString();
+                    time = time.slice(0, time.length - 5);
+                    time = time.slice(4, time.length);
+                    manga.add(createMangaTile({
+                        id: id,
+                        image: image,
+                        title: createIconText({ text: title }),
+                        secondaryText: createIconText({ text: time, icon: 'clock.fill' })
+                    }));
+                });
+            }
+            else if (homepageSectionId == 'recommended') {
+                let latest = JSON.parse(((_c = data.data.match(/vm.RecommendationJSON = (.*);/)) !== null && _c !== void 0 ? _c : [])[1]);
+                latest.forEach((elem) => {
+                    let id = elem.IndexName;
+                    let title = elem.SeriesName;
+                    let image = `${ML_IMAGE_DOMAIN}/${id}.jpg`;
+                    let time = (new Date(elem.Date)).toDateString();
+                    time = time.slice(0, time.length - 5);
+                    time = time.slice(4, time.length);
+                    manga.add(createMangaTile({
+                        id: id,
+                        image: image,
+                        title: createIconText({ text: title }),
+                        secondaryText: createIconText({ text: time, icon: 'clock.fill' })
+                    }));
+                });
+            }
+            else if (homepageSectionId == 'new_titles') {
+                let newTitles = JSON.parse(((_d = data.data.match(/vm.NewSeriesJSON = (.*);/)) !== null && _d !== void 0 ? _d : [])[1]).slice(15);
+                newTitles.forEach((elem) => {
+                    let id = elem.IndexName;
+                    let title = elem.SeriesName;
+                    let image = `${ML_IMAGE_DOMAIN}/${id}.jpg`;
+                    let time = (new Date(elem.Date)).toDateString();
+                    time = time.slice(0, time.length - 5);
+                    time = time.slice(4, time.length);
+                    manga.add(createMangaTile({
+                        id: id,
+                        image: image,
+                        title: createIconText({ text: title })
+                    }));
+                });
+            }
+            else
+                return null;
+            // This source parses JSON and never requires additional pages
+            return createPagedResults({
+                results: Array.from(manga)
             });
-            const recentData = yield this.requestManager.schedule(request, 1);
-            $ = this.cheerio.load(recentData.data);
-            for (let obj of $('.cartoon-box').toArray()) {
-                let id = (_b = $('a', $(obj)).attr('href')) === null || _b === void 0 ? void 0 : _b.replace(`${COMICEXTRA_DOMAIN}/comic/`, '');
-                let title = $('h3', $(obj)).text().trim();
-                let image = $('img', $(obj)).attr('src');
-                recent.push(createMangaTile({
-                    id: id,
-                    title: createIconText({ text: title }),
-                    image: image
-                }));
-            }
-            recentSection.items = recent;
-            sectionCallback(recentSection);
-            let newTitles = [];
-            request = createRequestObject({
-                url: `${COMICEXTRA_DOMAIN}/new-comic`,
-                method: 'GET'
-            });
-            const newData = yield this.requestManager.schedule(request, 1);
-            $ = this.cheerio.load(newData.data);
-            for (let obj of $('.cartoon-box').toArray()) {
-                let id = (_c = $('a', $(obj)).attr('href')) === null || _c === void 0 ? void 0 : _c.replace(`${COMICEXTRA_DOMAIN}/comic/`, '');
-                let title = $('h3', $(obj)).text().trim();
-                let image = $('img', $(obj)).attr('src');
-                newTitles.push(createMangaTile({
-                    id: id,
-                    title: createIconText({ text: title }),
-                    image: image
-                }));
-            }
-            newTitlesSection.items = newTitles;
-            sectionCallback(newTitlesSection);
         });
     }
 }
