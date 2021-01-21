@@ -85,6 +85,12 @@ describe('ComicExtra Tests', function () {
         }
     })
 
+    it("Testing view more", async () => {
+        let data = await wrapper.getViewMoreItems(source, '0', {page: undefined}) 
+        expect(data, "No server response").to.exist;
+        expect(data, "Empty server response").to.not.be.empty;
+     })
+
     /*it("Testing Notifications", async () => {
         await wrapper.filterUpdatedManga(source, new Date("2020-12-30"), [mangaId]);
     
