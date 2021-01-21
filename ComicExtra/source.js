@@ -307,7 +307,7 @@ const paperback_extensions_common_1 = require("paperback-extensions-common");
 const Parser_1 = require("./Parser");
 const COMICEXTRA_DOMAIN = 'https://www.comicextra.com';
 exports.ComicExtraInfo = {
-    version: '1.4.0',
+    version: '1.4.1',
     name: 'ComicExtra',
     description: 'Extension that pulls western comics from ComicExtra.com',
     author: 'GameFuzzy',
@@ -485,6 +485,7 @@ class ComicExtra extends paperback_extensions_common_1.Source {
             let data = yield this.requestManager.schedule(request, 1);
             let $ = this.cheerio.load(data.data);
             let manga = this.parser.parseHomePageSection($);
+            console.log(manga);
             if (!this.parser.isLastPage($)) {
                 metadata.page ? metadata.page++ : metadata.page = 2;
             }
@@ -492,8 +493,8 @@ class ComicExtra extends paperback_extensions_common_1.Source {
                 metadata = undefined; // There are no more pages to continue on to, do not provide page metadata
             }
             return createPagedResults({
-                results: Array.from(manga),
-                metadata: metadata
+                results: manga
+                //metadata: metadata
             });
         });
     }
