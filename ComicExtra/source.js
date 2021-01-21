@@ -462,6 +462,9 @@ class ComicExtra extends paperback_extensions_common_1.Source {
     getViewMoreItems(homepageSectionId, metadata) {
         return __awaiter(this, void 0, void 0, function* () {
             let page = '';
+            if (!metadata) {
+                metadata.page = 1;
+            }
             switch (homepageSectionId) {
                 case '0': {
                     page = `/new-comic/${metadata.page ? metadata.page : 1}`;
@@ -485,7 +488,6 @@ class ComicExtra extends paperback_extensions_common_1.Source {
             let data = yield this.requestManager.schedule(request, 1);
             let $ = this.cheerio.load(data.data);
             let manga = this.parser.parseHomePageSection($);
-            console.log(manga);
             if (!this.parser.isLastPage($)) {
                 metadata.page ? metadata.page++ : metadata.page = 2;
             }
@@ -493,8 +495,8 @@ class ComicExtra extends paperback_extensions_common_1.Source {
                 metadata = undefined; // There are no more pages to continue on to, do not provide page metadata
             }
             return createPagedResults({
-                results: manga
-                //metadata: metadata
+                results: manga,
+                metadata: metadata
             });
         });
     }
@@ -615,10 +617,12 @@ class Parser {
         return sortedChapters;
     }
     parseChapterDetails($, mangaId, chapterId) {
+        var _a;
         let pages = [];
-        if ($('img', $('.chapter-container')).toArray().length < 1) {
+        if ((_a = $('img', $('.chapter-container')).first().attr('src')) === null || _a === void 0 ? void 0 : _a.includes('.jpg')) {
             // Fallback to error image
-            pages.push('https://2.bp.blogspot.com/-Vc_P29M_7yk/WdSYg9e6F9I/AAAAAAAAEUI/3K5wt1yFlWEXfMZ6m6-haWMhN1HbjCWSACHMYCw/s0/RCO001.jpg');
+            console.log('bruh');
+            pages.push('https://i.ytimg.com/vi/vS43ZgcQ_hE/maxresdefault.jpg');
         }
         else {
             // Get all of the pages
