@@ -307,7 +307,7 @@ const paperback_extensions_common_1 = require("paperback-extensions-common");
 const Parser_1 = require("./Parser");
 const COMICEXTRA_DOMAIN = 'https://www.comicextra.com';
 exports.ComicExtraInfo = {
-    version: '1.4.1',
+    version: '1.4.2',
     name: 'ComicExtra',
     description: 'Extension that pulls western comics from ComicExtra.com',
     author: 'GameFuzzy',
@@ -460,43 +460,42 @@ class ComicExtra extends paperback_extensions_common_1.Source {
         });
     }
     getViewMoreItems(homepageSectionId, metadata) {
+        var _a;
         return __awaiter(this, void 0, void 0, function* () {
-            let page = '';
-            if (!metadata) {
-                metadata.page = 1;
-            }
+            let webPage = '';
+            let page = (_a = metadata === null || metadata === void 0 ? void 0 : metadata.page) !== null && _a !== void 0 ? _a : 1;
             switch (homepageSectionId) {
                 case '0': {
-                    page = `/new-comic/${metadata.page ? metadata.page : 1}`;
+                    webPage = `/new-comic/${page}`;
                     break;
                 }
                 case '1': {
-                    page = `/recent-comic/${metadata.page ? metadata.page : 1}`;
+                    webPage = `/recent-comic/${page}`;
                     break;
                 }
                 case '2': {
-                    page = `/popular-comic/${metadata.page ? metadata.page : 1}`;
+                    webPage = `/popular-comic/${page}`;
                     break;
                 }
                 default: return Promise.resolve(null);
             }
             let request = createRequestObject({
-                url: `${COMICEXTRA_DOMAIN}${page}`,
-                method: 'GET',
-                metadata: metadata
+                url: `${COMICEXTRA_DOMAIN}${webPage}`,
+                method: 'GET'
             });
             let data = yield this.requestManager.schedule(request, 1);
             let $ = this.cheerio.load(data.data);
             let manga = this.parser.parseHomePageSection($);
+            let mData;
             if (!this.parser.isLastPage($)) {
-                metadata.page ? metadata.page++ : metadata.page = 2;
+                mData = { page: (page + 1) };
             }
             else {
-                metadata = undefined; // There are no more pages to continue on to, do not provide page metadata
+                mData = undefined; // There are no more pages to continue on to, do not provide page metadata
             }
             return createPagedResults({
                 results: manga,
-                metadata: metadata
+                metadata: mData
             });
         });
     }
@@ -712,8 +711,8 @@ class Parser {
         return tiles;
     }
     isLastPage($) {
-        for (let obj of $('.general-nav').toArray()) {
-            if ($(obj).text().trim() == "Last") {
+        for (let obj of $('a', $('.general-nav')).toArray()) {
+            if ($(obj).text().trim().toLowerCase() == 'next') {
                 return false;
             }
         }
