@@ -404,7 +404,7 @@ class ComicExtra extends paperback_extensions_common_1.Source {
             let webPage = '';
             let page = (_a = metadata === null || metadata === void 0 ? void 0 : metadata.page) !== null && _a !== void 0 ? _a : 1;
             let request = createRequestObject({
-                url: `${COMICEXTRA_DOMAIN}/comic-search?key=${(_b = query.title) === null || _b === void 0 ? void 0 : _b.replace(' ', '+')}`,
+                url: `${COMICEXTRA_DOMAIN}/comic-search?key=${(_b = query.title) === null || _b === void 0 ? void 0 : _b.replace(' ', '+')}/${page}`,
                 method: "GET"
             });
             let data = yield this.requestManager.schedule(request, 1);
