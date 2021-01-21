@@ -307,7 +307,7 @@ const paperback_extensions_common_1 = require("paperback-extensions-common");
 const Parser_1 = require("./Parser");
 const COMICEXTRA_DOMAIN = 'https://www.comicextra.com';
 exports.ComicExtraInfo = {
-    version: '1.4.5',
+    version: '1.4.6',
     name: 'ComicExtra',
     description: 'Extension that pulls western comics from ComicExtra.com',
     author: 'GameFuzzy',
@@ -404,8 +404,9 @@ class ComicExtra extends paperback_extensions_common_1.Source {
             let webPage = '';
             let page = (_a = metadata === null || metadata === void 0 ? void 0 : metadata.page) !== null && _a !== void 0 ? _a : 1;
             let request = createRequestObject({
-                url: `${COMICEXTRA_DOMAIN}/comic-search?key=${(_b = query.title) === null || _b === void 0 ? void 0 : _b.replace(' ', '+')}/${page}`,
-                method: "GET"
+                url: `${COMICEXTRA_DOMAIN}/comic-search`,
+                method: "GET",
+                param: `?key=${(_b = query.title) === null || _b === void 0 ? void 0 : _b.replace(' ', '+')}&page=${page}`
             });
             let data = yield this.requestManager.schedule(request, 1);
             let $ = this.cheerio.load(data.data);
