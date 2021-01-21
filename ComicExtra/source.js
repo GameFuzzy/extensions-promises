@@ -647,8 +647,10 @@ class Parser {
             let id = (_c = (_b = ((_a = $('a', item).first().attr('href')) !== null && _a !== void 0 ? _a : '')) === null || _b === void 0 ? void 0 : _b.replace(`${COMICEXTRA_DOMAIN}/comic/`, '').trim()) !== null && _c !== void 0 ? _c : '';
             let mangaTime = new Date(time);
             if ($('.date', item).first().text().trim().toLowerCase() === "yesterday") {
-                mangaTime = new Date(Date.now());
-                mangaTime.setDate(new Date(Date.now()).getDate() - 1);
+                // For testing
+                // mangaTime = new Date(Date.now())
+                // mangaTime.setDate(new Date(Date.now()).getDate() - 1)
+                mangaTime.setDate(time.getDate() - 1);
             }
             else {
                 mangaTime = new Date($('.date', item).first().text());
