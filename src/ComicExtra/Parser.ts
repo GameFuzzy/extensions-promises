@@ -127,7 +127,6 @@ export class Parser {
         if($('img',$('.chapter-container')).first().attr('src')?.includes('.jpg'))
         {
           // Fallback to error image
-          console.log('bruh')
           pages.push('https://i.ytimg.com/vi/vS43ZgcQ_hE/maxresdefault.jpg')
         }
         else {
