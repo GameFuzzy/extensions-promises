@@ -623,7 +623,6 @@ class Parser {
             let image = $(obj).attr('src');
             if (image === undefined || (image.includes('.jpg') && image.includes('/RCO'))) {
                 // Fallback to error image
-                console.log('bruh');
                 pages.push(fallback);
             }
             else {
