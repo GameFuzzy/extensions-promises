@@ -58,7 +58,6 @@ export class Parser {
         case 4: {
           // Genres
           for(let obj of $('a',$(item)).toArray()){
-            //tagSections[0].tags.push(createTag({id: $(obj).attr('href')?.replace(`${COMICEXTRA_DOMAIN}/`, '').trim()!, label: $(obj).text().trim()}))
             tagArray0 = [...tagArray0, createTag({id: $(obj).attr('href')?.replace(`${COMICEXTRA_DOMAIN}/`, '').trim()!, label: $(obj).text().trim()})]
           }    
           i++
@@ -113,7 +112,7 @@ export class Parser {
         let sortedChapters: Chapter[] = []
         chapters.forEach((c) => {
             if (sortedChapters[sortedChapters.indexOf(c)]?.id !== c?.id) {
-              sortedChapters.push(c);
+              sortedChapters.push(c)
             }
           })
           sortedChapters.sort((a, b) => (a.id > b.id) ? 1 : -1)
