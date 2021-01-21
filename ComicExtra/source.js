@@ -620,7 +620,6 @@ class Parser {
         let pages = [];
         if ((_a = $('img', $('.chapter-container')).first().attr('src')) === null || _a === void 0 ? void 0 : _a.includes('.jpg')) {
             // Fallback to error image
-            console.log('bruh');
             pages.push('https://i.ytimg.com/vi/vS43ZgcQ_hE/maxresdefault.jpg');
         }
         else {
