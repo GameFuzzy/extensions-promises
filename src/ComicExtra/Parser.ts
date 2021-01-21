@@ -227,8 +227,8 @@ export class Parser {
         return tiles
     }
     isLastPage($: CheerioSelector): boolean {
-      for(let obj of $('.general-nav').toArray()) {
-        if($(obj).text().trim() == "Last") {
+      for(let obj of $('a', $('.general-nav')).toArray()) {
+        if($(obj).text().trim().toLowerCase() == 'next') {
           return false
         }
       }

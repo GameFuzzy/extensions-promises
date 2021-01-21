@@ -121,7 +121,7 @@ describe('Manga4Life Tests', function () {
     it("Testing view more", async () => {
         let data = await wrapper.getViewMoreItems(source, 'new_titles', {page: undefined}) 
 
-        console.log(data)
+        //console.log(data)
         expect(data, "No server response").to.exist;
         expect(data, "Empty server response").to.not.be.empty;
      })

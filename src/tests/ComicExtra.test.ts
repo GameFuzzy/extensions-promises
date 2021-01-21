@@ -86,8 +86,8 @@ describe('ComicExtra Tests', function () {
     })
 
     it("Testing view more", async () => {
-        let data = await wrapper.getViewMoreItems(source, '0', {page: undefined}) 
-        //console.log(data)
+        let data = await wrapper.getViewMoreItems(source, '0', {page: null}) 
+        console.log(data)
         expect(data, "No server response").to.exist;
         expect(data, "Empty server response").to.not.be.empty;
      })
