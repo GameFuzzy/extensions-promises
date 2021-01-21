@@ -559,7 +559,6 @@ class Parser {
                 case 4: {
                     // Genres
                     for (let obj of $('a', $(item)).toArray()) {
-                        //tagSections[0].tags.push(createTag({id: $(obj).attr('href')?.replace(`${COMICEXTRA_DOMAIN}/`, '').trim()!, label: $(obj).text().trim()}))
                         tagArray0 = [...tagArray0, createTag({ id: (_d = $(obj).attr('href')) === null || _d === void 0 ? void 0 : _d.replace(`${COMICEXTRA_DOMAIN}/`, '').trim(), label: $(obj).text().trim() })];
                     }
                     i++;
