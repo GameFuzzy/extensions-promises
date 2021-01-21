@@ -124,17 +124,28 @@ export class ComicExtra extends Source {
   }
 
   async searchRequest(query: SearchRequest, metadata: any): Promise<PagedResults> {
+    let webPage = ''
+    let page : number = metadata?.page ?? 1
 
     let request = createRequestObject({
       url: `${COMICEXTRA_DOMAIN}/comic-search?key=${query.title?.replace(' ', '+')}`,
       method: "GET"
     })
 
-    const data = await this.requestManager.schedule(request, 1)
+    let data = await this.requestManager.schedule(request, 1)
     let $ = this.cheerio.load(data.data)
+    let manga = this.parser.parseSearchResults($)
+    let mData
+    if (!this.parser.isLastPage($)) {
+      mData = {page: (page + 1)}
+    }
+    else {
+      mData = undefined  // There are no more pages to continue on to, do not provide page metadata
+    }
 
     return createPagedResults({
-      results: this.parser.parseSearchResults($)
+      results: manga,
+      metadata: mData
     })
 
   }
