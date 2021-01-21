@@ -124,10 +124,11 @@ export class Parser {
     parseChapterDetails($: CheerioSelector, mangaId: string, chapterId: string) : ChapterDetails {
         
         let pages: string[] = []
-        if($('img',$('.chapter-container')).toArray().length < 1)
+        if($('img',$('.chapter-container')).first().attr('src')?.includes('.jpg'))
         {
           // Fallback to error image
-          pages.push('https://2.bp.blogspot.com/-Vc_P29M_7yk/WdSYg9e6F9I/AAAAAAAAEUI/3K5wt1yFlWEXfMZ6m6-haWMhN1HbjCWSACHMYCw/s0/RCO001.jpg')
+          console.log('bruh')
+          pages.push('https://i.ytimg.com/vi/vS43ZgcQ_hE/maxresdefault.jpg')
         }
         else {
           // Get all of the pages
