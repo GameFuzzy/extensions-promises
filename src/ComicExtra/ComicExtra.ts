@@ -19,7 +19,7 @@ import {
 const COMICEXTRA_DOMAIN = 'https://www.comicextra.com'
 
 export const ComicExtraInfo: SourceInfo = {
-  version: '1.4.5',
+  version: '1.4.6',
   name: 'ComicExtra',
   description: 'Extension that pulls western comics from ComicExtra.com',
   author: 'GameFuzzy',
@@ -128,8 +128,9 @@ export class ComicExtra extends Source {
     let page : number = metadata?.page ?? 1
 
     let request = createRequestObject({
-      url: `${COMICEXTRA_DOMAIN}/comic-search?key=${query.title?.replace(' ', '+')}/${page}`,
-      method: "GET"
+      url: `${COMICEXTRA_DOMAIN}/comic-search`,
+      method: "GET",
+      param: `?key=${query.title?.replace(' ', '+')}&page=${page}`
     })
 
     let data = await this.requestManager.schedule(request, 1)
