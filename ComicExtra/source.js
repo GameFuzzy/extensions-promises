@@ -307,7 +307,7 @@ const paperback_extensions_common_1 = require("paperback-extensions-common");
 const Parser_1 = require("./Parser");
 const COMICEXTRA_DOMAIN = 'https://www.comicextra.com';
 exports.ComicExtraInfo = {
-    version: '1.4.2',
+    version: '1.4.3',
     name: 'ComicExtra',
     description: 'Extension that pulls western comics from ComicExtra.com',
     author: 'GameFuzzy',
@@ -616,17 +616,23 @@ class Parser {
         return sortedChapters;
     }
     parseChapterDetails($, mangaId, chapterId) {
-        var _a;
+        const fallback = 'https://cdn.discordapp.com/attachments/549267639881695289/801836271407726632/fallback.png';
         let pages = [];
-        if ((_a = $('img', $('.chapter-container')).first().attr('src')) === null || _a === void 0 ? void 0 : _a.includes('.jpg')) {
-            // Fallback to error image
-            pages.push('https://i.ytimg.com/vi/vS43ZgcQ_hE/maxresdefault.jpg');
-        }
-        else {
-            // Get all of the pages
-            for (let obj of $('img', $('.chapter-container')).toArray()) {
-                pages.push($(obj).attr('src'));
+        // Get all of the pages
+        for (let obj of $('img', $('.chapter-container')).toArray()) {
+            let image = $(obj).attr('src');
+            if (image === undefined || (image.includes('.jpg') && image.includes('/RCO'))) {
+                // Fallback to error image
+                console.log('bruh');
+                pages.push(fallback);
             }
+            else {
+                pages.push(image);
+            }
+        }
+        // Fallback if empty
+        if (pages.length < 1) {
+            pages.push(fallback);
         }
         return createChapterDetails({
             id: chapterId,
