@@ -155,8 +155,10 @@ export class Parser {
       let id = ($('a', item).first().attr('href') ?? '')?.replace(`${COMICEXTRA_DOMAIN}/comic/`, '')!.trim() ?? ''
       let mangaTime = new Date(time)
       if($('.date', item).first().text().trim().toLowerCase() === "yesterday") {
-        mangaTime = new Date(Date.now())
-        mangaTime.setDate(new Date(Date.now()).getDate() - 1)
+        // For testing
+        // mangaTime = new Date(Date.now())
+        // mangaTime.setDate(new Date(Date.now()).getDate() - 1)
+        mangaTime.setDate(time.getDate() - 1)
       }
       else {
         mangaTime = new Date($('.date', item).first().text()) 

@@ -90,51 +90,8 @@ describe('ComicExtra Tests', function () {
         expect(data, "Empty server response").to.not.be.empty;
      })
 
-    /*it("Testing Notifications", async () => {
+    it("Testing Notifications", async () => {
         await wrapper.filterUpdatedManga(source, new Date("2020-12-30"), [mangaId]);
-    
-    
     })
-
-    it("Testing home page results for hot titles", async() => {
-        let results = await wrapper.getViewMoreItems(source, "hot_update", {}, 1)
-
-        expect(results, "No results whatsoever for this section").to.exist
-        expect(results, "No results whatsoever for this section").to.exist
-        
-        let data = results![0]
-        expect(data.id, "No ID present").to.exist
-        expect(data.image, "No image present").to.exist
-        expect(data.title.text, "No title present").to.exist
-    })
-
-    
-    it("Testing home page results for latest titles", async() => {
-        let results = await wrapper.getViewMoreItems(source, "latest", {}, 1)
-        let resultsWithPagedData = await wrapper.getViewMoreItems(source, "latest", {}, 3)
-
-        expect(results, "No results whatsoever for this section").to.exist
-        expect(results, "No results whatsoever for this section").to.exist
-        
-        let data = results![0]
-        expect(data.id, "No ID present").to.exist
-        expect(data.image, "No image present").to.exist
-        expect(data.title.text, "No title present").to.exist
-    })
-
-    
-    it("Testing home page results for new titles", async() => {
-        let results = await wrapper.getViewMoreItems(source, "new_titles", {}, 1)
-        let resultsWithPagedData = await wrapper.getViewMoreItems(source, "new_titles", {}, 3)
-
-        expect(results, "No results whatsoever for this section").to.exist
-        expect(results, "No results whatsoever for this section").to.exist
-        
-        let data = results![0]
-        expect(data.id, "No ID present").to.exist
-        expect(data.image, "No image present").to.exist
-        expect(data.title.text, "No title present").to.exist
-    })
-    */
 
 })
