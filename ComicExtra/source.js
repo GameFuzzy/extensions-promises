@@ -307,7 +307,7 @@ const paperback_extensions_common_1 = require("paperback-extensions-common");
 const Parser_1 = require("./Parser");
 const COMICEXTRA_DOMAIN = 'https://www.comicextra.com';
 exports.ComicExtraInfo = {
-    version: '1.4.3',
+    version: '1.4.4',
     name: 'ComicExtra',
     description: 'Extension that pulls western comics from ComicExtra.com',
     author: 'GameFuzzy',
@@ -399,16 +399,27 @@ class ComicExtra extends paperback_extensions_common_1.Source {
         });
     }
     searchRequest(query, metadata) {
-        var _a;
+        var _a, _b;
         return __awaiter(this, void 0, void 0, function* () {
+            let webPage = '';
+            let page = (_a = metadata === null || metadata === void 0 ? void 0 : metadata.page) !== null && _a !== void 0 ? _a : 1;
             let request = createRequestObject({
-                url: `${COMICEXTRA_DOMAIN}/comic-search?key=${(_a = query.title) === null || _a === void 0 ? void 0 : _a.replace(' ', '+')}`,
+                url: `${COMICEXTRA_DOMAIN}/comic-search?key=${(_b = query.title) === null || _b === void 0 ? void 0 : _b.replace(' ', '+')}`,
                 method: "GET"
             });
-            const data = yield this.requestManager.schedule(request, 1);
+            let data = yield this.requestManager.schedule(request, 1);
             let $ = this.cheerio.load(data.data);
+            let manga = this.parser.parseSearchResults($);
+            let mData;
+            if (!this.parser.isLastPage($)) {
+                mData = { page: (page + 1) };
+            }
+            else {
+                mData = undefined; // There are no more pages to continue on to, do not provide page metadata
+            }
             return createPagedResults({
-                results: this.parser.parseSearchResults($)
+                results: manga,
+                metadata: mData
             });
         });
     }
