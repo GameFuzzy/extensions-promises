@@ -122,18 +122,23 @@ export class Parser {
 
 
     parseChapterDetails($: CheerioSelector, mangaId: string, chapterId: string) : ChapterDetails {
-        
+        const fallback = 'https://cdn.discordapp.com/attachments/549267639881695289/801836271407726632/fallback.png'
         let pages: string[] = []
-        if($('img',$('.chapter-container')).first().attr('src')?.includes('.jpg'))
-        {
-          // Fallback to error image
-          pages.push('https://i.ytimg.com/vi/vS43ZgcQ_hE/maxresdefault.jpg')
-        }
-        else {
-          // Get all of the pages
-          for(let obj of $('img',$('.chapter-container')).toArray()) {
-            pages.push($(obj).attr('src')!)
+        // Get all of the pages
+        for(let obj of $('img',$('.chapter-container')).toArray()) {
+          let image = $(obj).attr('src')!
+          if(image === undefined || (image.includes('.jpg') && image.includes('/RCO'))) {
+            // Fallback to error image
+            console.log('bruh')
+            pages.push(fallback)
           }
+          else{
+            pages.push(image)
+          }
+        }
+        // Fallback if empty
+        if(pages.length < 1) {
+          pages.push(fallback)
         }
     
         return createChapterDetails({
