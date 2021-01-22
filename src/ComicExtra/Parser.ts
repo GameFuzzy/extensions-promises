@@ -121,7 +121,6 @@ export class Parser {
 
 
     parseChapterDetails($: CheerioSelector) : string[] {
-        const fallback = 'https://cdn.discordapp.com/attachments/549267639881695289/801836271407726632/fallback.png'
         let pages: string[] = []
         // Get all of the pages
         for(let obj of $('img',$('.chapter-container')).toArray()) {
