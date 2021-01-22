@@ -307,7 +307,7 @@ const paperback_extensions_common_1 = require("paperback-extensions-common");
 const Parser_1 = require("./Parser");
 const COMICEXTRA_DOMAIN = 'https://www.comicextra.com';
 exports.ComicExtraInfo = {
-    version: '1.4.6',
+    version: '1.4.7',
     name: 'ComicExtra',
     description: 'Extension that pulls western comics from ComicExtra.com',
     author: 'GameFuzzy',
@@ -369,9 +369,37 @@ class ComicExtra extends paperback_extensions_common_1.Source {
                 url: `${COMICEXTRA_DOMAIN}/${mangaId}/${chapterId}/full`,
                 method: 'GET',
             });
-            const data = yield this.requestManager.schedule(request, 1);
+            let data = yield this.requestManager.schedule(request, 1);
             let $ = this.cheerio.load(data.data);
-            return this.parser.parseChapterDetails($, mangaId, chapterId);
+            let unFilteredPages = this.parser.parseChapterDetails($);
+            let pages = [];
+            const fallback = 'https://cdn.discordapp.com/attachments/549267639881695289/801836271407726632/fallback.png';
+            // Fallback if empty
+            if (unFilteredPages.length < 1) {
+                pages.push(fallback);
+            }
+            else {
+                // Filter out 404 status codes
+                for (let page of unFilteredPages) {
+                    request = createRequestObject({
+                        url: `${page}`,
+                        method: 'HEAD',
+                    });
+                    try {
+                        data = yield this.requestManager.schedule(request, 1);
+                        pages.push(page);
+                    }
+                    catch (_a) {
+                        pages.push(fallback);
+                    }
+                }
+            }
+            return createChapterDetails({
+                id: chapterId,
+                mangaId: mangaId,
+                pages: pages,
+                longStrip: false
+            });
         });
     }
     filterUpdatedManga(mangaUpdatesFoundCallback, time, ids) {
@@ -626,30 +654,14 @@ class Parser {
         sortedChapters.sort((a, b) => (a.id > b.id) ? 1 : -1);
         return sortedChapters;
     }
-    parseChapterDetails($, mangaId, chapterId) {
+    parseChapterDetails($) {
         const fallback = 'https://cdn.discordapp.com/attachments/549267639881695289/801836271407726632/fallback.png';
         let pages = [];
         // Get all of the pages
         for (let obj of $('img', $('.chapter-container')).toArray()) {
-            let image = $(obj).attr('src');
-            if (image === undefined || (image.includes('.jpg') && image.includes('/RCO'))) {
-                // Fallback to error image
-                pages.push(fallback);
-            }
-            else {
-                pages.push(image);
-            }
+            pages.push($(obj).attr('src'));
         }
-        // Fallback if empty
-        if (pages.length < 1) {
-            pages.push(fallback);
-        }
-        return createChapterDetails({
-            id: chapterId,
-            mangaId: mangaId,
-            pages: pages,
-            longStrip: false
-        });
+        return pages;
     }
     filterUpdatedManga($, time, ids) {
         var _a, _b, _c;
