@@ -435,7 +435,6 @@ class ComicExtra extends paperback_extensions_common_1.Source {
     searchRequest(query, metadata) {
         var _a, _b;
         return __awaiter(this, void 0, void 0, function* () {
-            let webPage = '';
             let page = (_a = metadata === null || metadata === void 0 ? void 0 : metadata.page) !== null && _a !== void 0 ? _a : 1;
             let request = createRequestObject({
                 url: `${COMICEXTRA_DOMAIN}/comic-search`,
