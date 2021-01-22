@@ -307,7 +307,7 @@ const paperback_extensions_common_1 = require("paperback-extensions-common");
 const Parser_1 = require("./Parser");
 const COMICEXTRA_DOMAIN = 'https://www.comicextra.com';
 exports.ComicExtraInfo = {
-    version: '1.4.8',
+    version: '1.4.9',
     name: 'ComicExtra',
     description: 'Extension that pulls western comics from ComicExtra.com',
     author: 'GameFuzzy',
@@ -384,10 +384,16 @@ class ComicExtra extends paperback_extensions_common_1.Source {
                     url: `${unFilteredPages[0]}`,
                     method: 'HEAD',
                 });
+                // Try/catch is because the testing framework throws an error on 404
                 try {
                     data = yield this.requestManager.schedule(request, 1);
-                    for (let page of unFilteredPages) {
-                        pages.push(page);
+                    if (data.status == 404) {
+                        pages.push(fallback);
+                    }
+                    else {
+                        for (let page of unFilteredPages) {
+                            pages.push(page);
+                        }
                     }
                 }
                 catch (_a) {
