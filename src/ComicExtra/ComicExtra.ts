@@ -19,7 +19,7 @@ import {
 const COMICEXTRA_DOMAIN = 'https://www.comicextra.com'
 
 export const ComicExtraInfo: SourceInfo = {
-  version: '1.5.0',
+  version: '1.5.1',
   name: 'ComicExtra',
   description: 'Extension that pulls western comics from ComicExtra.com',
   author: 'GameFuzzy',
@@ -166,18 +166,15 @@ export class ComicExtra extends Source {
     let request = createRequestObject({
       url: `${COMICEXTRA_DOMAIN}/comic-search`,
       method: "GET",
-      param: `?key=${query.title?.replace(' ', '+')}&page=${page}`
+      param: `?key=${query.title?.replaceAll(' ', '+')}&page=${page}`
     })
 
     let data = await this.requestManager.schedule(request, 1)
     let $ = this.cheerio.load(data.data)
     let manga = this.parser.parseSearchResults($)
-    let mData
+    let mData = undefined
     if (!this.parser.isLastPage($)) {
       mData = {page: (page + 1)}
-    }
-    else {
-      mData = undefined  // There are no more pages to continue on to, do not provide page metadata
     }
 
     return createPagedResults({
