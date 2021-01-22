@@ -161,7 +161,6 @@ export class ComicExtra extends Source {
   }
 
   async searchRequest(query: SearchRequest, metadata: any): Promise<PagedResults> {
-    let webPage = ''
     let page : number = metadata?.page ?? 1
 
     let request = createRequestObject({
