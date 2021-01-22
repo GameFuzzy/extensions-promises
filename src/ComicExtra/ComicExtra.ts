@@ -159,8 +159,9 @@ export class ComicExtra extends Source {
     let page : number = metadata?.page ?? 1
 
     let request = createRequestObject({
-      url: `${COMICEXTRA_DOMAIN}/comic-search?key=${query.title?.replace(' ', '+')}`,
-      method: "GET"
+      url: `${COMICEXTRA_DOMAIN}/comic-search`,
+      method: "GET",
+      param: `?key=${query.title?.replace(' ', '+')}&page=${page}`
     })
 
     let data = await this.requestManager.schedule(request, 1)
