@@ -47,7 +47,6 @@ describe('ComicExtra Tests', function () {
 
         let chapters = await wrapper.getChapters(source, mangaId);
         let data = await wrapper.getChapterDetails(source, mangaId, chapters[4].id);
-        console.log(data)
         expect(data, "No server response").to.exist;
         expect(data, "Empty server response").to.not.be.empty;
 
@@ -90,10 +89,11 @@ describe('ComicExtra Tests', function () {
         expect(data, "No server response").to.exist;
         expect(data, "Empty server response").to.not.be.empty;
      })
-     
+
+    /*
     it("Testing Notifications", async () => {
         let updates = await wrapper.filterUpdatedManga(source, new Date("2020-12-30"), [mangaId]);
-        console.log(updates)
     })
+    */
     
 })
