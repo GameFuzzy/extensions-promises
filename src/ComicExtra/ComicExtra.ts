@@ -19,7 +19,7 @@ import {
 const COMICEXTRA_DOMAIN = 'https://www.comicextra.com'
 
 export const ComicExtraInfo: SourceInfo = {
-  version: '1.4.7',
+  version: '1.4.8',
   name: 'ComicExtra',
   description: 'Extension that pulls western comics from ComicExtra.com',
   author: 'GameFuzzy',
@@ -102,20 +102,20 @@ export class ComicExtra extends Source {
     } 
     else {
       // Filter out 404 status codes
-      for(let page of unFilteredPages) {
         request = createRequestObject({
-          url: `${page}`,
+          url: `${unFilteredPages[0]}`,
           method: 'HEAD',
         })
         try{
           data = await this.requestManager.schedule(request, 1)
-          pages.push(page)
+          for(let page of unFilteredPages) {
+            pages.push(page)
+          }
         }
         catch {
           pages.push(fallback)
         }
   
-      }
     }
 
     return createChapterDetails({
