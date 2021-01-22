@@ -307,7 +307,7 @@ const paperback_extensions_common_1 = require("paperback-extensions-common");
 const Parser_1 = require("./Parser");
 const COMICEXTRA_DOMAIN = 'https://www.comicextra.com';
 exports.ComicExtraInfo = {
-    version: '1.4.9',
+    version: '1.5.0',
     name: 'ComicExtra',
     description: 'Extension that pulls western comics from ComicExtra.com',
     author: 'GameFuzzy',
@@ -677,10 +677,8 @@ class Parser {
             let id = (_c = (_b = ((_a = $('a', item).first().attr('href')) !== null && _a !== void 0 ? _a : '')) === null || _b === void 0 ? void 0 : _b.replace(`${COMICEXTRA_DOMAIN}/comic/`, '').trim()) !== null && _c !== void 0 ? _c : '';
             let mangaTime = new Date(time);
             if ($('.date', item).first().text().trim().toLowerCase() === "yesterday") {
-                // For testing
-                // mangaTime = new Date(Date.now())
-                // mangaTime.setDate(new Date(Date.now()).getDate() - 1)
-                mangaTime.setDate(time.getDate() - 1);
+                mangaTime = new Date(Date.now());
+                mangaTime.setDate(new Date(Date.now()).getDate() - 1);
             }
             else {
                 mangaTime = new Date($('.date', item).first().text());
