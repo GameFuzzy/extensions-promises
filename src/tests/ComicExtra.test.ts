@@ -90,9 +90,10 @@ describe('ComicExtra Tests', function () {
         expect(data, "No server response").to.exist;
         expect(data, "Empty server response").to.not.be.empty;
      })
-     /*
+     
     it("Testing Notifications", async () => {
-        await wrapper.filterUpdatedManga(source, new Date("2020-12-30"), [mangaId]);
+        let updates = await wrapper.filterUpdatedManga(source, new Date("2020-12-30"), [mangaId]);
+        console.log(updates)
     })
-    */
+    
 })
