@@ -19,7 +19,7 @@ import {
 const COMICEXTRA_DOMAIN = 'https://www.comicextra.com'
 
 export const ComicExtraInfo: SourceInfo = {
-  version: '1.4.4',
+  version: '1.4.6',
   name: 'ComicExtra',
   description: 'Extension that pulls western comics from ComicExtra.com',
   author: 'GameFuzzy',
@@ -89,10 +89,41 @@ export class ComicExtra extends Source {
       method: 'GET',
     })
 
-    const data = await this.requestManager.schedule(request, 1)
+    let data = await this.requestManager.schedule(request, 1)
 
     let $ = this.cheerio.load(data.data)
-    return this.parser.parseChapterDetails($, mangaId, chapterId)
+    let unFilteredPages = this.parser.parseChapterDetails($)
+    let pages : string[] = []
+
+    const fallback = 'https://cdn.discordapp.com/attachments/549267639881695289/801836271407726632/fallback.png'
+    // Fallback if empty
+    if(unFilteredPages.length < 1) {
+      pages.push(fallback)
+    } 
+    else {
+      // Filter out 404 status codes
+      for(let page of unFilteredPages) {
+        request = createRequestObject({
+          url: `${page}`,
+          method: 'HEAD',
+        })
+        try{
+          data = await this.requestManager.schedule(request, 1)
+          pages.push(page)
+        }
+        catch {
+          pages.push(fallback)
+        }
+  
+      }
+    }
+
+    return createChapterDetails({
+      id: chapterId,
+      mangaId: mangaId,
+      pages: pages,
+      longStrip: false
+    })
   }
 
   async filterUpdatedManga(mangaUpdatesFoundCallback: (updates: MangaUpdates) => void, time: Date, ids: string[]): Promise<void> {
