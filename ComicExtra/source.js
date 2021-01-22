@@ -661,7 +661,6 @@ class Parser {
         return sortedChapters;
     }
     parseChapterDetails($) {
-        const fallback = 'https://cdn.discordapp.com/attachments/549267639881695289/801836271407726632/fallback.png';
         let pages = [];
         // Get all of the pages
         for (let obj of $('img', $('.chapter-container')).toArray()) {
