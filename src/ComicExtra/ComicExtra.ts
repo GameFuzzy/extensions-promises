@@ -19,7 +19,7 @@ import {
 const COMICEXTRA_DOMAIN = 'https://www.comicextra.com'
 
 export const ComicExtraInfo: SourceInfo = {
-  version: '1.4.8',
+  version: '1.4.9',
   name: 'ComicExtra',
   description: 'Extension that pulls western comics from ComicExtra.com',
   author: 'GameFuzzy',
@@ -106,10 +106,16 @@ export class ComicExtra extends Source {
           url: `${unFilteredPages[0]}`,
           method: 'HEAD',
         })
+        // Try/catch is because the testing framework throws an error on 404
         try{
           data = await this.requestManager.schedule(request, 1)
-          for(let page of unFilteredPages) {
-            pages.push(page)
+          if(data.status == 404) {
+            pages.push(fallback)
+          }
+          else {
+            for(let page of unFilteredPages) {
+              pages.push(page)
+            }
           }
         }
         catch {

@@ -46,7 +46,8 @@ describe('ComicExtra Tests', function () {
     it("Get Chapter Details", async () => {
 
         let chapters = await wrapper.getChapters(source, mangaId);
-        let data = await wrapper.getChapterDetails(source, mangaId, chapters[13].id);
+        let data = await wrapper.getChapterDetails(source, mangaId, chapters[4].id);
+        console.log(data)
         expect(data, "No server response").to.exist;
         expect(data, "Empty server response").to.not.be.empty;
 
