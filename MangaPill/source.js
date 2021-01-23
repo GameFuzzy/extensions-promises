@@ -307,7 +307,7 @@ const paperback_extensions_common_1 = require("paperback-extensions-common");
 const Parser_1 = require("./Parser");
 const MANGAPILL_DOMAIN = 'https://www.mangapill.com';
 exports.MangaPillInfo = {
-    version: '1.0.3',
+    version: '1.0.4',
     name: 'MangaPill',
     description: 'Extension that pulls manga from MangaPill, has a lot of officially translated manga (can sometimes miss manga notifications)',
     author: 'GameFuzzy',
@@ -316,10 +316,6 @@ exports.MangaPillInfo = {
     hentaiSource: false,
     websiteBaseURL: MANGAPILL_DOMAIN,
     sourceTags: [
-        {
-            text: "Work in progress",
-            type: paperback_extensions_common_1.TagType.RED
-        },
         {
             text: "Notifications",
             type: paperback_extensions_common_1.TagType.GREEN
