@@ -19,7 +19,7 @@ import {
 const MANGAPILL_DOMAIN = 'https://www.mangapill.com'
 
 export const MangaPillInfo: SourceInfo = {
-  version: '1.0.3',
+  version: '1.0.4',
   name: 'MangaPill',
   description: 'Extension that pulls manga from MangaPill, has a lot of officially translated manga (can sometimes miss manga notifications)',
   author: 'GameFuzzy',
@@ -28,10 +28,6 @@ export const MangaPillInfo: SourceInfo = {
   hentaiSource: false,
   websiteBaseURL: MANGAPILL_DOMAIN,
   sourceTags: [
-    {
-      text: "Work in progress",
-      type: TagType.RED
-    },
     {
       text: "Notifications",
       type: TagType.GREEN
