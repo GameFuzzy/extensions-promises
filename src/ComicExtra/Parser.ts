@@ -176,6 +176,7 @@ export class Parser {
             let titleText = encodedTitleText.replace(/&#(\d+);/g, function(match, dec) {
               return String.fromCharCode(dec);
             })
+
             let image = $('img', $(obj)).attr('src')
       
             if(titleText == "Not found") continue // If a search result has no data, the only cartoon-box object has "Not Found" as title. Ignore.
@@ -217,6 +218,7 @@ export class Parser {
             let titleText = encodedTitleText.replace(/&#(\d+);/g, function(match, dec) {
               return String.fromCharCode(dec);
             })
+
             let image = $('img', $(obj)).attr('src')
 
             if (typeof id === 'undefined' || typeof image === 'undefined') continue
