@@ -19,7 +19,7 @@ import {
 const COMICEXTRA_DOMAIN = 'https://www.comicextra.com'
 
 export const ComicExtraInfo: SourceInfo = {
-  version: '1.4.4',
+  version: '1.5.1',
   name: 'ComicExtra',
   description: 'Extension that pulls western comics from ComicExtra.com',
   author: 'GameFuzzy',
@@ -89,10 +89,47 @@ export class ComicExtra extends Source {
       method: 'GET',
     })
 
-    const data = await this.requestManager.schedule(request, 1)
+    let data = await this.requestManager.schedule(request, 1)
 
     let $ = this.cheerio.load(data.data)
-    return this.parser.parseChapterDetails($, mangaId, chapterId)
+    let unFilteredPages = this.parser.parseChapterDetails($)
+    let pages : string[] = []
+
+    const fallback = 'https://cdn.discordapp.com/attachments/549267639881695289/801836271407726632/fallback.png'
+    // Fallback if empty
+    if(unFilteredPages.length < 1) {
+      pages.push(fallback)
+    } 
+    else {
+      // Filter out 404 status codes
+        request = createRequestObject({
+          url: `${unFilteredPages[0]}`,
+          method: 'HEAD',
+        })
+        // Try/catch is because the testing framework throws an error on 404
+        try{
+          data = await this.requestManager.schedule(request, 1)
+          if(data.status == 404) {
+            pages.push(fallback)
+          }
+          else {
+            for(let page of unFilteredPages) {
+              pages.push(page)
+            }
+          }
+        }
+        catch {
+          pages.push(fallback)
+        }
+  
+    }
+
+    return createChapterDetails({
+      id: chapterId,
+      mangaId: mangaId,
+      pages: pages,
+      longStrip: false
+    })
   }
 
   async filterUpdatedManga(mangaUpdatesFoundCallback: (updates: MangaUpdates) => void, time: Date, ids: string[]): Promise<void> {
@@ -124,23 +161,20 @@ export class ComicExtra extends Source {
   }
 
   async searchRequest(query: SearchRequest, metadata: any): Promise<PagedResults> {
-    let webPage = ''
     let page : number = metadata?.page ?? 1
 
     let request = createRequestObject({
-      url: `${COMICEXTRA_DOMAIN}/comic-search?key=${query.title?.replace(' ', '+')}`,
-      method: "GET"
+      url: `${COMICEXTRA_DOMAIN}/comic-search`,
+      method: "GET",
+      param: `?key=${query.title?.replaceAll(' ', '+')}&page=${page}`
     })
 
     let data = await this.requestManager.schedule(request, 1)
     let $ = this.cheerio.load(data.data)
     let manga = this.parser.parseSearchResults($)
-    let mData
+    let mData = undefined
     if (!this.parser.isLastPage($)) {
       mData = {page: (page + 1)}
-    }
-    else {
-      mData = undefined  // There are no more pages to continue on to, do not provide page metadata
     }
 
     return createPagedResults({

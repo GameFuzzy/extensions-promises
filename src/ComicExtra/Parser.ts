@@ -120,31 +120,13 @@ export class Parser {
     }
 
 
-    parseChapterDetails($: CheerioSelector, mangaId: string, chapterId: string) : ChapterDetails {
-        const fallback = 'https://cdn.discordapp.com/attachments/549267639881695289/801836271407726632/fallback.png'
+    parseChapterDetails($: CheerioSelector) : string[] {
         let pages: string[] = []
         // Get all of the pages
         for(let obj of $('img',$('.chapter-container')).toArray()) {
-          let image = $(obj).attr('src')!
-          if(image === undefined || (image.includes('.jpg') && image.includes('/RCO'))) {
-            // Fallback to error image
-            pages.push(fallback)
-          }
-          else{
-            pages.push(image)
-          }
+            pages.push($(obj).attr('src')!)
         }
-        // Fallback if empty
-        if(pages.length < 1) {
-          pages.push(fallback)
-        }
-    
-        return createChapterDetails({
-          id: chapterId,
-          mangaId: mangaId,
-          pages: pages,
-          longStrip: false
-        })
+        return pages
     }
 
     filterUpdatedManga($: CheerioSelector, time: Date, ids: string[] ) : {updates: string[], loadNextPage : boolean} {
@@ -155,10 +137,8 @@ export class Parser {
       let id = ($('a', item).first().attr('href') ?? '')?.replace(`${COMICEXTRA_DOMAIN}/comic/`, '')!.trim() ?? ''
       let mangaTime = new Date(time)
       if($('.date', item).first().text().trim().toLowerCase() === "yesterday") {
-        // For testing
-        // mangaTime = new Date(Date.now())
-        // mangaTime.setDate(new Date(Date.now()).getDate() - 1)
-        mangaTime.setDate(time.getDate() - 1)
+        mangaTime = new Date(Date.now())
+        mangaTime.setDate(new Date(Date.now()).getDate() - 1)
       }
       else {
         mangaTime = new Date($('.date', item).first().text()) 
