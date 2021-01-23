@@ -171,7 +171,11 @@ export class Parser {
         let collectedIds: string[] = []
         for(let obj of $('.cartoon-box').toArray()) {
             let id = $('a', $(obj)).attr('href')?.replace(`${COMICEXTRA_DOMAIN}/comic/`, '')
-            let titleText = $('h3', $(obj)).text()
+            let encodedTitleText = $('h3', $(obj)).text()
+            // Decode title
+            let titleText = encodedTitleText.replace(/&#(\d+);/g, function(match, dec) {
+              return String.fromCharCode(dec);
+            })
             let image = $('img', $(obj)).attr('src')
       
             if(titleText == "Not found") continue // If a search result has no data, the only cartoon-box object has "Not Found" as title. Ignore.
@@ -208,14 +212,18 @@ export class Parser {
         let collectedIds: string[] = []
         for(let obj of $('.cartoon-box').toArray()) {
             let id = $('a', $(obj)).attr('href')?.replace(`${COMICEXTRA_DOMAIN}/comic/`, '')
-            let title = $('h3', $(obj)).text().trim()
+            let encodedTitleText = $('h3', $(obj)).text().trim()
+            // Decode title
+            let titleText = encodedTitleText.replace(/&#(\d+);/g, function(match, dec) {
+              return String.fromCharCode(dec);
+            })
             let image = $('img', $(obj)).attr('src')
 
             if (typeof id === 'undefined' || typeof image === 'undefined') continue
             if(!collectedIds.includes(id)) {
             tiles.push(createMangaTile({
                 id: id,
-                title: createIconText({text: title}),
+                title: createIconText({text: titleText}),
                 image: image
             }))
         }

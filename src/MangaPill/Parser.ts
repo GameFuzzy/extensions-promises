@@ -157,7 +157,13 @@ export class Parser {
       let collectedIds: string[] = []
       for(let obj of $('div', $('.grid.gap-3')).toArray()) {
           let id = $('a', $(obj)).attr('href')?.replace(`/manga/`, '')
-          let titleText = $('a', $('div', $(obj))).text()
+          let encodedTitleText = $('a', $('div', $(obj))).text()
+
+          // Decode title
+          let titleText = encodedTitleText.replace(/&#(\d+);/g, function(match, dec) {
+            return String.fromCharCode(dec);
+          })
+
           let image = $('img', $('a', $(obj))).attr('data-src')
 
           if (typeof id === 'undefined' || typeof image === 'undefined') continue
@@ -191,7 +197,13 @@ export class Parser {
       let collectedIds: string[] = []
       for(let obj of $('div', $('.grid.gap-3')).toArray()) {
           let id = $('a', $(obj)).attr('href')?.replace(`/manga/`, '')
-          let titleText = $('a', $('div', $(obj))).text()
+          let encodedTitleText = $('a', $('div', $(obj))).text()
+
+          // Decode title
+          let titleText = encodedTitleText.replace(/&#(\d+);/g, function(match, dec) {
+            return String.fromCharCode(dec);
+          })
+
           let image = $('img', $('a', $(obj))).attr('data-src')
 
           if (typeof id === 'undefined' || typeof image === 'undefined') continue
@@ -238,7 +250,13 @@ export class Parser {
       for(let obj of $('.mb-2.rounded.border').toArray()) {
         let href = ($('a', $(obj)).attr('href') ?? '')
         let id = href.split('-')[0].split('/').pop() + '/' + href.split('/').pop()?.split('-chapter')[0].trim()
-        let titleText = $('a', $('.mb-2', $('.p-3', $(obj)))).text().split(' Chapter')[0]
+        let encodedTitleText = $('a', $('.mb-2', $('.p-3', $(obj)))).text().split(' Chapter')[0]
+
+        // Decode title
+        let titleText = encodedTitleText.replace(/&#(\d+);/g, function(match, dec) {
+          return String.fromCharCode(dec);
+        })
+        
         let image = $('img', $('a', $(obj))).attr('data-src')
         
         if (typeof id === 'undefined' || typeof image === 'undefined') continue
