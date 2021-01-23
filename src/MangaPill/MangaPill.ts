@@ -19,9 +19,9 @@ import {
 const MANGAPILL_DOMAIN = 'https://www.mangapill.com'
 
 export const MangaPillInfo: SourceInfo = {
-  version: '0.0.1',
+  version: '1.0.3',
   name: 'MangaPill',
-  description: 'Extension that pulls manga from MangaPill.com',
+  description: 'Extension that pulls manga from MangaPill, has a lot of officially translated manga (can sometimes miss manga notifications)',
   author: 'GameFuzzy',
   authorWebsite: 'http://github.com/gamefuzzy',
   icon: "icon.png",
@@ -41,7 +41,7 @@ export const MangaPillInfo: SourceInfo = {
 
 export class MangaPill extends Source {
   parser = new Parser()
-  getMangaShareUrl(mangaId: string): string | null { return `${MANGAPILL_DOMAIN}/comic/${mangaId}` }
+  getMangaShareUrl(mangaId: string): string | null { return `${MANGAPILL_DOMAIN}/manga/${mangaId}` }
 
   async getMangaDetails(mangaId: string): Promise<Manga> {
 
@@ -59,7 +59,7 @@ export class MangaPill extends Source {
 
   async getChapters(mangaId: string): Promise<Chapter[]> {
     let request = createRequestObject({
-      url: `${MANGAPILL_DOMAIN}/comic/${mangaId}`,
+      url: `${MANGAPILL_DOMAIN}/manga/${mangaId}`,
       method: "GET"
     })
 
@@ -67,47 +67,41 @@ export class MangaPill extends Source {
     let $ = this.cheerio.load(data.data)
 
     let chapters: Chapter[] = []
-    let pagesLeft = $('a', $('.general-nav')).toArray().length
-    pagesLeft = pagesLeft == 0 ? 1 : pagesLeft
-
-    while(pagesLeft > 0)
-    {
       let pageRequest = createRequestObject({
-        url: `${MANGAPILL_DOMAIN}/comic/${mangaId}/${pagesLeft}`,
+        url: `${MANGAPILL_DOMAIN}/manga/${mangaId}`,
         method: "GET"
       })
       const pageData = await this.requestManager.schedule(pageRequest, 1)
       $ = this.cheerio.load(pageData.data)
       chapters = chapters.concat(this.parser.parseChapterList($, mangaId))
-      pagesLeft--
-    }
     
     return this.parser.sortChapters(chapters)
   }
 
 
   async getChapterDetails(mangaId: string, chapterId: string): Promise<ChapterDetails> {
-
     let request = createRequestObject({
-      url: `${MANGAPILL_DOMAIN}/${mangaId}/${chapterId}/full`,
+      url: `${MANGAPILL_DOMAIN}${chapterId}`,
       method: 'GET',
     })
 
-    const data = await this.requestManager.schedule(request, 1)
+    let data = await this.requestManager.schedule(request, 1)
 
     let $ = this.cheerio.load(data.data)
-    return this.parser.parseChapterDetails($, mangaId, chapterId)
+    let pages = this.parser.parseChapterDetails($)
+
+    return createChapterDetails({
+      id: chapterId,
+      mangaId: mangaId,
+      pages: pages,
+      longStrip: false
+    })
   }
 
   async filterUpdatedManga(mangaUpdatesFoundCallback: (updates: MangaUpdates) => void, time: Date, ids: string[]): Promise<void> {
 
-    let loadNextPage: boolean = true
-    let currPageNum: number = 1
-
-    while (loadNextPage) {
-
       let request = createRequestObject({
-        url: `${MANGAPILL_DOMAIN}/comic-updates/${String(currPageNum)}`,
+        url: `${MANGAPILL_DOMAIN}`,
         method: 'GET'
       })
 
@@ -115,25 +109,29 @@ export class MangaPill extends Source {
       let $ = this.cheerio.load(data.data)
 
       let updatedComics = this.parser.filterUpdatedManga($, time, ids)
-      loadNextPage = updatedComics.loadNextPage
-      if (loadNextPage) {
-        currPageNum++
-      }
+
       if (updatedComics.updates.length > 0) {
       mangaUpdatesFoundCallback(createMangaUpdates({
         ids: updatedComics.updates
       }))
       }
-    }
+    
   }
 
   async searchRequest(query: SearchRequest, metadata: any): Promise<PagedResults> {
-    let webPage = ''
     let page : number = metadata?.page ?? 1
-
+    let genres = '&genre=' + (query.includeGenre ?? []).join('&genre=')
+    let format = '&type=' + (query.includeFormat ?? '')
+    let status = ''
+    switch (query.status) {
+      case 0: status = '&status=2'; break
+      case 1: status = '&status=1'; break
+      default: status = ''
+    }
     let request = createRequestObject({
-      url: `${MANGAPILL_DOMAIN}/comic-search?key=${query.title?.replace(' ', '+')}`,
-      method: "GET"
+      url: `${MANGAPILL_DOMAIN}/search`,
+      method: "GET",
+      param: `?page=${page}&title=${query.title?.replaceAll(' ', '+')}${format}${status}${genres}`
     })
 
     let data = await this.requestManager.schedule(request, 1)
@@ -157,7 +155,7 @@ export class MangaPill extends Source {
 
   async getTags(): Promise<TagSection[] | null> {
     const request = createRequestObject({
-      url: `${MANGAPILL_DOMAIN}/comic-genres/`,
+      url: `${MANGAPILL_DOMAIN}/search`,
       method: 'GET'
     })
 
@@ -171,87 +169,112 @@ export class MangaPill extends Source {
   async getHomePageSections(sectionCallback: (section: HomeSection) => void): Promise<void> {
 
     // Let the app know what the homesections are without filling in the data
-    let popularSection = createHomeSection({ id: '2', title: 'POPULAR COMICS', view_more: true })
-    let recentSection = createHomeSection({ id: '1', title: 'RECENTLY ADDED COMICS', view_more: true })
-    let newTitlesSection = createHomeSection({ id: '0', title: 'LATEST COMICS', view_more: true })
+    
+    // Add featured section back in whenever a section type for that comes around
+    
+    //let featuredSection = createHomeSection({ id: '0', title: 'FEATURED MANGA', view_more: true })
+    let recentUpdatesSection = createHomeSection({ id: '1', title: 'RECENTLY UPDATED MANGA', view_more: true })
+    let popularSection = createHomeSection({ id: '2', title: 'POPULAR MANGA', view_more: true })
+    //sectionCallback(featuredSection)
+    sectionCallback(recentUpdatesSection)
     sectionCallback(popularSection)
-    sectionCallback(recentSection)
-    sectionCallback(newTitlesSection)
 
-    // Make the request and fill out available titles
+    // Make the requests and fill out available titles
+/*
     let request = createRequestObject({
-      url: `${MANGAPILL_DOMAIN}/popular-comic`,
-      method: 'GET'
-    })
-
-    const popularData = await this.requestManager.schedule(request, 1)
-    let $ = this.cheerio.load(popularData.data)
-
-    popularSection.items = this.parser.parseHomePageSection($)
-    sectionCallback(popularSection)
-
-    request = createRequestObject({
-      url: `${MANGAPILL_DOMAIN}/recent-comic`,
+      url: `${MANGAPILL_DOMAIN}`,
       method: 'GET'
     })
 
     const recentData = await this.requestManager.schedule(request, 1)
-    $ = this.cheerio.load(recentData.data)
+    let $ = this.cheerio.load(recentData.data)
 
-    recentSection.items = this.parser.parseHomePageSection($)
-    sectionCallback(recentSection)
-
-    request = createRequestObject({
-      url: `${MANGAPILL_DOMAIN}/new-comic`,
+    featuredSection.items = this.parser.parseFeaturedSection($)
+    sectionCallback(featuredSection)
+*/
+    let request = createRequestObject({
+      url: `${MANGAPILL_DOMAIN}`,
       method: 'GET'
     })
 
     const newData = await this.requestManager.schedule(request, 1)
-    $ = this.cheerio.load(newData.data)
+    let $ = this.cheerio.load(newData.data)
 
-    newTitlesSection.items = this.parser.parseHomePageSection($)
-    sectionCallback(newTitlesSection)
+    recentUpdatesSection.items = this.parser.parseRecentUpdatesSection($)
+    sectionCallback(recentUpdatesSection)
+
+    request = createRequestObject({
+      url: `${MANGAPILL_DOMAIN}/search?title=&type=&status=1`,
+      method: 'GET'
+    })
+
+    const popularData = await this.requestManager.schedule(request, 1)
+    $ = this.cheerio.load(popularData.data)
+
+    popularSection.items = this.parser.parsePopularSection($)
+    sectionCallback(popularSection)
   }
-  
 
   async getViewMoreItems(homepageSectionId: string, metadata: any): Promise<PagedResults | null> {
-    let webPage = ''
     let page : number = metadata?.page ?? 1
+    let manga
+    let mData = undefined
     switch (homepageSectionId) {
+      /*
       case '0': {
-        webPage = `/new-comic/${page}`
+        let request = createRequestObject({
+          url: `${MANGAPILL_DOMAIN}`,
+          method: 'GET'
+        })
+    
+        let data = await this.requestManager.schedule(request, 1)
+        let $ = this.cheerio.load(data.data)
+
+        manga = this.parser.parseFeaturedSection($)
         break
       }
+      */
       case '1': {
-        webPage = `/recent-comic/${page}`
+        let request = createRequestObject({
+          url: `${MANGAPILL_DOMAIN}`,
+          method: 'GET'
+        })
+    
+        let data = await this.requestManager.schedule(request, 1)
+        let $ = this.cheerio.load(data.data)
+
+        manga = this.parser.parseRecentUpdatesSection($)
         break
       }
       case '2': {
-        webPage = `/popular-comic/${page}`
+        let request = createRequestObject({
+          url: `${MANGAPILL_DOMAIN}/search?title=&type=&status=1&page=${page}`,
+          method: 'GET'
+        })
+    
+        let data = await this.requestManager.schedule(request, 1)
+        let $ = this.cheerio.load(data.data)
+
+        manga = this.parser.parsePopularSection($)
+        if (!this.parser.isLastPage($)) {
+          mData = {page: (page + 1)}
+        }
+
         break
       }
       default: return Promise.resolve(null)
     }
 
-    let request = createRequestObject({
-      url: `${MANGAPILL_DOMAIN}${webPage}`,
-      method: 'GET'
-    })
-
-    let data = await this.requestManager.schedule(request, 1)
-    let $ = this.cheerio.load(data.data)
-    let manga = this.parser.parseHomePageSection($)
-    let mData
-    if (!this.parser.isLastPage($)) {
-      mData = {page: (page + 1)}
-    }
-    else {
-      mData = undefined  // There are no more pages to continue on to, do not provide page metadata
-    }
-
     return createPagedResults({
       results: manga,
       metadata: mData
+    })
+  }
+
+  cloudflareBypassRequest() {
+    return createRequestObject({
+      url: `${MANGAPILL_DOMAIN}`,
+      method: 'GET',
     })
   }
 
