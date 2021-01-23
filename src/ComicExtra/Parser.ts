@@ -14,7 +14,7 @@ export class Parser {
     let summary = $('#film-content', $('#film-content-wrapper')).text().trim()
     let relatedIds: string[] = []
     for(let obj of $('.list-top-item').toArray()) {
-        relatedIds.push($('a', $(obj)).attr('href')?.replace(`${COMICEXTRA_DOMAIN}/comic/`, '')!.trim() || '')
+        relatedIds.push($('a', $(obj)).attr('href')?.replace(`${COMICEXTRA_DOMAIN}/comic/`, '').trim() || '')
     }
 
     let status = MangaStatus.ONGOING, author, released, rating: number = 0
@@ -58,7 +58,10 @@ export class Parser {
         case 4: {
           // Genres
           for(let obj of $('a',$(item)).toArray()){
-            tagArray0 = [...tagArray0, createTag({id: $(obj).attr('href')?.replace(`${COMICEXTRA_DOMAIN}/`, '').trim()!, label: $(obj).text().trim()})]
+            let id = $(obj).attr('href')?.replace(`${COMICEXTRA_DOMAIN}/`, '').trim()
+            let label = $(obj).text().trim()
+            if (typeof id === 'undefined' || typeof label === 'undefined') continue
+            tagArray0 = [...tagArray0, createTag({id: id, label: label})]
           }    
           i++
           continue
@@ -71,7 +74,7 @@ export class Parser {
         id: mangaId,
         rating: rating,
         titles: titles,
-        image: image!,
+        image: image ?? '',
         status: status,
         author: author,
         tags: tagSections,
@@ -94,9 +97,9 @@ export class Parser {
         }
         let chapName = $('a', $(obj)).text()
         let time = $($('td', $(obj)).toArray()[1]).text()
-
+        if (typeof chapterId === 'undefined') continue
         chapters.push(createChapter({
-            id: chapterId!,
+            id: chapterId,
             mangaId: mangaId,
             chapNum: Number(chapNum),
             langCode: LanguageCode.ENGLISH,
@@ -124,7 +127,9 @@ export class Parser {
         let pages: string[] = []
         // Get all of the pages
         for(let obj of $('img',$('.chapter-container')).toArray()) {
-            pages.push($(obj).attr('src')!)
+          let page = $(obj).attr('src')
+          if(typeof page === 'undefined') continue  
+          pages.push(page)
         }
         return pages
     }
@@ -162,20 +167,23 @@ export class Parser {
 }
 
     parseSearchResults($: CheerioSelector): MangaTile[] { 
-        
         let mangaTiles: MangaTile[] = []
+        let collectedIds: string[] = []
         for(let obj of $('.cartoon-box').toArray()) {
             let id = $('a', $(obj)).attr('href')?.replace(`${COMICEXTRA_DOMAIN}/comic/`, '')
             let titleText = $('h3', $(obj)).text()
             let image = $('img', $(obj)).attr('src')
       
             if(titleText == "Not found") continue // If a search result has no data, the only cartoon-box object has "Not Found" as title. Ignore.
-      
+            if (typeof id === 'undefined' || typeof image === 'undefined') continue
+            if(!collectedIds.includes(id)) {
             mangaTiles.push(createMangaTile({
-                id: id!,
+                id: id,
                 title: createIconText({text: titleText}),
-                image: image!
+                image: image
             }))
+            collectedIds.push(id)
+          }
     }
     return mangaTiles
     }
@@ -186,7 +194,7 @@ export class Parser {
         createTagSection({ id: '1', label: 'format', tags: [] })]
     
         for(let obj of $('a', $('.home-list')).toArray()) {
-          let id = $(obj).attr('href')?.replace(`${COMICEXTRA_DOMAIN}/`, '')!.trim() ?? $(obj).text().trim()
+          let id = $(obj).attr('href')?.replace(`${COMICEXTRA_DOMAIN}/`, '').trim() ?? $(obj).text().trim()
           let genre = $(obj).text().trim()
           tagSections[0].tags.push(createTag({id: id, label: genre}))
         }
@@ -197,17 +205,21 @@ export class Parser {
     parseHomePageSection($ : CheerioSelector): MangaTile[]{
         
         let tiles: MangaTile[] = []
+        let collectedIds: string[] = []
         for(let obj of $('.cartoon-box').toArray()) {
             let id = $('a', $(obj)).attr('href')?.replace(`${COMICEXTRA_DOMAIN}/comic/`, '')
             let title = $('h3', $(obj)).text().trim()
             let image = $('img', $(obj)).attr('src')
-      
+
+            if (typeof id === 'undefined' || typeof image === 'undefined') continue
+            if(!collectedIds.includes(id)) {
             tiles.push(createMangaTile({
-                id: id!,
+                id: id,
                 title: createIconText({text: title}),
-                image: image!
+                image: image
             }))
         }
+      }
         return tiles
     }
     isLastPage($: CheerioSelector): boolean {
