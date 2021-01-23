@@ -601,7 +601,11 @@ class Parser {
                 case 4: {
                     // Genres
                     for (let obj of $('a', $(item)).toArray()) {
-                        tagArray0 = [...tagArray0, createTag({ id: (_d = $(obj).attr('href')) === null || _d === void 0 ? void 0 : _d.replace(`${COMICEXTRA_DOMAIN}/`, '').trim(), label: $(obj).text().trim() })];
+                        let id = (_d = $(obj).attr('href')) === null || _d === void 0 ? void 0 : _d.replace(`${COMICEXTRA_DOMAIN}/`, '').trim();
+                        let label = $(obj).text().trim();
+                        if (typeof id === 'undefined' || typeof label === 'undefined')
+                            continue;
+                        tagArray0 = [...tagArray0, createTag({ id: id, label: label })];
                     }
                     i++;
                     continue;
@@ -614,7 +618,7 @@ class Parser {
             id: mangaId,
             rating: rating,
             titles: titles,
-            image: image,
+            image: image !== null && image !== void 0 ? image : '',
             status: status,
             author: author,
             tags: tagSections,
@@ -634,6 +638,8 @@ class Parser {
             }
             let chapName = $('a', $(obj)).text();
             let time = $($('td', $(obj)).toArray()[1]).text();
+            if (typeof chapterId === 'undefined')
+                continue;
             chapters.push(createChapter({
                 id: chapterId,
                 mangaId: mangaId,
@@ -660,7 +666,10 @@ class Parser {
         let pages = [];
         // Get all of the pages
         for (let obj of $('img', $('.chapter-container')).toArray()) {
-            pages.push($(obj).attr('src'));
+            let page = $(obj).attr('src');
+            if (typeof page === 'undefined')
+                continue;
+            pages.push(page);
         }
         return pages;
     }
@@ -697,17 +706,23 @@ class Parser {
     parseSearchResults($) {
         var _a;
         let mangaTiles = [];
+        let collectedIds = [];
         for (let obj of $('.cartoon-box').toArray()) {
             let id = (_a = $('a', $(obj)).attr('href')) === null || _a === void 0 ? void 0 : _a.replace(`${COMICEXTRA_DOMAIN}/comic/`, '');
             let titleText = $('h3', $(obj)).text();
             let image = $('img', $(obj)).attr('src');
             if (titleText == "Not found")
                 continue; // If a search result has no data, the only cartoon-box object has "Not Found" as title. Ignore.
-            mangaTiles.push(createMangaTile({
-                id: id,
-                title: createIconText({ text: titleText }),
-                image: image
-            }));
+            if (typeof id === 'undefined' || typeof image === 'undefined')
+                continue;
+            if (!collectedIds.includes(id)) {
+                mangaTiles.push(createMangaTile({
+                    id: id,
+                    title: createIconText({ text: titleText }),
+                    image: image
+                }));
+                collectedIds.push(id);
+            }
         }
         return mangaTiles;
     }
@@ -726,15 +741,20 @@ class Parser {
     parseHomePageSection($) {
         var _a;
         let tiles = [];
+        let collectedIds = [];
         for (let obj of $('.cartoon-box').toArray()) {
             let id = (_a = $('a', $(obj)).attr('href')) === null || _a === void 0 ? void 0 : _a.replace(`${COMICEXTRA_DOMAIN}/comic/`, '');
             let title = $('h3', $(obj)).text().trim();
             let image = $('img', $(obj)).attr('src');
-            tiles.push(createMangaTile({
-                id: id,
-                title: createIconText({ text: title }),
-                image: image
-            }));
+            if (typeof id === 'undefined' || typeof image === 'undefined')
+                continue;
+            if (!collectedIds.includes(id)) {
+                tiles.push(createMangaTile({
+                    id: id,
+                    title: createIconText({ text: title }),
+                    image: image
+                }));
+            }
         }
         return tiles;
     }
