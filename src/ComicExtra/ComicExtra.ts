@@ -77,7 +77,7 @@ export class ComicExtra extends Source {
       chapters = chapters.concat(this.parser.parseChapterList($, mangaId))
       pagesLeft--
     }
-    
+
     return this.parser.sortChapters(chapters)
   }
 
@@ -99,7 +99,7 @@ export class ComicExtra extends Source {
     // Fallback if empty
     if(unFilteredPages.length < 1) {
       pages.push(fallback)
-    } 
+    }
     else {
       // Filter out 404 status codes
         request = createRequestObject({
@@ -121,7 +121,7 @@ export class ComicExtra extends Source {
         catch {
           pages.push(fallback)
         }
-  
+
     }
 
     return createChapterDetails({
@@ -242,7 +242,7 @@ export class ComicExtra extends Source {
     newTitlesSection.items = this.parser.parseHomePageSection($)
     sectionCallback(newTitlesSection)
   }
-  
+
 
   async getViewMoreItems(homepageSectionId: string, metadata: any): Promise<PagedResults | null> {
     let webPage = ''

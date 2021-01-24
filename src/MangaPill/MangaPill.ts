@@ -70,7 +70,7 @@ export class MangaPill extends Source {
       const pageData = await this.requestManager.schedule(pageRequest, 1)
       $ = this.cheerio.load(pageData.data)
       chapters = chapters.concat(this.parser.parseChapterList($, mangaId))
-    
+
     return this.parser.sortChapters(chapters)
   }
 
@@ -111,7 +111,7 @@ export class MangaPill extends Source {
         ids: updatedComics.updates
       }))
       }
-    
+
   }
 
   async searchRequest(query: SearchRequest, metadata: any): Promise<PagedResults> {
@@ -165,9 +165,9 @@ export class MangaPill extends Source {
   async getHomePageSections(sectionCallback: (section: HomeSection) => void): Promise<void> {
 
     // Let the app know what the homesections are without filling in the data
-    
+
     // Add featured section back in whenever a section type for that comes around
-    
+
     //let featuredSection = createHomeSection({ id: '0', title: 'FEATURED MANGA', view_more: true })
     let recentUpdatesSection = createHomeSection({ id: '1', title: 'RECENTLY UPDATED MANGA', view_more: true })
     let popularSection = createHomeSection({ id: '2', title: 'POPULAR MANGA', view_more: true })
@@ -222,7 +222,7 @@ export class MangaPill extends Source {
           url: `${MANGAPILL_DOMAIN}`,
           method: 'GET'
         })
-    
+
         let data = await this.requestManager.schedule(request, 1)
         let $ = this.cheerio.load(data.data)
 
@@ -235,7 +235,7 @@ export class MangaPill extends Source {
           url: `${MANGAPILL_DOMAIN}`,
           method: 'GET'
         })
-    
+
         let data = await this.requestManager.schedule(request, 1)
         let $ = this.cheerio.load(data.data)
 
@@ -247,7 +247,7 @@ export class MangaPill extends Source {
           url: `${MANGAPILL_DOMAIN}/search?title=&type=&status=1&page=${page}`,
           method: 'GET'
         })
-    
+
         let data = await this.requestManager.schedule(request, 1)
         let $ = this.cheerio.load(data.data)
 

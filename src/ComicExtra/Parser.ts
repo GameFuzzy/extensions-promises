@@ -4,9 +4,9 @@ const COMICEXTRA_DOMAIN = 'https://www.comicextra.com'
 
 export class Parser {
 
-    
+
     parseMangaDetails($: CheerioSelector, mangaId: string): Manga {
-    
+
 
     let titles = [$('.title-1', $('.mobile-hide')).text().trimStart()]
     let image = $('img', $('.movie-l-img')).attr('src')
@@ -62,7 +62,7 @@ export class Parser {
             let label = $(obj).text().trim()
             if (typeof id === 'undefined' || typeof label === 'undefined') continue
             tagArray0 = [...tagArray0, createTag({id: id, label: label})]
-          }    
+          }
           i++
           continue
         }
@@ -85,8 +85,8 @@ export class Parser {
     }
 
 
-    parseChapterList($: CheerioSelector, mangaId: string) : Chapter[] { 
-    
+    parseChapterList($: CheerioSelector, mangaId: string) : Chapter[] {
+
     let chapters: Chapter[] = []
 
       for(let obj of $('tr', $('#list')).toArray()) {
@@ -128,14 +128,14 @@ export class Parser {
         // Get all of the pages
         for(let obj of $('img',$('.chapter-container')).toArray()) {
           let page = $(obj).attr('src')
-          if(typeof page === 'undefined') continue  
+          if(typeof page === 'undefined') continue
           pages.push(page)
         }
         return pages
     }
 
     filterUpdatedManga($: CheerioSelector, time: Date, ids: string[] ) : {updates: string[], loadNextPage : boolean} {
-    
+
     let foundIds: string[] = []
     let passedReferenceTime = false
     for (let item of $('.hlb-t').toArray()) {
@@ -146,7 +146,7 @@ export class Parser {
         mangaTime.setDate(new Date(Date.now()).getDate() - 1)
       }
       else {
-        mangaTime = new Date($('.date', item).first().text()) 
+        mangaTime = new Date($('.date', item).first().text())
       }
       passedReferenceTime = mangaTime <= time
       if (!passedReferenceTime) {
@@ -163,10 +163,10 @@ export class Parser {
         return {updates: foundIds, loadNextPage: false}
     }
 
-    
+
 }
 
-    parseSearchResults($: CheerioSelector): MangaTile[] { 
+    parseSearchResults($: CheerioSelector): MangaTile[] {
         let mangaTiles: MangaTile[] = []
         let collectedIds: string[] = []
         for(let obj of $('.cartoon-box').toArray()) {
@@ -178,7 +178,7 @@ export class Parser {
             })
 
             let image = $('img', $(obj)).attr('src')
-      
+
             if(titleText == "Not found") continue // If a search result has no data, the only cartoon-box object has "Not Found" as title. Ignore.
             if (typeof id === 'undefined' || typeof image === 'undefined') continue
             if(!collectedIds.includes(id)) {
@@ -194,10 +194,10 @@ export class Parser {
     }
 
     parseTags($: CheerioSelector): TagSection[] {
-        
+
         let tagSections: TagSection[] = [createTagSection({ id: '0', label: 'genres', tags: [] }),
         createTagSection({ id: '1', label: 'format', tags: [] })]
-    
+
         for(let obj of $('a', $('.home-list')).toArray()) {
           let id = $(obj).attr('href')?.replace(`${COMICEXTRA_DOMAIN}/`, '').trim() ?? $(obj).text().trim()
           let genre = $(obj).text().trim()
@@ -208,7 +208,7 @@ export class Parser {
     }
 
     parseHomePageSection($ : CheerioSelector): MangaTile[]{
-        
+
         let tiles: MangaTile[] = []
         let collectedIds: string[] = []
         for(let obj of $('.cartoon-box').toArray()) {

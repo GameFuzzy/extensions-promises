@@ -4,9 +4,9 @@ const MANGAPILL_DOMAIN = 'https://www.mangapill.com'
 
 export class Parser {
 
-    
+
     parseMangaDetails($: CheerioSelector, mangaId: string): Manga {
-    
+
 
     let titles = [$('.font-bold.text-xl').text().trim()]
     let altTitle = $('.text-color-text-secondary', $('div:nth-child(1)', $('.flex.flex-col'))).last().text().trim()
@@ -62,7 +62,7 @@ export class Parser {
       }
       i = 0
     }
-    let tagSections: TagSection[] = [createTagSection({ id: '0', label: 'genres', tags: tagArray0 }), 
+    let tagSections: TagSection[] = [createTagSection({ id: '0', label: 'genres', tags: tagArray0 }),
     createTagSection({ id: '1', label: 'format', tags: tagArray1 })]
       return createManga({
         id: mangaId,
@@ -77,8 +77,8 @@ export class Parser {
     }
 
 
-    parseChapterList($: CheerioSelector, mangaId: string) : Chapter[] { 
-    
+    parseChapterList($: CheerioSelector, mangaId: string) : Chapter[] {
+
     let chapters: Chapter[] = []
 
       for(let obj of $('option', $('select[name=view-chapter]')).toArray()) {
@@ -149,10 +149,10 @@ export class Parser {
         return {updates: foundIds, loadNextPage: false}
     }
 
-    
+
 }
 
-    parseSearchResults($: CheerioSelector): MangaTile[] { 
+    parseSearchResults($: CheerioSelector): MangaTile[] {
       let mangaTiles: MangaTile[] = []
       let collectedIds: string[] = []
       for(let obj of $('div', $('.grid.gap-3')).toArray()) {
@@ -182,7 +182,7 @@ export class Parser {
     parseTags($: CheerioSelector): TagSection[] {
       let tagSections: TagSection[] = [createTagSection({ id: '0', label: 'genres', tags: [] }),
       createTagSection({ id: '1', label: 'format', tags: [] })]
-  
+
       for(let obj of $('Label', $('.gap-2')).toArray()) {
         let genre = $(obj).text().trim()
         let id = $('input', $(obj)).attr('value') ?? genre
@@ -220,7 +220,7 @@ export class Parser {
       }
 
     // Add featured section back in whenever a section type for that comes around
-    
+
     /*
     parseFeaturedSection($ : CheerioSelector): MangaTile[]{
       let mangaTiles: MangaTile[] = []
@@ -228,11 +228,11 @@ export class Parser {
         let href = ($('a', $(obj)).attr('href') ?? '')
         let id = href.split('-')[0].split('/').pop() + '/' + href.split('/').pop()?.split('-chapter')[0].trim()
         let encodedTitleText = $('.text-sm', $('.text-color-text-fire-ch', $('div', $(obj)))).text()
-        
+
          // Decode title
          let titleText = encodedTitleText.replace(/&#(\d+);/g, function(match, dec) {
            return String.fromCharCode(dec);
-         })        
+         })
 
         let image = $('img', $('div', $(obj))).attr('data-src')
 
@@ -262,9 +262,9 @@ export class Parser {
         let titleText = encodedTitleText.replace(/&#(\d+);/g, function(match, dec) {
           return String.fromCharCode(dec);
         })
-        
+
         let image = $('img', $('a', $(obj))).attr('data-src')
-        
+
         if (typeof id === 'undefined' || typeof image === 'undefined') continue
         if(!collectedIds.includes(id)) {
           mangaTiles.push(createMangaTile({
