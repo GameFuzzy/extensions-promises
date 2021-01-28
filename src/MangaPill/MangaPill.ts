@@ -119,7 +119,7 @@ export class MangaPill extends Source {
     let request = createRequestObject({
       url: `${MANGAPILL_DOMAIN}/search`,
       method: "GET",
-      param: `?page=${page}&title=${query.title?.replace(/ /gi, '+')}${format}${status}${genres}`
+      param: `?page=${page}&title=${encodeURIComponent(query.title ?? '')}${format}${status}${genres}`
     })
 
     let data = await this.requestManager.schedule(request, 1)

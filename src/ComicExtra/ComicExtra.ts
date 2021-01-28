@@ -166,7 +166,7 @@ export class ComicExtra extends Source {
     let request = createRequestObject({
       url: `${COMICEXTRA_DOMAIN}/comic-search`,
       method: "GET",
-      param: `?key=${query.title?.replace(/ /gi, '+')}&page=${page}`
+      param: `?key=${encodeURIComponent(query.title ?? '')}&page=${page}`
     })
 
     let data = await this.requestManager.schedule(request, 1)
