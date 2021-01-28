@@ -121,7 +121,7 @@ export class BatoTo extends Source {
     let request = createRequestObject({
       url: `${BATOTO_DOMAIN}/search`,
       method: "GET",
-      param: `?word=${query.title?.replaceAll(' ', '+')}&page=${page}`
+      param: `?word=${query.title?.replace(/ /gi, '+')}&page=${page}`
     })
 
     let data = await this.requestManager.schedule(request, 1)

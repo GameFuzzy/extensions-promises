@@ -8,7 +8,7 @@ export class Parser {
     parseMangaDetails($: CheerioSelector, mangaId: string): Manga {
     
 
-    let titles = [$('.title-1', $('.mobile-hide')).text().trimStart()]
+    let titles = [$('.title-1', $('.mobile-hide')).text().trimLeft()]
     let image = $('img', $('.movie-l-img')).attr('src')
 
     let summary = $('#film-content', $('#film-content-wrapper')).text().trim()

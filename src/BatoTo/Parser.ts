@@ -160,7 +160,7 @@ export class Parser {
             else if(script.includes("const server =")) {
                 let encryptedServer = script.split('const server = ', 2)[1].split(";", 2)[0] ?? ''
                 let batoJS = eval(script.split('const batojs = ', 2)[1].split(";", 2)[0] ?? '').toString()
-                let decryptScript = CryptoJS.AES.decrypt(encryptedServer, batoJS).toString(cryptoJS.enc.Utf8)
+                let decryptScript = CryptoJS.AES.decrypt(encryptedServer, batoJS).toString(CryptoJS.enc.Utf8)
                 let server = eval(decryptScript).toString().replace('"', '')
                 let imgArray = JSON.parse(script.split('const images = ', 2)[1].split(";", 2)[0] ?? '') as any
                 if (imgArray != null) {
