@@ -410,7 +410,7 @@ class MangaPill extends paperback_extensions_common_1.Source {
             let request = createRequestObject({
                 url: `${MANGAPILL_DOMAIN}/search`,
                 method: "GET",
-                param: `?page=${page}&title=${(_d = query.title) === null || _d === void 0 ? void 0 : _d.replace(/ /gi, '+')}${format}${status}${genres}`
+                param: `?page=${page}&title=${encodeURIComponent((_d = query.title) !== null && _d !== void 0 ? _d : '')}${format}${status}${genres}`
             });
             let data = yield this.requestManager.schedule(request, 1);
             let $ = this.cheerio.load(data.data);
@@ -441,43 +441,45 @@ class MangaPill extends paperback_extensions_common_1.Source {
     }
     getHomePageSections(sectionCallback) {
         return __awaiter(this, void 0, void 0, function* () {
-            // Let the app know what the homesections are without filling in the data
             // Add featured section back in whenever a section type for that comes around
-            //let featuredSection = createHomeSection({ id: '0', title: 'FEATURED MANGA', view_more: true })
-            let recentUpdatesSection = createHomeSection({ id: '1', title: 'RECENTLY UPDATED MANGA', view_more: true });
-            let popularSection = createHomeSection({ id: '2', title: 'POPULAR MANGA', view_more: true });
-            //sectionCallback(featuredSection)
-            sectionCallback(recentUpdatesSection);
-            sectionCallback(popularSection);
-            // Make the requests and fill out available titles
-            /*
-                let request = createRequestObject({
-                  url: `${MANGAPILL_DOMAIN}`,
-                  method: 'GET'
-                })
-            
-                const recentData = await this.requestManager.schedule(request, 1)
-                let $ = this.cheerio.load(recentData.data)
-            
-                featuredSection.items = this.parser.parseFeaturedSection($)
-                sectionCallback(featuredSection)
-            */
-            let request = createRequestObject({
-                url: `${MANGAPILL_DOMAIN}`,
-                method: 'GET'
-            });
-            const newData = yield this.requestManager.schedule(request, 1);
-            let $ = this.cheerio.load(newData.data);
-            recentUpdatesSection.items = this.parser.parseRecentUpdatesSection($);
-            sectionCallback(recentUpdatesSection);
-            request = createRequestObject({
-                url: `${MANGAPILL_DOMAIN}/search?title=&type=&status=1`,
-                method: 'GET'
-            });
-            const popularData = yield this.requestManager.schedule(request, 1);
-            $ = this.cheerio.load(popularData.data);
-            popularSection.items = this.parser.parsePopularSection($);
-            sectionCallback(popularSection);
+            const sections = [
+                {
+                    request: createRequestObject({
+                        url: `${MANGAPILL_DOMAIN}`,
+                        method: 'GET'
+                    }),
+                    section: createHomeSection({
+                        id: '1',
+                        title: 'RECENTLY UPDATED MANGA',
+                        view_more: true,
+                    }),
+                },
+                {
+                    request: createRequestObject({
+                        url: `${MANGAPILL_DOMAIN}/search?title=&type=&status=1`,
+                        method: 'GET'
+                    }),
+                    section: createHomeSection({
+                        id: '2',
+                        title: 'POPULAR MANGA',
+                        view_more: true
+                    }),
+                },
+            ];
+            const promises = [];
+            for (const section of sections) {
+                // Let the app load empty sections
+                sectionCallback(section.section);
+                // Get the section data
+                promises.push(this.requestManager.schedule(section.request, 1).then(response => {
+                    const $ = this.cheerio.load(response.data);
+                    const tiles = section.section.id === '1' ? this.parser.parseRecentUpdatesSection($) : this.parser.parsePopularSection($);
+                    section.section.items = tiles;
+                    sectionCallback(section.section);
+                }));
+            }
+            // Make sure the function completes
+            yield Promise.all(promises);
         });
     }
     getViewMoreItems(homepageSectionId, metadata) {
@@ -487,20 +489,6 @@ class MangaPill extends paperback_extensions_common_1.Source {
             let manga;
             let mData = undefined;
             switch (homepageSectionId) {
-                /*
-                case '0': {
-                  let request = createRequestObject({
-                    url: `${MANGAPILL_DOMAIN}`,
-                    method: 'GET'
-                  })
-              
-                  let data = await this.requestManager.schedule(request, 1)
-                  let $ = this.cheerio.load(data.data)
-          
-                  manga = this.parser.parseFeaturedSection($)
-                  break
-                }
-                */
                 case '1': {
                     let request = createRequestObject({
                         url: `${MANGAPILL_DOMAIN}`,

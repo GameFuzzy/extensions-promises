@@ -445,7 +445,7 @@ class ComicExtra extends paperback_extensions_common_1.Source {
             let request = createRequestObject({
                 url: `${COMICEXTRA_DOMAIN}/comic-search`,
                 method: "GET",
-                param: `?key=${(_b = query.title) === null || _b === void 0 ? void 0 : _b.replace(/ /gi, '+')}&page=${page}`
+                param: `?key=${encodeURIComponent((_b = query.title) !== null && _b !== void 0 ? _b : '')}&page=${page}`
             });
             let data = yield this.requestManager.schedule(request, 1);
             let $ = this.cheerio.load(data.data);

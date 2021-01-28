@@ -30366,7 +30366,7 @@ class BatoTo extends paperback_extensions_common_1.Source {
             let request = createRequestObject({
                 url: `${BATOTO_DOMAIN}/search`,
                 method: "GET",
-                param: `?word=${(_b = query.title) === null || _b === void 0 ? void 0 : _b.replace(/ /gi, '+')}&page=${page}`
+                param: `?word=${encodeURIComponent((_b = query.title) !== null && _b !== void 0 ? _b : '')}&page=${page}`
             });
             let data = yield this.requestManager.schedule(request, 1);
             let $ = this.cheerio.load(data.data);
@@ -30394,38 +30394,55 @@ class BatoTo extends paperback_extensions_common_1.Source {
     }
     getHomePageSections(sectionCallback) {
         return __awaiter(this, void 0, void 0, function* () {
-            // Let the app know what the homesections are without filling in the data
-            let popularSection = createHomeSection({ id: '2', title: 'POPULAR', view_more: true });
-            let recentSection = createHomeSection({ id: '1', title: 'RECENTLY UPDATED', view_more: true });
-            let newTitlesSection = createHomeSection({ id: '0', title: 'RECENTLY ADDED', view_more: true });
-            sectionCallback(popularSection);
-            sectionCallback(recentSection);
-            sectionCallback(newTitlesSection);
-            // Make the request and fill out available titles
-            let request = createRequestObject({
-                url: `${BATOTO_DOMAIN}?sort=views_a`,
-                method: 'GET'
-            });
-            const popularData = yield this.requestManager.schedule(request, 1);
-            let $ = this.cheerio.load(popularData.data);
-            popularSection.items = this.parser.parseHomePageSection($, this);
-            sectionCallback(popularSection);
-            request = createRequestObject({
-                url: `${BATOTO_DOMAIN}?sort=update`,
-                method: 'GET'
-            });
-            const recentData = yield this.requestManager.schedule(request, 1);
-            $ = this.cheerio.load(recentData.data);
-            recentSection.items = this.parser.parseHomePageSection($, this);
-            sectionCallback(recentSection);
-            request = createRequestObject({
-                url: `${BATOTO_DOMAIN}?sort=create`,
-                method: 'GET'
-            });
-            const newData = yield this.requestManager.schedule(request, 1);
-            $ = this.cheerio.load(newData.data);
-            newTitlesSection.items = this.parser.parseHomePageSection($, this);
-            sectionCallback(newTitlesSection);
+            const sections = [
+                {
+                    request: createRequestObject({
+                        url: `${BATOTO_DOMAIN}?sort=create`,
+                        method: 'GET'
+                    }),
+                    section: createHomeSection({
+                        id: '0',
+                        title: 'RECENTLY ADDED',
+                        view_more: true,
+                    }),
+                },
+                {
+                    request: createRequestObject({
+                        url: `${BATOTO_DOMAIN}?sort=update`,
+                        method: 'GET'
+                    }),
+                    section: createHomeSection({
+                        id: '1',
+                        title: 'RECENTLY UPDATED',
+                        view_more: true,
+                    }),
+                },
+                {
+                    request: createRequestObject({
+                        url: `${BATOTO_DOMAIN}?sort=views_a`,
+                        method: 'GET'
+                    }),
+                    section: createHomeSection({
+                        id: '2',
+                        title: 'POPULAR',
+                        view_more: true
+                    }),
+                },
+            ];
+            const promises = [];
+            for (const section of sections) {
+                // Let the app load empty sections
+                sectionCallback(section.section);
+                // Get the section data
+                promises.push(this.requestManager.schedule(section.request, 1).then(response => {
+                    const $ = this.cheerio.load(response.data);
+                    const tiles = this.parser.parseHomePageSection($, this);
+                    section.section.items = tiles;
+                    sectionCallback(section.section);
+                }));
+            }
+            // Make sure the function completes
+            yield Promise.all(promises);
         });
     }
     getViewMoreItems(homepageSectionId, metadata) {
@@ -30555,7 +30572,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Parser = void 0;
 const paperback_extensions_common_1 = require("paperback-extensions-common");
 const Languages_1 = require("./Languages");
-const { CryptoJS } = require('./external/crypto.min.js');
+const CryptoJS = require('./external/crypto.min.js');
 const BATOTO_DOMAIN = 'https://www.bato.to';
 class Parser {
     parseMangaDetails($, mangaId) {
@@ -30706,21 +30723,21 @@ class Parser {
                 }
             }
             else if (script.includes("const server =")) {
-                let encryptedServer = (_c = script.split('const server = ', 2)[1].split(";", 2)[0]) !== null && _c !== void 0 ? _c : '';
+                let encryptedServer = ((_c = script.split('const server = ', 2)[1].split(";", 2)[0]) !== null && _c !== void 0 ? _c : '').replace(/\"/g, "");
                 let batoJS = eval((_d = script.split('const batojs = ', 2)[1].split(";", 2)[0]) !== null && _d !== void 0 ? _d : '').toString();
                 let decryptScript = CryptoJS.AES.decrypt(encryptedServer, batoJS).toString(CryptoJS.enc.Utf8);
-                let server = eval(decryptScript).toString().replace('"', '');
+                let server = decryptScript.toString().replace(/"/g, '');
                 let imgArray = JSON.parse((_e = script.split('const images = ', 2)[1].split(";", 2)[0]) !== null && _e !== void 0 ? _e : '');
                 if (imgArray != null) {
                     if (script.includes('bato.to/images')) {
-                        for (let i = 0; i < imgArray.length(); i++) {
-                            let imgUrl = imgArray.get(i);
+                        for (let i = 0; i < imgArray.length; i++) {
+                            let imgUrl = imgArray[i];
                             pages.push(`${imgUrl}`);
                         }
                     }
                     else {
-                        for (let i = 0; i < imgArray.length(); i++) {
-                            let imgUrl = imgArray.get(i);
+                        for (let i = 0; i < imgArray.length; i++) {
+                            let imgUrl = imgArray[i];
                             if (server.startsWith("http"))
                                 pages.push(`${server}${imgUrl}`);
                             else
@@ -30787,15 +30804,11 @@ class Parser {
         return mangaTiles;
     }
     parseTags($) {
-        var _a, _b;
-        let tagSections = [createTagSection({ id: '0', label: 'genres', tags: [] }),
-            createTagSection({ id: '1', label: 'format', tags: [] })];
-        for (let obj of $('a', $('.home-list')).toArray()) {
-            let id = (_b = (_a = $(obj).attr('href')) === null || _a === void 0 ? void 0 : _a.replace(`${BATOTO_DOMAIN}/`, '').trim()) !== null && _b !== void 0 ? _b : $(obj).text().trim();
-            let genre = $(obj).text().trim();
-            tagSections[0].tags.push(createTag({ id: id, label: genre }));
+        let tagSections = [createTagSection({ id: '0', label: 'genres', tags: [] })];
+        for (let obj of $('filter-item', $('.filter-items').first()).toArray()) {
+            let label = $('span', $(obj)).text().trim();
+            tagSections[0].tags.push(createTag({ id: label, label: label }));
         }
-        tagSections[1].tags.push(createTag({ id: 'comic/', label: 'Comic' }));
         return tagSections;
     }
     parseHomePageSection($, source) {
