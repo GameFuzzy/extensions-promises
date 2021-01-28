@@ -77,11 +77,12 @@ describe('ComicExtra Tests', function () {
         expect(homePages[0].items, "No items present").to.exist
 
         // Ensure that we can resolve each of the images for the home-page, since these images are generated and not scraped
+        const promises: Promise<void>[] = []
+        let axios = require('axios')
         for(let obj of homePages[0].items ?? []) {
-            let axios = require('axios')
-            let imageResult = await axios.get(obj.image)
-            expect(imageResult.status).to.equal(200)    // Good resolve!
+            promises.push(axios.get(obj.image).then((imageResult: { status: any; }) => {expect(imageResult.status).to.equal(200)}))
         }
+        await Promise.all(promises)
     })
 
     it("Testing view more", async () => {
