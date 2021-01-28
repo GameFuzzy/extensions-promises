@@ -105,6 +105,9 @@ export class Parser {
             let chapter: Cheerio = $('a', $(obj))
             let chapterId = chapter.attr('href')?.replace(`/chapter/`, '')
             let chapNum = $('b', chapter).text().toLowerCase().replace('chapter', '').trim()
+            if(isNaN(Number(chapNum))){
+            chapNum = `0.${chapNum?.replace( /^\D+/g, '')}`
+            }
             let chapName = $(chapter).text().trim().split('\n')[0]
             let chapGroup = $(chapter).text().trim().split('\n').pop()?.trim()
             let language = $('.emoji').attr('data-lang') ?? 'gb'
