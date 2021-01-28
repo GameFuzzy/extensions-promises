@@ -21,7 +21,7 @@ const BATOTO_DOMAIN = 'https://bato.to'
 export const BatoToInfo: SourceInfo = {
   version: '1.0.0',
   name: 'Bato.To',
-  description: 'Extension that pulls western comics from Bato.To',
+  description: 'Extension that pulls western comics from bato.to',
   author: 'GameFuzzy',
   authorWebsite: 'http://github.com/gamefuzzy',
   icon: "icon.png",
