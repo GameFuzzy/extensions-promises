@@ -30667,18 +30667,18 @@ class Parser {
         });
     }
     parseChapterList($, mangaId, source) {
-        var _a, _b, _c, _d;
+        var _a, _b, _c, _d, _e;
         let chapters = [];
         for (let obj of $('.item', $('.main')).toArray()) {
             let chapter = $('a', $(obj));
             let chapterId = (_a = chapter.attr('href')) === null || _a === void 0 ? void 0 : _a.replace(`/chapter/`, '');
-            let chapNum = $('b', chapter).text().toLowerCase().replace('chapter', '').trim();
+            let chapNum = $('b', chapter).text().toLowerCase().replace('chapter ', '').trim();
             if (isNaN(Number(chapNum))) {
-                chapNum = `0.${chapNum === null || chapNum === void 0 ? void 0 : chapNum.replace(/^\D+/g, '')}`;
+                chapNum = `0.${(_b = chapNum.replace(/^\D+/g, '')) !== null && _b !== void 0 ? _b : '0'}`;
             }
             let chapName = $(chapter).text().trim().split('\n')[0];
-            let chapGroup = (_b = $(chapter).text().trim().split('\n').pop()) === null || _b === void 0 ? void 0 : _b.trim();
-            let language = (_c = $('.emoji').attr('data-lang')) !== null && _c !== void 0 ? _c : 'gb';
+            let chapGroup = (_c = $(chapter).text().trim().split('\n').pop()) === null || _c === void 0 ? void 0 : _c.trim();
+            let language = (_d = $('.emoji').attr('data-lang')) !== null && _d !== void 0 ? _d : 'gb';
             let time = source.convertTime($('i', $(obj)).text());
             if (typeof chapterId === 'undefined')
                 continue;
@@ -30687,7 +30687,7 @@ class Parser {
                 mangaId: mangaId,
                 chapNum: Number(chapNum),
                 group: chapGroup,
-                langCode: (_d = Languages_1.reverseLangCode[language]) !== null && _d !== void 0 ? _d : Languages_1.reverseLangCode['_unknown'],
+                langCode: (_e = Languages_1.reverseLangCode[language]) !== null && _e !== void 0 ? _e : Languages_1.reverseLangCode['_unknown'],
                 name: chapName,
                 time: new Date(time)
             }));
