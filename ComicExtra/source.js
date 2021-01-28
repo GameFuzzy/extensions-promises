@@ -445,7 +445,7 @@ class ComicExtra extends paperback_extensions_common_1.Source {
             let request = createRequestObject({
                 url: `${COMICEXTRA_DOMAIN}/comic-search`,
                 method: "GET",
-                param: `?key=${(_b = query.title) === null || _b === void 0 ? void 0 : _b.replaceAll(' ', '+')}&page=${page}`
+                param: `?key=${(_b = query.title) === null || _b === void 0 ? void 0 : _b.replace(/ /gi, '+')}&page=${page}`
             });
             let data = yield this.requestManager.schedule(request, 1);
             let $ = this.cheerio.load(data.data);
@@ -559,7 +559,7 @@ const COMICEXTRA_DOMAIN = 'https://www.comicextra.com';
 class Parser {
     parseMangaDetails($, mangaId) {
         var _a, _b, _c, _d;
-        let titles = [$('.title-1', $('.mobile-hide')).text().trimStart()];
+        let titles = [$('.title-1', $('.mobile-hide')).text().trimLeft()];
         let image = $('img', $('.movie-l-img')).attr('src');
         let summary = $('#film-content', $('#film-content-wrapper')).text().trim();
         let relatedIds = [];

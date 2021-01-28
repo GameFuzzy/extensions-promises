@@ -410,7 +410,7 @@ class MangaPill extends paperback_extensions_common_1.Source {
             let request = createRequestObject({
                 url: `${MANGAPILL_DOMAIN}/search`,
                 method: "GET",
-                param: `?page=${page}&title=${(_d = query.title) === null || _d === void 0 ? void 0 : _d.replaceAll(' ', '+')}${format}${status}${genres}`
+                param: `?page=${page}&title=${(_d = query.title) === null || _d === void 0 ? void 0 : _d.replace(/ /gi, '+')}${format}${status}${genres}`
             });
             let data = yield this.requestManager.schedule(request, 1);
             let $ = this.cheerio.load(data.data);
