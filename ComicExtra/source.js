@@ -315,7 +315,7 @@ const COMICEXTRA_DOMAIN = 'https://www.comicextra.com';
 exports.ComicExtraInfo = {
     version: '1.5.2',
     name: 'ComicExtra',
-    description: 'Extension that pulls western comics from BatoTo.com',
+    description: 'Extension that pulls western comics from comicextra.com',
     author: 'GameFuzzy',
     authorWebsite: 'http://github.com/gamefuzzy',
     icon: "icon.png",
