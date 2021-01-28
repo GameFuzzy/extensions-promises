@@ -22,8 +22,7 @@ describe('BatoTo Tests', function () {
         expect(details, "No results found with test-defined ID [" + mangaId + "]").to.exist;
 
         // Validate that the fields are filled
-        let data = details;
-        console.log(data)
+        let data = details
         expect(data.id, "Missing ID").to.be.not.empty;
         expect(data.image, "Missing Image").to.be.not.empty;
         expect(data.status, "Missing Status").to.exist;

@@ -1,6 +1,6 @@
 import {Manga, MangaStatus, Tag, TagSection, Chapter, MangaTile} from 'paperback-extensions-common'
-import {reverseLangCode} from "./Languages";
-const { CryptoJS } = require('./external/crypto.min.js')
+import {reverseLangCode} from "./Languages"
+const CryptoJS = require('./external/crypto.min.js')
 
 const BATOTO_DOMAIN = 'https://www.bato.to'
 
@@ -158,20 +158,20 @@ export class Parser {
 
             }
             else if(script.includes("const server =")) {
-                let encryptedServer = script.split('const server = ', 2)[1].split(";", 2)[0] ?? ''
+                let encryptedServer = (script.split('const server = ', 2)[1].split(";", 2)[0] ?? '').replace(/\"/g, "")
                 let batoJS = eval(script.split('const batojs = ', 2)[1].split(";", 2)[0] ?? '').toString()
                 let decryptScript = CryptoJS.AES.decrypt(encryptedServer, batoJS).toString(CryptoJS.enc.Utf8)
-                let server = eval(decryptScript).toString().replace('"', '')
+                let server = decryptScript.toString().replace(/"/g, '')
                 let imgArray = JSON.parse(script.split('const images = ', 2)[1].split(";", 2)[0] ?? '') as any
                 if (imgArray != null) {
                     if (script.includes('bato.to/images')) {
-                        for (let i = 0; i < imgArray.length(); i++) {
-                            let imgUrl = imgArray.get(i)
+                        for (let i = 0; i < imgArray.length; i++) {
+                            let imgUrl = imgArray[i]
                             pages.push(`${imgUrl}`)
                         }
                     } else {
-                        for (let i = 0; i < imgArray.length(); i++) {
-                            let imgUrl = imgArray.get(i)
+                        for (let i = 0; i < imgArray.length; i++) {
+                            let imgUrl = imgArray[i]
                             if (server.startsWith("http"))
                                 pages.push(`${server}${imgUrl}`)
                             else
@@ -241,15 +241,12 @@ export class Parser {
 
     parseTags($: CheerioSelector): TagSection[] {
         
-        let tagSections: TagSection[] = [createTagSection({ id: '0', label: 'genres', tags: [] }),
-        createTagSection({ id: '1', label: 'format', tags: [] })]
+        let tagSections: TagSection[] = [createTagSection({ id: '0', label: 'genres', tags: [] })]
     
-        for(let obj of $('a', $('.home-list')).toArray()) {
-          let id = $(obj).attr('href')?.replace(`${BATOTO_DOMAIN}/`, '').trim() ?? $(obj).text().trim()
-          let genre = $(obj).text().trim()
-          tagSections[0].tags.push(createTag({id: id, label: genre}))
+        for(let obj of $('filter-item', $('.filter-items').first()).toArray()) {
+          let label = $('span', $(obj)).text().trim()
+          tagSections[0].tags.push(createTag({id: label, label: label}))
         }
-        tagSections[1].tags.push(createTag({id: 'comic/', label: 'Comic'}))
         return tagSections
     }
 

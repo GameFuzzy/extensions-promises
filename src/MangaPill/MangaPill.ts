@@ -156,51 +156,52 @@ export class MangaPill extends Source {
 
   async getHomePageSections(sectionCallback: (section: HomeSection) => void): Promise<void> {
 
-    // Let the app know what the homesections are without filling in the data
-    
     // Add featured section back in whenever a section type for that comes around
-    
-    //let featuredSection = createHomeSection({ id: '0', title: 'FEATURED MANGA', view_more: true })
-    let recentUpdatesSection = createHomeSection({ id: '1', title: 'RECENTLY UPDATED MANGA', view_more: true })
-    let popularSection = createHomeSection({ id: '2', title: 'POPULAR MANGA', view_more: true })
-    //sectionCallback(featuredSection)
-    sectionCallback(recentUpdatesSection)
-    sectionCallback(popularSection)
 
-    // Make the requests and fill out available titles
-/*
-    let request = createRequestObject({
-      url: `${MANGAPILL_DOMAIN}`,
-      method: 'GET'
-    })
+    const sections = [
+      {
+        request: createRequestObject({
+          url: `${MANGAPILL_DOMAIN}`,
+          method: 'GET'
+        }),
+        section: createHomeSection({
+          id: '1',
+          title: 'RECENTLY UPDATED MANGA',
+          view_more: true,
+        }),
+      },
+      {
+        request: createRequestObject({
+          url: `${MANGAPILL_DOMAIN}/search?title=&type=&status=1`,
+          method: 'GET'
+        }),
+        section: createHomeSection({
+          id: '2',
+          title: 'POPULAR MANGA',
+          view_more: true
+        }),
+      },
+    ]
 
-    const recentData = await this.requestManager.schedule(request, 1)
-    let $ = this.cheerio.load(recentData.data)
+    const promises: Promise<void>[] = []
 
-    featuredSection.items = this.parser.parseFeaturedSection($)
-    sectionCallback(featuredSection)
-*/
-    let request = createRequestObject({
-      url: `${MANGAPILL_DOMAIN}`,
-      method: 'GET'
-    })
+    for (const section of sections) {
+      // Let the app load empty sections
+      sectionCallback(section.section)
 
-    const newData = await this.requestManager.schedule(request, 1)
-    let $ = this.cheerio.load(newData.data)
+      // Get the section data
+      promises.push(
+          this.requestManager.schedule(section.request, 1).then(response => {
+            const $ = this.cheerio.load(response.data)
+            const tiles = section.section.id === '1' ? this.parser.parseRecentUpdatesSection($) : this.parser.parsePopularSection($)
+            section.section.items = tiles
+            sectionCallback(section.section)
+          }),
+      )
+    }
 
-    recentUpdatesSection.items = this.parser.parseRecentUpdatesSection($)
-    sectionCallback(recentUpdatesSection)
-
-    request = createRequestObject({
-      url: `${MANGAPILL_DOMAIN}/search?title=&type=&status=1`,
-      method: 'GET'
-    })
-
-    const popularData = await this.requestManager.schedule(request, 1)
-    $ = this.cheerio.load(popularData.data)
-
-    popularSection.items = this.parser.parsePopularSection($)
-    sectionCallback(popularSection)
+    // Make sure the function completes
+    await Promise.all(promises)
   }
 
   async getViewMoreItems(homepageSectionId: string, metadata: any): Promise<PagedResults | null> {
@@ -208,20 +209,7 @@ export class MangaPill extends Source {
     let manga
     let mData = undefined
     switch (homepageSectionId) {
-      /*
-      case '0': {
-        let request = createRequestObject({
-          url: `${MANGAPILL_DOMAIN}`,
-          method: 'GET'
-        })
-    
-        let data = await this.requestManager.schedule(request, 1)
-        let $ = this.cheerio.load(data.data)
 
-        manga = this.parser.parseFeaturedSection($)
-        break
-      }
-      */
       case '1': {
         let request = createRequestObject({
           url: `${MANGAPILL_DOMAIN}`,

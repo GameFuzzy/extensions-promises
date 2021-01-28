@@ -155,47 +155,61 @@ export class BatoTo extends Source {
 
   async getHomePageSections(sectionCallback: (section: HomeSection) => void): Promise<void> {
 
-    // Let the app know what the homesections are without filling in the data
-    let popularSection = createHomeSection({ id: '2', title: 'POPULAR', view_more: true })
-    let recentSection = createHomeSection({ id: '1', title: 'RECENTLY UPDATED', view_more: true })
-    let newTitlesSection = createHomeSection({ id: '0', title: 'RECENTLY ADDED', view_more: true })
-    sectionCallback(popularSection)
-    sectionCallback(recentSection)
-    sectionCallback(newTitlesSection)
+    const sections = [
+      {
+        request: createRequestObject({
+          url: `${BATOTO_DOMAIN}?sort=create`,
+          method: 'GET'
+        }),
+        section: createHomeSection({
+          id: '0',
+          title: 'RECENTLY ADDED',
+          view_more: true,
+        }),
+      },
+      {
+        request: createRequestObject({
+          url: `${BATOTO_DOMAIN}?sort=update`,
+          method: 'GET'
+        }),
+        section: createHomeSection({
+          id: '1',
+          title: 'RECENTLY UPDATED',
+          view_more: true,
+        }),
+      },
+      {
+        request: createRequestObject({
+          url: `${BATOTO_DOMAIN}?sort=views_a`,
+          method: 'GET'
+        }),
+        section: createHomeSection({
+          id: '2',
+          title: 'POPULAR',
+          view_more: true
+        }),
+      },
+    ]
 
-    // Make the request and fill out available titles
-    let request = createRequestObject({
-      url: `${BATOTO_DOMAIN}?sort=views_a`,
-      method: 'GET'
-    })
+    const promises: Promise<void>[] = []
 
-    const popularData = await this.requestManager.schedule(request, 1)
-    let $ = this.cheerio.load(popularData.data)
+    for (const section of sections) {
+      // Let the app load empty sections
+      sectionCallback(section.section)
 
-    popularSection.items = this.parser.parseHomePageSection($, this)
-    sectionCallback(popularSection)
+      // Get the section data
+      promises.push(
+        this.requestManager.schedule(section.request, 1).then(response => {
+          const $ = this.cheerio.load(response.data)
+          const tiles = this.parser.parseHomePageSection($, this)
+          section.section.items = tiles
+          sectionCallback(section.section)
+        }),
+      )
+    }
 
-    request = createRequestObject({
-      url: `${BATOTO_DOMAIN}?sort=update`,
-      method: 'GET'
-    })
-
-    const recentData = await this.requestManager.schedule(request, 1)
-    $ = this.cheerio.load(recentData.data)
-
-    recentSection.items = this.parser.parseHomePageSection($, this)
-    sectionCallback(recentSection)
-
-    request = createRequestObject({
-      url: `${BATOTO_DOMAIN}?sort=create`,
-      method: 'GET'
-    })
-
-    const newData = await this.requestManager.schedule(request, 1)
-    $ = this.cheerio.load(newData.data)
-
-    newTitlesSection.items = this.parser.parseHomePageSection($, this)
-    sectionCallback(newTitlesSection)
+    // Make sure the function completes
+    await Promise.all(promises)
   }
   
 
