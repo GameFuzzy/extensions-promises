@@ -1,7 +1,6 @@
 import {Manga, MangaStatus, Tag, TagSection, Chapter, MangaTile} from 'paperback-extensions-common'
-const cryptoJS = require('crypto')
 import {reverseLangCode} from "./Languages";
-
+const { CryptoJS } = require('./external/crypto.min.js')
 
 const BATOTO_DOMAIN = 'https://www.bato.to'
 
@@ -161,7 +160,7 @@ export class Parser {
             else if(script.includes("const server =")) {
                 let encryptedServer = script.split('const server = ', 2)[1].split(";", 2)[0] ?? ''
                 let batoJS = eval(script.split('const batojs = ', 2)[1].split(";", 2)[0] ?? '').toString()
-                let decryptScript = cryptoJS.extensionCryptoJS(encryptedServer, batoJS).toString()
+                let decryptScript = CryptoJS.AES.decrypt(encryptedServer, batoJS).toString(CryptoJS.enc.Utf8)
                 let server = eval(decryptScript).toString().replace('"', '')
                 let imgArray = JSON.parse(script.split('const images = ', 2)[1].split(";", 2)[0] ?? '') as any
                 if (imgArray != null) {
