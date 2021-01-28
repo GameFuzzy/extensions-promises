@@ -30673,6 +30673,9 @@ class Parser {
             let chapter = $('a', $(obj));
             let chapterId = (_a = chapter.attr('href')) === null || _a === void 0 ? void 0 : _a.replace(`/chapter/`, '');
             let chapNum = $('b', chapter).text().toLowerCase().replace('chapter', '').trim();
+            if (isNaN(Number(chapNum))) {
+                chapNum = `0.${chapNum === null || chapNum === void 0 ? void 0 : chapNum.replace(/^\D+/g, '')}`;
+            }
             let chapName = $(chapter).text().trim().split('\n')[0];
             let chapGroup = (_b = $(chapter).text().trim().split('\n').pop()) === null || _b === void 0 ? void 0 : _b.trim();
             let language = (_c = $('.emoji').attr('data-lang')) !== null && _c !== void 0 ? _c : 'gb';
