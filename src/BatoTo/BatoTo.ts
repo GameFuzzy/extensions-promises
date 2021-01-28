@@ -19,7 +19,7 @@ import {
 const BATOTO_DOMAIN = 'https://bato.to'
 
 export const BatoToInfo: SourceInfo = {
-  version: '1.0.0',
+  version: '1.1.0',
   name: 'Bato.To',
   description: 'Extension that pulls western comics from bato.to',
   author: 'GameFuzzy',
@@ -142,7 +142,7 @@ export class BatoTo extends Source {
 
   async getTags(): Promise<TagSection[] | null> {
     const request = createRequestObject({
-      url: `${BATOTO_DOMAIN}/comic-genres/`,
+      url: `${BATOTO_DOMAIN}/browse`,
       method: 'GET'
     })
 
@@ -158,7 +158,7 @@ export class BatoTo extends Source {
     const sections = [
       {
         request: createRequestObject({
-          url: `${BATOTO_DOMAIN}?sort=create`,
+          url: `${BATOTO_DOMAIN}/browse?sort=create`,
           method: 'GET'
         }),
         section: createHomeSection({
@@ -169,7 +169,7 @@ export class BatoTo extends Source {
       },
       {
         request: createRequestObject({
-          url: `${BATOTO_DOMAIN}?sort=update`,
+          url: `${BATOTO_DOMAIN}/browse?sort=update`,
           method: 'GET'
         }),
         section: createHomeSection({
@@ -180,7 +180,7 @@ export class BatoTo extends Source {
       },
       {
         request: createRequestObject({
-          url: `${BATOTO_DOMAIN}?sort=views_a`,
+          url: `${BATOTO_DOMAIN}/browse?sort=views_a`,
           method: 'GET'
         }),
         section: createHomeSection({
@@ -233,7 +233,7 @@ export class BatoTo extends Source {
     }
 
     let request = createRequestObject({
-      url: `${BATOTO_DOMAIN}${webPage}`,
+      url: `${BATOTO_DOMAIN}/browse${webPage}`,
       method: 'GET'
     })
 
