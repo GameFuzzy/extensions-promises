@@ -153,7 +153,7 @@ __exportStar(require("./base"), exports);
 __exportStar(require("./models"), exports);
 __exportStar(require("./APIWrapper"), exports);
 
-},{"./APIWrapper":1,"./base":3,"./models":22}],5:[function(require,module,exports){
+},{"./APIWrapper":1,"./base":3,"./models":24}],5:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 
@@ -240,6 +240,8 @@ arguments[4][5][0].apply(exports,arguments)
 },{"dup":5}],19:[function(require,module,exports){
 arguments[4][5][0].apply(exports,arguments)
 },{"dup":5}],20:[function(require,module,exports){
+arguments[4][5][0].apply(exports,arguments)
+},{"dup":5}],21:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TagType = void 0;
@@ -257,9 +259,11 @@ var TagType;
     TagType["RED"] = "danger";
 })(TagType = exports.TagType || (exports.TagType = {}));
 
-},{}],21:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 arguments[4][5][0].apply(exports,arguments)
-},{"dup":5}],22:[function(require,module,exports){
+},{"dup":5}],23:[function(require,module,exports){
+arguments[4][5][0].apply(exports,arguments)
+},{"dup":5}],24:[function(require,module,exports){
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
@@ -289,8 +293,10 @@ __exportStar(require("./ResponseObject"), exports);
 __exportStar(require("./RequestManager"), exports);
 __exportStar(require("./RequestHeaders"), exports);
 __exportStar(require("./SourceInfo"), exports);
+__exportStar(require("./TrackObject"), exports);
+__exportStar(require("./OAuth"), exports);
 
-},{"./Chapter":5,"./ChapterDetails":6,"./Constants":7,"./HomeSection":8,"./Languages":9,"./Manga":10,"./MangaTile":11,"./MangaUpdate":12,"./PagedResults":13,"./RequestHeaders":14,"./RequestManager":15,"./RequestObject":16,"./ResponseObject":17,"./SearchRequest":18,"./SourceInfo":19,"./SourceTag":20,"./TagSection":21}],23:[function(require,module,exports){
+},{"./Chapter":5,"./ChapterDetails":6,"./Constants":7,"./HomeSection":8,"./Languages":9,"./Manga":10,"./MangaTile":11,"./MangaUpdate":12,"./OAuth":13,"./PagedResults":14,"./RequestHeaders":15,"./RequestManager":16,"./RequestObject":17,"./ResponseObject":18,"./SearchRequest":19,"./SourceInfo":20,"./SourceTag":21,"./TagSection":22,"./TrackObject":23}],25:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -341,19 +347,13 @@ class MangaPill extends paperback_extensions_common_1.Source {
     }
     getChapters(mangaId) {
         return __awaiter(this, void 0, void 0, function* () {
-            let request = createRequestObject({
-                url: `${MANGAPILL_DOMAIN}/manga/${mangaId}`,
-                method: "GET"
-            });
-            const data = yield this.requestManager.schedule(request, 1);
-            let $ = this.cheerio.load(data.data);
             let chapters = [];
             let pageRequest = createRequestObject({
                 url: `${MANGAPILL_DOMAIN}/manga/${mangaId}`,
                 method: "GET"
             });
             const pageData = yield this.requestManager.schedule(pageRequest, 1);
-            $ = this.cheerio.load(pageData.data);
+            let $ = this.cheerio.load(pageData.data);
             chapters = chapters.concat(this.parser.parseChapterList($, mangaId));
             return this.parser.sortChapters(chapters);
         });
@@ -383,10 +383,10 @@ class MangaPill extends paperback_extensions_common_1.Source {
             });
             let data = yield this.requestManager.schedule(request, 1);
             let $ = this.cheerio.load(data.data);
-            let updatedComics = this.parser.filterUpdatedManga($, time, ids);
-            if (updatedComics.updates.length > 0) {
+            let updatedManga = this.parser.filterUpdatedManga($, time, ids);
+            if (updatedManga.updates.length > 0) {
                 mangaUpdatesFoundCallback(createMangaUpdates({
-                    ids: updatedComics.updates
+                    ids: updatedManga.updates
                 }));
             }
         });
@@ -541,7 +541,7 @@ class MangaPill extends paperback_extensions_common_1.Source {
 }
 exports.MangaPill = MangaPill;
 
-},{"./Parser":24,"paperback-extensions-common":4}],24:[function(require,module,exports){
+},{"./Parser":26,"paperback-extensions-common":4}],26:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Parser = void 0;
@@ -812,5 +812,5 @@ class Parser {
 }
 exports.Parser = Parser;
 
-},{"paperback-extensions-common":4}]},{},[23])(23)
+},{"paperback-extensions-common":4}]},{},[25])(25)
 });
