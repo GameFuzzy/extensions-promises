@@ -1,6 +1,7 @@
 import {Manga, MangaStatus, Tag, TagSection, Chapter, MangaTile} from 'paperback-extensions-common'
-import {transpile} from 'typescript'
+const cryptoJS = require('crypto')
 import {reverseLangCode} from "./Languages";
+
 
 const BATOTO_DOMAIN = 'https://www.bato.to'
 
@@ -136,7 +137,7 @@ export class Parser {
     }
 
 
-    async parseChapterDetails($: CheerioSelector, cryptoJS: any) : Promise<string[]> {
+     parseChapterDetails($: CheerioSelector) : string[] {
         let pages: string[] = []
         // Get all of the pages
 
@@ -160,7 +161,7 @@ export class Parser {
             else if(script.includes("const server =")) {
                 let encryptedServer = script.split('const server = ', 2)[1].split(";", 2)[0] ?? ''
                 let batoJS = eval(script.split('const batojs = ', 2)[1].split(";", 2)[0] ?? '').toString()
-                let decryptScript = await cryptoJS() + `CryptoJS.AES.decrypt(${encryptedServer}, "${batoJS}").toString(CryptoJS.enc.Utf8);`
+                let decryptScript = cryptoJS.extensionCryptoJS(encryptedServer, batoJS).toString()
                 let server = eval(decryptScript).toString().replace('"', '')
                 let imgArray = JSON.parse(script.split('const images = ', 2)[1].split(";", 2)[0] ?? '') as any
                 if (imgArray != null) {

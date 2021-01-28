@@ -18,7 +18,7 @@ import {
 
 const BATOTO_DOMAIN = 'https://bato.to'
 
-export const ComicExtraInfo: SourceInfo = {
+export const BatoToInfo: SourceInfo = {
   version: '1.0.0',
   name: 'Bato.To',
   description: 'Extension that pulls western comics from Bato.To',
@@ -77,7 +77,7 @@ export class BatoTo extends Source {
     let data = await this.requestManager.schedule(request, 1)
 
     let $ = this.cheerio.load(data.data, {xmlMode: false})
-    let pages : string[] = await this.parser.parseChapterDetails($, this.cryptoJS)
+    let pages : string[] = this.parser.parseChapterDetails($)
 
     return createChapterDetails({
       id: chapterId,
@@ -271,15 +271,6 @@ export class BatoTo extends Source {
       url: `${BATOTO_DOMAIN}`,
       method: 'GET',
     })
-  }
-
-  async cryptoJS(): Promise<string | null> {
-    let request = createRequestObject({
-      url: `https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.0.0/crypto-js.min.js`,
-      method: 'GET'
-    })
-    const data = await this.requestManager.schedule(request, 1)
-    return this.cheerio.load(data.data)('body').html()
   }
 
 }
