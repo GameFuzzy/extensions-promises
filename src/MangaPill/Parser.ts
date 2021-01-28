@@ -1,4 +1,4 @@
-import {Manga, MangaStatus, Tag, TagSection, LanguageCode, Chapter, ChapterDetails, MangaTile} from 'paperback-extensions-common'
+import {Manga, MangaStatus, Tag, TagSection, LanguageCode, Chapter, MangaTile} from 'paperback-extensions-common'
 
 const MANGAPILL_DOMAIN = 'https://www.mangapill.com'
 

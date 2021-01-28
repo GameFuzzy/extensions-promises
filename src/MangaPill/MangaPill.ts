@@ -54,21 +54,13 @@ export class MangaPill extends Source {
 
 
   async getChapters(mangaId: string): Promise<Chapter[]> {
-    let request = createRequestObject({
-      url: `${MANGAPILL_DOMAIN}/manga/${mangaId}`,
-      method: "GET"
-    })
-
-    const data = await this.requestManager.schedule(request, 1)
-    let $ = this.cheerio.load(data.data)
-
     let chapters: Chapter[] = []
       let pageRequest = createRequestObject({
         url: `${MANGAPILL_DOMAIN}/manga/${mangaId}`,
         method: "GET"
       })
       const pageData = await this.requestManager.schedule(pageRequest, 1)
-      $ = this.cheerio.load(pageData.data)
+      let $ = this.cheerio.load(pageData.data)
       chapters = chapters.concat(this.parser.parseChapterList($, mangaId))
     
     return this.parser.sortChapters(chapters)
@@ -104,11 +96,11 @@ export class MangaPill extends Source {
       let data = await this.requestManager.schedule(request, 1)
       let $ = this.cheerio.load(data.data)
 
-      let updatedComics = this.parser.filterUpdatedManga($, time, ids)
+      let updatedManga = this.parser.filterUpdatedManga($, time, ids)
 
-      if (updatedComics.updates.length > 0) {
+      if (updatedManga.updates.length > 0) {
       mangaUpdatesFoundCallback(createMangaUpdates({
-        ids: updatedComics.updates
+        ids: updatedManga.updates
       }))
       }
     

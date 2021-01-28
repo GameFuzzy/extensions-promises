@@ -16,17 +16,17 @@ import {
   Parser,
 } from './Parser'
 
-const COMICEXTRA_DOMAIN = 'https://www.comicextra.com'
+const BATOTO_DOMAIN = 'https://bato.to'
 
 export const ComicExtraInfo: SourceInfo = {
-  version: '1.5.2',
-  name: 'ComicExtra',
-  description: 'Extension that pulls western comics from BatoTo.com',
+  version: '1.0.0',
+  name: 'Bato.To',
+  description: 'Extension that pulls western comics from Bato.To',
   author: 'GameFuzzy',
   authorWebsite: 'http://github.com/gamefuzzy',
   icon: "icon.png",
   hentaiSource: false,
-  websiteBaseURL: COMICEXTRA_DOMAIN,
+  websiteBaseURL: BATOTO_DOMAIN,
   sourceTags: [
     {
       text: "Notifications",
@@ -35,14 +35,14 @@ export const ComicExtraInfo: SourceInfo = {
   ]
 }
 
-export class ComicExtra extends Source {
+export class BatoTo extends Source {
   parser = new Parser()
-  getMangaShareUrl(mangaId: string): string | null { return `${COMICEXTRA_DOMAIN}/comic/${mangaId}` }
+  getMangaShareUrl(mangaId: string): string | null { return `${BATOTO_DOMAIN}/series/${mangaId}` }
 
   async getMangaDetails(mangaId: string): Promise<Manga> {
 
     let request = createRequestObject({
-      url: `${COMICEXTRA_DOMAIN}/comic/${mangaId}`,
+      url: `${BATOTO_DOMAIN}/series/${mangaId}`,
       method: 'GET'
     })
     const data = await this.requestManager.schedule(request, 1)
@@ -54,30 +54,15 @@ export class ComicExtra extends Source {
 
 
   async getChapters(mangaId: string): Promise<Chapter[]> {
-    let request = createRequestObject({
-      url: `${COMICEXTRA_DOMAIN}/comic/${mangaId}`,
+    let chapters: Chapter[] = []
+    let pageRequest = createRequestObject({
+      url: `${BATOTO_DOMAIN}/series/${mangaId}`,
       method: "GET"
     })
+    const pageData = await this.requestManager.schedule(pageRequest, 1)
+    let $ = this.cheerio.load(pageData.data)
+    chapters = chapters.concat(this.parser.parseChapterList($, mangaId, this))
 
-    const data = await this.requestManager.schedule(request, 1)
-    let $ = this.cheerio.load(data.data)
-
-    let chapters: Chapter[] = []
-    let pagesLeft = $('a', $('.general-nav')).toArray().length
-    pagesLeft = pagesLeft == 0 ? 1 : pagesLeft
-
-    while(pagesLeft > 0)
-    {
-      let pageRequest = createRequestObject({
-        url: `${COMICEXTRA_DOMAIN}/comic/${mangaId}/${pagesLeft}`,
-        method: "GET"
-      })
-      const pageData = await this.requestManager.schedule(pageRequest, 1)
-      $ = this.cheerio.load(pageData.data)
-      chapters = chapters.concat(this.parser.parseChapterList($, mangaId))
-      pagesLeft--
-    }
-    
     return this.parser.sortChapters(chapters)
   }
 
@@ -85,44 +70,14 @@ export class ComicExtra extends Source {
   async getChapterDetails(mangaId: string, chapterId: string): Promise<ChapterDetails> {
 
     let request = createRequestObject({
-      url: `${COMICEXTRA_DOMAIN}/${mangaId}/${chapterId}/full`,
+      url: `${BATOTO_DOMAIN}/chapter/${chapterId}`,
       method: 'GET',
     })
 
     let data = await this.requestManager.schedule(request, 1)
 
-    let $ = this.cheerio.load(data.data)
-    let unFilteredPages = this.parser.parseChapterDetails($)
-    let pages : string[] = []
-
-    const fallback = 'https://cdn.discordapp.com/attachments/549267639881695289/801836271407726632/fallback.png'
-    // Fallback if empty
-    if(unFilteredPages.length < 1) {
-      pages.push(fallback)
-    } 
-    else {
-      // Filter out 404 status codes
-        request = createRequestObject({
-          url: `${unFilteredPages[0]}`,
-          method: 'HEAD',
-        })
-        // Try/catch is because the testing framework throws an error on 404
-        try{
-          data = await this.requestManager.schedule(request, 1)
-          if(data.status == 404) {
-            pages.push(fallback)
-          }
-          else {
-            for(let page of unFilteredPages) {
-              pages.push(page)
-            }
-          }
-        }
-        catch {
-          pages.push(fallback)
-        }
-  
-    }
+    let $ = this.cheerio.load(data.data, {xmlMode: false})
+    let pages : string[] = await this.parser.parseChapterDetails($, this.cryptoJS)
 
     return createChapterDetails({
       id: chapterId,
@@ -140,21 +95,21 @@ export class ComicExtra extends Source {
     while (loadNextPage) {
 
       let request = createRequestObject({
-        url: `${COMICEXTRA_DOMAIN}/comic-updates/${String(currPageNum)}`,
+        url: `${BATOTO_DOMAIN}/browse/?sort=update&page=${String(currPageNum)}`,
         method: 'GET'
       })
 
       let data = await this.requestManager.schedule(request, 1)
       let $ = this.cheerio.load(data.data)
 
-      let updatedComics = this.parser.filterUpdatedManga($, time, ids)
-      loadNextPage = updatedComics.loadNextPage
+      let updatedManga = this.parser.filterUpdatedManga($, time, ids, this)
+      loadNextPage = updatedManga.loadNextPage
       if (loadNextPage) {
         currPageNum++
       }
-      if (updatedComics.updates.length > 0) {
+      if (updatedManga.updates.length > 0) {
       mangaUpdatesFoundCallback(createMangaUpdates({
-        ids: updatedComics.updates
+        ids: updatedManga.updates
       }))
       }
     }
@@ -164,14 +119,14 @@ export class ComicExtra extends Source {
     let page : number = metadata?.page ?? 1
 
     let request = createRequestObject({
-      url: `${COMICEXTRA_DOMAIN}/comic-search`,
+      url: `${BATOTO_DOMAIN}/search`,
       method: "GET",
-      param: `?key=${query.title?.replaceAll(' ', '+')}&page=${page}`
+      param: `?word=${query.title?.replaceAll(' ', '+')}&page=${page}`
     })
 
     let data = await this.requestManager.schedule(request, 1)
     let $ = this.cheerio.load(data.data)
-    let manga = this.parser.parseSearchResults($)
+    let manga = this.parser.parseSearchResults($, this)
     let mData = undefined
     if (!this.parser.isLastPage($)) {
       mData = {page: (page + 1)}
@@ -187,7 +142,7 @@ export class ComicExtra extends Source {
 
   async getTags(): Promise<TagSection[] | null> {
     const request = createRequestObject({
-      url: `${COMICEXTRA_DOMAIN}/comic-genres/`,
+      url: `${BATOTO_DOMAIN}/comic-genres/`,
       method: 'GET'
     })
 
@@ -201,45 +156,45 @@ export class ComicExtra extends Source {
   async getHomePageSections(sectionCallback: (section: HomeSection) => void): Promise<void> {
 
     // Let the app know what the homesections are without filling in the data
-    let popularSection = createHomeSection({ id: '2', title: 'POPULAR COMICS', view_more: true })
-    let recentSection = createHomeSection({ id: '1', title: 'RECENTLY ADDED COMICS', view_more: true })
-    let newTitlesSection = createHomeSection({ id: '0', title: 'LATEST COMICS', view_more: true })
+    let popularSection = createHomeSection({ id: '2', title: 'POPULAR', view_more: true })
+    let recentSection = createHomeSection({ id: '1', title: 'RECENTLY UPDATED', view_more: true })
+    let newTitlesSection = createHomeSection({ id: '0', title: 'RECENTLY ADDED', view_more: true })
     sectionCallback(popularSection)
     sectionCallback(recentSection)
     sectionCallback(newTitlesSection)
 
     // Make the request and fill out available titles
     let request = createRequestObject({
-      url: `${COMICEXTRA_DOMAIN}/popular-comic`,
+      url: `${BATOTO_DOMAIN}?sort=views_a`,
       method: 'GET'
     })
 
     const popularData = await this.requestManager.schedule(request, 1)
     let $ = this.cheerio.load(popularData.data)
 
-    popularSection.items = this.parser.parseHomePageSection($)
+    popularSection.items = this.parser.parseHomePageSection($, this)
     sectionCallback(popularSection)
 
     request = createRequestObject({
-      url: `${COMICEXTRA_DOMAIN}/recent-comic`,
+      url: `${BATOTO_DOMAIN}?sort=update`,
       method: 'GET'
     })
 
     const recentData = await this.requestManager.schedule(request, 1)
     $ = this.cheerio.load(recentData.data)
 
-    recentSection.items = this.parser.parseHomePageSection($)
+    recentSection.items = this.parser.parseHomePageSection($, this)
     sectionCallback(recentSection)
 
     request = createRequestObject({
-      url: `${COMICEXTRA_DOMAIN}/new-comic`,
+      url: `${BATOTO_DOMAIN}?sort=create`,
       method: 'GET'
     })
 
     const newData = await this.requestManager.schedule(request, 1)
     $ = this.cheerio.load(newData.data)
 
-    newTitlesSection.items = this.parser.parseHomePageSection($)
+    newTitlesSection.items = this.parser.parseHomePageSection($, this)
     sectionCallback(newTitlesSection)
   }
   
@@ -249,28 +204,28 @@ export class ComicExtra extends Source {
     let page : number = metadata?.page ?? 1
     switch (homepageSectionId) {
       case '0': {
-        webPage = `/new-comic/${page}`
+        webPage = `?sort=views_a&page=${page}`
         break
       }
       case '1': {
-        webPage = `/recent-comic/${page}`
+        webPage = `?sort=update&page=${page}`
         break
       }
       case '2': {
-        webPage = `/popular-comic/${page}`
+        webPage = `?sort=create&page=${page}`
         break
       }
       default: return Promise.resolve(null)
     }
 
     let request = createRequestObject({
-      url: `${COMICEXTRA_DOMAIN}${webPage}`,
+      url: `${BATOTO_DOMAIN}${webPage}`,
       method: 'GET'
     })
 
     let data = await this.requestManager.schedule(request, 1)
     let $ = this.cheerio.load(data.data)
-    let manga = this.parser.parseHomePageSection($)
+    let manga = this.parser.parseHomePageSection($, this)
     let mData
     if (!this.parser.isLastPage($)) {
       mData = {page: (page + 1)}
@@ -283,6 +238,48 @@ export class ComicExtra extends Source {
       results: manga,
       metadata: mData
     })
+  }
+
+  protected convertTime(timeAgo: string): Date {
+    let time: Date
+    let trimmed: number = Number((/\d*/.exec(timeAgo) ?? [])[0])
+    trimmed = (trimmed == 0 && timeAgo.includes('a')) ? 1 : trimmed
+    if (timeAgo.includes('sec') || timeAgo.includes('secs')) {
+      time = new Date(Date.now() - trimmed * 1000)
+    }
+    if (timeAgo.includes('min') || timeAgo.includes('mins')) {
+      time = new Date(Date.now() - trimmed * 60000)
+    }
+    else if (timeAgo.includes('hour') || timeAgo.includes('hours')) {
+      time = new Date(Date.now() - trimmed * 3600000)
+    }
+    else if (timeAgo.includes('day') || timeAgo.includes('days')) {
+      time = new Date(Date.now() - trimmed * 86400000)
+    }
+    else if (timeAgo.includes('year') || timeAgo.includes('years')) {
+      time = new Date(Date.now() - trimmed * 31556952000)
+    }
+    else {
+      time = new Date(Date.now())
+    }
+
+    return time
+  }
+
+  cloudflareBypassRequest() {
+    return createRequestObject({
+      url: `${BATOTO_DOMAIN}`,
+      method: 'GET',
+    })
+  }
+
+  async cryptoJS(): Promise<string | null> {
+    let request = createRequestObject({
+      url: `https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.0.0/crypto-js.min.js`,
+      method: 'GET'
+    })
+    const data = await this.requestManager.schedule(request, 1)
+    return this.cheerio.load(data.data)('body').html()
   }
 
 }
