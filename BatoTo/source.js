@@ -30273,7 +30273,7 @@ const paperback_extensions_common_1 = require("paperback-extensions-common");
 const Parser_1 = require("./Parser");
 const BATOTO_DOMAIN = 'https://bato.to';
 exports.BatoToInfo = {
-    version: '1.0.0',
+    version: '1.1.0',
     name: 'Bato.To',
     description: 'Extension that pulls western comics from bato.to',
     author: 'GameFuzzy',
@@ -30384,7 +30384,7 @@ class BatoTo extends paperback_extensions_common_1.Source {
     getTags() {
         return __awaiter(this, void 0, void 0, function* () {
             const request = createRequestObject({
-                url: `${BATOTO_DOMAIN}/comic-genres/`,
+                url: `${BATOTO_DOMAIN}/browse`,
                 method: 'GET'
             });
             const data = yield this.requestManager.schedule(request, 1);
@@ -30397,7 +30397,7 @@ class BatoTo extends paperback_extensions_common_1.Source {
             const sections = [
                 {
                     request: createRequestObject({
-                        url: `${BATOTO_DOMAIN}?sort=create`,
+                        url: `${BATOTO_DOMAIN}/browse?sort=create`,
                         method: 'GET'
                     }),
                     section: createHomeSection({
@@ -30408,7 +30408,7 @@ class BatoTo extends paperback_extensions_common_1.Source {
                 },
                 {
                     request: createRequestObject({
-                        url: `${BATOTO_DOMAIN}?sort=update`,
+                        url: `${BATOTO_DOMAIN}/browse?sort=update`,
                         method: 'GET'
                     }),
                     section: createHomeSection({
@@ -30419,7 +30419,7 @@ class BatoTo extends paperback_extensions_common_1.Source {
                 },
                 {
                     request: createRequestObject({
-                        url: `${BATOTO_DOMAIN}?sort=views_a`,
+                        url: `${BATOTO_DOMAIN}/browse?sort=views_a`,
                         method: 'GET'
                     }),
                     section: createHomeSection({
@@ -30466,7 +30466,7 @@ class BatoTo extends paperback_extensions_common_1.Source {
                 default: return Promise.resolve(null);
             }
             let request = createRequestObject({
-                url: `${BATOTO_DOMAIN}${webPage}`,
+                url: `${BATOTO_DOMAIN}/browse${webPage}`,
                 method: 'GET'
             });
             let data = yield this.requestManager.schedule(request, 1);
