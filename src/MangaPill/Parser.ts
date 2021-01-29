@@ -81,24 +81,26 @@ export class Parser {
     
     let chapters: Chapter[] = []
 
-      for(let obj of $('option', $('select[name=view-chapter]')).toArray()) {
-        let chapterId = $(obj).attr('value')
-        if(chapterId == 'Read Chapters') {
-          continue
-        }
-        let chapNum = $(obj).text().trim()?.replace(`Chapter `, '')
-        if(isNaN(Number(chapNum))){
-          chapNum = `0.${chapNum?.replace( /^\D+/g, '')}`
-        }
-        let chapName = $(obj).text()
-        if (typeof chapterId === 'undefined') continue
-        chapters.push(createChapter({
-            id: chapterId,
-            mangaId: mangaId,
-            chapNum: Number(chapNum),
-            langCode: LanguageCode.ENGLISH,
-            name: chapName
-        }))
+        for(let obj of $('option', $('select[name=view-chapter]')).toArray()) {
+            let chapterId = $(obj).attr('value')
+            if(chapterId == 'Read Chapters') {
+                continue
+            }
+            let chapNum = $(obj).text().trim()?.replace(`Chapter `, '')
+            // NaN check
+            if(isNaN(Number(chapNum))){
+                chapNum = `${chapNum.replace( /^\D+/, '') ?? '0'}`.toLowerCase().split('v')[0]
+                if(isNaN(Number(chapNum))) chapNum = '0'
+            }
+            let chapName = $(obj).text()
+            if (typeof chapterId === 'undefined') continue
+            chapters.push(createChapter({
+                id: chapterId,
+                mangaId: mangaId,
+                chapNum: Number(chapNum),
+                langCode: LanguageCode.ENGLISH,
+                name: chapName
+            }))
     }
     return chapters
 }

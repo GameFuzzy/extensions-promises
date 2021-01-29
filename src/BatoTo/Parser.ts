@@ -54,7 +54,7 @@ export class Parser {
                 }
                 case 3: {i++; continue}
                 case 4: {
-                    // Comic Status
+                    // Status
                     if ($(itemSpan).text().toLowerCase().includes("ongoing")) {
                       status = MangaStatus.ONGOING
                     }
@@ -104,11 +104,16 @@ export class Parser {
         for(let obj of $('.item', $('.main')).toArray()) {
             let chapter: Cheerio = $('a', $(obj))
             let chapterId = chapter.attr('href')?.replace(`/chapter/`, '')
-            let chapNum = $('b', chapter).text().toLowerCase().replace('chapter ', '').trim()
+            let chapNum = $('b', chapter).text().toLowerCase().replace('chapter', '').trim()
+            let chapName = $('span', $(chapter)).first().text().replace(':', '').trim()
+            // NaN check
             if(isNaN(Number(chapNum))){
-            chapNum = `0.${chapNum.replace( /^\D+/g, '') ?? '0'}`
-            }
-            let chapName = $(chapter).text().trim().split('\n')[0]
+                chapNum = `${chapNum.replace( /^\D+/, '') ?? '0'}`.toLowerCase().split('v')[0]
+                if(isNaN(Number(chapNum))){
+                    chapNum = '0'
+                    chapName = $(chapter).text().trim().split('\n')[0]
+                    }
+                }
             let chapGroup = $(chapter).text().trim().split('\n').pop()?.trim()
             let language = $('.emoji').attr('data-lang') ?? 'gb'
             let time = source.convertTime($('i', $(obj)).text())
