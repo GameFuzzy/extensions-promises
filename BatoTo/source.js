@@ -30273,7 +30273,7 @@ const paperback_extensions_common_1 = require("paperback-extensions-common");
 const Parser_1 = require("./Parser");
 const BATOTO_DOMAIN = 'https://bato.to';
 exports.BatoToInfo = {
-    version: '1.1.0',
+    version: '1.1.2',
     name: 'Bato.To',
     description: 'Extension that pulls western comics from bato.to',
     author: 'GameFuzzy',
@@ -30624,7 +30624,7 @@ class Parser {
                     continue;
                 }
                 case 4: {
-                    // Comic Status
+                    // Status
                     if ($(itemSpan).text().toLowerCase().includes("ongoing")) {
                         status = paperback_extensions_common_1.MangaStatus.ONGOING;
                     }
@@ -30672,11 +30672,16 @@ class Parser {
         for (let obj of $('.item', $('.main')).toArray()) {
             let chapter = $('a', $(obj));
             let chapterId = (_a = chapter.attr('href')) === null || _a === void 0 ? void 0 : _a.replace(`/chapter/`, '');
-            let chapNum = $('b', chapter).text().toLowerCase().replace('chapter ', '').trim();
+            let chapNum = $('b', chapter).text().toLowerCase().replace('chapter', '').trim();
+            let chapName = $('span', $(chapter)).first().text().replace(':', '').trim();
+            // NaN check
             if (isNaN(Number(chapNum))) {
-                chapNum = `0.${(_b = chapNum.replace(/^\D+/g, '')) !== null && _b !== void 0 ? _b : '0'}`;
+                chapNum = `${(_b = chapNum.replace(/^\D+/, '')) !== null && _b !== void 0 ? _b : '0'}`.toLowerCase().split('v')[0];
+                if (isNaN(Number(chapNum))) {
+                    chapNum = '0';
+                    chapName = $(chapter).text().trim().split('\n')[0];
+                }
             }
-            let chapName = $(chapter).text().trim().split('\n')[0];
             let chapGroup = (_c = $(chapter).text().trim().split('\n').pop()) === null || _c === void 0 ? void 0 : _c.trim();
             let language = (_d = $('.emoji').attr('data-lang')) !== null && _d !== void 0 ? _d : 'gb';
             let time = source.convertTime($('i', $(obj)).text());

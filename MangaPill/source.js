@@ -313,7 +313,7 @@ const paperback_extensions_common_1 = require("paperback-extensions-common");
 const Parser_1 = require("./Parser");
 const MANGAPILL_DOMAIN = 'https://www.mangapill.com';
 exports.MangaPillInfo = {
-    version: '1.0.6',
+    version: '1.0.7',
     name: 'MangaPill',
     description: 'Extension that pulls manga from mangapill.com. It has a lot of officially translated manga but can sometimes miss manga notifications',
     author: 'GameFuzzy',
@@ -606,7 +606,7 @@ class Parser {
         });
     }
     parseChapterList($, mangaId) {
-        var _a;
+        var _a, _b;
         let chapters = [];
         for (let obj of $('option', $('select[name=view-chapter]')).toArray()) {
             let chapterId = $(obj).attr('value');
@@ -614,8 +614,11 @@ class Parser {
                 continue;
             }
             let chapNum = (_a = $(obj).text().trim()) === null || _a === void 0 ? void 0 : _a.replace(`Chapter `, '');
+            // NaN check
             if (isNaN(Number(chapNum))) {
-                chapNum = `0.${chapNum === null || chapNum === void 0 ? void 0 : chapNum.replace(/^\D+/g, '')}`;
+                chapNum = `${(_b = chapNum.replace(/^\D+/, '')) !== null && _b !== void 0 ? _b : '0'}`.toLowerCase().split('v')[0];
+                if (isNaN(Number(chapNum)))
+                    chapNum = '0';
             }
             let chapName = $(obj).text();
             if (typeof chapterId === 'undefined')
