@@ -102,25 +102,28 @@ export class Parser {
         let chapters: Chapter[] = []
 
         for(let obj of $('.item', $('.main')).toArray()) {
-            let chapter: Cheerio = $('a', $(obj))
-            let chapterId = chapter.attr('href')?.replace(`/chapter/`, '')
-            let chapNum = $('b', chapter).text().toLowerCase().replace('chapter', '').trim()
-            let chapName = $('span', $(chapter)).first().text().replace(':', '').trim()
+            let chapterTile: Cheerio = $('a', $(obj))
+            let chapterId = chapterTile.attr('href')?.replace(`/chapter/`, '')
+            let chapName = $('span', $(chapterTile)).first().text().replace(':', '').trim()
+            let chapter = $('b', chapterTile).text().toLowerCase().split('chapter')
+            let chapNum = chapter[0].trim()
+            let volume = Number(chapter[1].replace('volume', '').trim())
             // NaN check
             if(isNaN(Number(chapNum))){
-                chapNum = `${chapNum.replace( /^\D+/, '') ?? '0'}`.toLowerCase().split('v')[0]
+                chapNum = `${chapNum.replace( /^\D+/, '') ?? '0'}`.split(/^\D+/)[0]
                 if(isNaN(Number(chapNum))){
                     chapNum = '0'
-                    chapName = $(chapter).text().trim().split('\n')[0]
+                    chapName = $(chapterTile).text().trim().split('\n')[0]
                     }
                 }
-            let chapGroup = $(chapter).text().trim().split('\n').pop()?.trim()
+            let chapGroup = $(chapterTile).text().trim().split('\n').pop()?.trim()
             let language = $('.emoji').attr('data-lang') ?? 'gb'
             let time = source.convertTime($('i', $(obj)).text())
             if (typeof chapterId === 'undefined') continue
             chapters.push(createChapter({
                 id: chapterId,
                 mangaId: mangaId,
+                volume: Number.isNaN(volume) ? 0 : volume,
                 chapNum: Number(chapNum),
                 group: chapGroup,
                 langCode: reverseLangCode[language] ?? reverseLangCode['_unknown'],
@@ -231,7 +234,6 @@ export class Parser {
             let time = source.convertTime($('i', $(obj)).text().trim())
             let image = $('img', $(obj)).attr('src')
 
-            if(titleText == "Not found") continue // If a search result has no data, the only cartoon-box object has "Not Found" as title. Ignore.
             if (typeof id === 'undefined' || typeof image === 'undefined') continue
             if(!collectedIds.includes(id)) {
             mangaTiles.push(createMangaTile({

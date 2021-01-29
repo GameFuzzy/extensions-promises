@@ -94,6 +94,9 @@ export class Parser {
         let chapNum = chapterId?.replace(`chapter-`, '').trim()
         if(isNaN(Number(chapNum))){
           chapNum = `0.${chapNum?.replace( /^\D+/g, '')}`
+            if(isNaN(Number(chapNum))){
+                chapNum = '0'
+            }
         }
         let chapName = $('a', $(obj)).text()
         let time = $($('td', $(obj)).toArray()[1]).text()

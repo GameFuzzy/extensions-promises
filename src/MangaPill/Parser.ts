@@ -88,11 +88,14 @@ export class Parser {
             }
             let chapNum = $(obj).text().trim()?.replace(`Chapter `, '')
             // NaN check
-            if(isNaN(Number(chapNum))){
-                chapNum = `${chapNum.replace( /^\D+/, '') ?? '0'}`.toLowerCase().split('v')[0]
-                if(isNaN(Number(chapNum))) chapNum = '0'
-            }
             let chapName = $(obj).text()
+            if(isNaN(Number(chapNum))){
+                chapNum = `${chapNum.replace( /^\D+/, '') ?? '0'}`.split(/^\D+/)[0]
+                if(isNaN(Number(chapNum))){
+                    chapNum = '0'
+                }
+            }
+
             if (typeof chapterId === 'undefined') continue
             chapters.push(createChapter({
                 id: chapterId,
