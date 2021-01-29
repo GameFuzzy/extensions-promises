@@ -30670,19 +30670,21 @@ class Parser {
         var _a, _b, _c, _d, _e;
         let chapters = [];
         for (let obj of $('.item', $('.main')).toArray()) {
-            let chapter = $('a', $(obj));
-            let chapterId = (_a = chapter.attr('href')) === null || _a === void 0 ? void 0 : _a.replace(`/chapter/`, '');
-            let chapNum = $('b', chapter).text().toLowerCase().replace('chapter', '').trim();
-            let chapName = $('span', $(chapter)).first().text().replace(':', '').trim();
+            let chapterTile = $('a', $(obj));
+            let chapterId = (_a = chapterTile.attr('href')) === null || _a === void 0 ? void 0 : _a.replace(`/chapter/`, '');
+            let chapName = $('span', $(chapterTile)).first().text().replace(':', '').trim();
+            let chapter = $('b', chapterTile).text().toLowerCase().split('chapter');
+            let chapNum = chapter[0].trim();
+            let volume = Number(chapter[1].replace('volume', '').trim());
             // NaN check
             if (isNaN(Number(chapNum))) {
-                chapNum = `${(_b = chapNum.replace(/^\D+/, '')) !== null && _b !== void 0 ? _b : '0'}`.toLowerCase().split('v')[0];
+                chapNum = `${(_b = chapNum.replace(/^\D+/, '')) !== null && _b !== void 0 ? _b : '0'}`.split(/^\D+/)[0];
                 if (isNaN(Number(chapNum))) {
                     chapNum = '0';
-                    chapName = $(chapter).text().trim().split('\n')[0];
+                    chapName = $(chapterTile).text().trim().split('\n')[0];
                 }
             }
-            let chapGroup = (_c = $(chapter).text().trim().split('\n').pop()) === null || _c === void 0 ? void 0 : _c.trim();
+            let chapGroup = (_c = $(chapterTile).text().trim().split('\n').pop()) === null || _c === void 0 ? void 0 : _c.trim();
             let language = (_d = $('.emoji').attr('data-lang')) !== null && _d !== void 0 ? _d : 'gb';
             let time = source.convertTime($('i', $(obj)).text());
             if (typeof chapterId === 'undefined')
@@ -30690,6 +30692,7 @@ class Parser {
             chapters.push(createChapter({
                 id: chapterId,
                 mangaId: mangaId,
+                volume: Number.isNaN(volume) ? 0 : volume,
                 chapNum: Number(chapNum),
                 group: chapGroup,
                 langCode: (_e = Languages_1.reverseLangCode[language]) !== null && _e !== void 0 ? _e : Languages_1.reverseLangCode['_unknown'],
@@ -30794,8 +30797,6 @@ class Parser {
             let subtitle = $('.visited', $(obj)).text().trim();
             let time = source.convertTime($('i', $(obj)).text().trim());
             let image = $('img', $(obj)).attr('src');
-            if (titleText == "Not found")
-                continue; // If a search result has no data, the only cartoon-box object has "Not Found" as title. Ignore.
             if (typeof id === 'undefined' || typeof image === 'undefined')
                 continue;
             if (!collectedIds.includes(id)) {

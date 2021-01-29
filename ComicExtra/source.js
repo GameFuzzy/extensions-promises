@@ -641,6 +641,9 @@ class Parser {
             let chapNum = chapterId === null || chapterId === void 0 ? void 0 : chapterId.replace(`chapter-`, '').trim();
             if (isNaN(Number(chapNum))) {
                 chapNum = `0.${chapNum === null || chapNum === void 0 ? void 0 : chapNum.replace(/^\D+/g, '')}`;
+                if (isNaN(Number(chapNum))) {
+                    chapNum = '0';
+                }
             }
             let chapName = $('a', $(obj)).text();
             let time = $($('td', $(obj)).toArray()[1]).text();

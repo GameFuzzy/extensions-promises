@@ -615,12 +615,13 @@ class Parser {
             }
             let chapNum = (_a = $(obj).text().trim()) === null || _a === void 0 ? void 0 : _a.replace(`Chapter `, '');
             // NaN check
-            if (isNaN(Number(chapNum))) {
-                chapNum = `${(_b = chapNum.replace(/^\D+/, '')) !== null && _b !== void 0 ? _b : '0'}`.toLowerCase().split('v')[0];
-                if (isNaN(Number(chapNum)))
-                    chapNum = '0';
-            }
             let chapName = $(obj).text();
+            if (isNaN(Number(chapNum))) {
+                chapNum = `${(_b = chapNum.replace(/^\D+/, '')) !== null && _b !== void 0 ? _b : '0'}`.split(/^\D+/)[0];
+                if (isNaN(Number(chapNum))) {
+                    chapNum = '0';
+                }
+            }
             if (typeof chapterId === 'undefined')
                 continue;
             chapters.push(createChapter({
