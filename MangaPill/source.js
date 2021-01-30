@@ -749,12 +749,7 @@ class Parser {
       for(let obj of $('div[class=relative]').toArray()) {
         let href = ($('a', $(obj)).attr('href') ?? '')
         let id = href.split('-')[0].split('/').pop() + '/' + href.split('/').pop()?.split('-chapter')[0].trim()
-        let encodedTitleText = $('.text-sm', $('.text-color-text-fire-ch', $('div', $(obj)))).text()
-        
-         // Decode title
-         let titleText = encodedTitleText.replace(/&#(\d+);/g, function(match, dec) {
-           return String.fromCharCode(dec);
-         })
+        let titleText = this.decodeHTMLEntity($('.text-sm', $('.text-color-text-fire-ch', $('div', $(obj)))).text())
 
         let image = $('img', $('div', $(obj))).attr('data-src')
 
