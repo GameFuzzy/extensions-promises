@@ -95,7 +95,7 @@ export class Parser {
             titles: titles,
             image: image ?? '',
             status: status,
-            author: this.decodeHTMLEntity(author),
+            author: this.decodeHTMLEntity(author ?? ''),
             tags: tagSections,
             desc: this.decodeHTMLEntity(summary),
             lastUpdate: released,
@@ -133,7 +133,7 @@ export class Parser {
                 mangaId: mangaId,
                 volume: Number.isNaN(volume) ? 0 : volume,
                 chapNum: Number(chapNum),
-                group: this.decodeHTMLEntity(chapGroup),
+                group: this.decodeHTMLEntity(chapGroup ?? ''),
                 langCode: reverseLangCode[language] ?? reverseLangCode['_unknown'],
                 name: this.decodeHTMLEntity(chapName),
                 time: new Date(time)
@@ -293,8 +293,8 @@ export class Parser {
     }
 
     decodeHTMLEntity(str: string): string {
-        return str?.replace(/&#(\d+);/g, function (match, dec) {
-            return String?.fromCharCode(dec);
+        return str.replace(/&#(\d+);/g, function (match, dec) {
+            return String.fromCharCode(dec);
         })
     }
 
