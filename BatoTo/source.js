@@ -30851,7 +30851,7 @@ class Parser {
         return $('.page-item').last().hasClass('disabled');
     }
     decodeHTMLEntity(str) {
-        return str.replace(/&#(\d+);/g, function (match, dec) {
+        return str === null || str === void 0 ? void 0 : str.replace(/&#(\d+);/g, function (match, dec) {
             return String.fromCharCode(dec);
         });
     }
