@@ -30671,25 +30671,27 @@ class Parser {
         });
     }
     parseChapterList($, mangaId, source) {
-        var _a, _b, _c, _d, _e, _f, _g;
+        var _a, _b, _c, _d, _e, _f, _g, _h;
         let chapters = [];
         for (let obj of $('.item', $('.main')).toArray()) {
             let chapterTile = $('a', $(obj));
             let chapterId = (_a = chapterTile.attr('href')) === null || _a === void 0 ? void 0 : _a.replace(`/chapter/`, '');
+            let chapGroup = (_b = $(chapterTile).text().trim().split('\n').pop()) === null || _b === void 0 ? void 0 : _b.trim();
             let chapName = $('span', $(chapterTile)).first().text().replace(':', '').trim();
-            let chapter = $('b', chapterTile).text().toLowerCase().split('volume');
-            let chapNum = (_b = chapter[0]) === null || _b === void 0 ? void 0 : _b.replace('chapter', '').trim();
-            let volume = Number((_c = chapter[1]) === null || _c === void 0 ? void 0 : _c.replace('volume', '').trim());
+            if (chapName == chapGroup)
+                chapName = '';
+            let chapter = (_c = $('b', chapterTile).text().toLowerCase()) === null || _c === void 0 ? void 0 : _c.split('chapter');
+            let chapNum = (_d = chapter[1]) === null || _d === void 0 ? void 0 : _d.trim();
+            let volume = Number((_e = chapter[0]) === null || _e === void 0 ? void 0 : _e.replace('volume', '').trim());
             // NaN check
             if (isNaN(Number(chapNum))) {
-                chapNum = `${(_d = chapNum.replace(/^\D+/, '')) !== null && _d !== void 0 ? _d : '0'}`.split(/^\D+/)[0];
+                chapNum = `${(_f = chapNum.replace(/^\D+/, '')) !== null && _f !== void 0 ? _f : '0'}`.split(/^\D+/)[0];
                 if (isNaN(Number(chapNum))) {
                     chapNum = '0';
                     chapName = $(chapterTile).text().trim().split('\n')[0];
                 }
             }
-            let chapGroup = (_e = $(chapterTile).text().trim().split('\n').pop()) === null || _e === void 0 ? void 0 : _e.trim();
-            let language = (_f = $('.emoji').attr('data-lang')) !== null && _f !== void 0 ? _f : 'gb';
+            let language = (_g = $('.emoji').attr('data-lang')) !== null && _g !== void 0 ? _g : 'gb';
             let time = source.convertTime($('i', $(obj)).text());
             if (typeof chapterId === 'undefined')
                 continue;
@@ -30699,7 +30701,7 @@ class Parser {
                 volume: Number.isNaN(volume) ? 0 : volume,
                 chapNum: Number(chapNum),
                 group: chapGroup,
-                langCode: (_g = Languages_1.reverseLangCode[language]) !== null && _g !== void 0 ? _g : Languages_1.reverseLangCode['_unknown'],
+                langCode: (_h = Languages_1.reverseLangCode[language]) !== null && _h !== void 0 ? _h : Languages_1.reverseLangCode['_unknown'],
                 name: chapName,
                 time: new Date(time)
             }));
