@@ -30673,8 +30673,8 @@ class Parser {
             let chapterTile = $('a', $(obj));
             let chapterId = (_a = chapterTile.attr('href')) === null || _a === void 0 ? void 0 : _a.replace(`/chapter/`, '');
             let chapName = $('span', $(chapterTile)).first().text().replace(':', '').trim();
-            let chapter = $('b', chapterTile).text().toLowerCase().split('chapter');
-            let chapNum = chapter[0].trim();
+            let chapter = $('b', chapterTile).text().toLowerCase().split('volume');
+            let chapNum = chapter[0].replace('chapter', '').trim();
             let volume = Number(chapter[1].replace('volume', '').trim());
             // NaN check
             if (isNaN(Number(chapNum))) {
