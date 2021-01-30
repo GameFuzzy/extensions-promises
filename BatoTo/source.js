@@ -30703,7 +30703,7 @@ class Parser {
                 group: this.decodeHTMLEntity(chapGroup !== null && chapGroup !== void 0 ? chapGroup : ''),
                 langCode: (_h = Languages_1.reverseLangCode[language]) !== null && _h !== void 0 ? _h : Languages_1.reverseLangCode['_unknown'],
                 name: this.decodeHTMLEntity(chapName),
-                time: new Date(time)
+                time: time
             }));
         }
         return chapters;
