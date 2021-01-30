@@ -313,7 +313,7 @@ const paperback_extensions_common_1 = require("paperback-extensions-common");
 const Parser_1 = require("./Parser");
 const COMICEXTRA_DOMAIN = 'https://www.comicextra.com';
 exports.ComicExtraInfo = {
-    version: '1.5.2',
+    version: '1.5.3',
     name: 'ComicExtra',
     description: 'Extension that pulls western comics from comicextra.com',
     author: 'GameFuzzy',
@@ -333,7 +333,9 @@ class ComicExtra extends paperback_extensions_common_1.Source {
         super(...arguments);
         this.parser = new Parser_1.Parser();
     }
-    getMangaShareUrl(mangaId) { return `${COMICEXTRA_DOMAIN}/comic/${mangaId}`; }
+    getMangaShareUrl(mangaId) {
+        return `${COMICEXTRA_DOMAIN}/comic/${mangaId}`;
+    }
     getMangaDetails(mangaId) {
         return __awaiter(this, void 0, void 0, function* () {
             let request = createRequestObject({
@@ -525,7 +527,8 @@ class ComicExtra extends paperback_extensions_common_1.Source {
                     webPage = `/popular-comic/${page}`;
                     break;
                 }
-                default: return Promise.resolve(null);
+                default:
+                    return Promise.resolve(null);
             }
             let request = createRequestObject({
                 url: `${COMICEXTRA_DOMAIN}${webPage}`,
@@ -771,6 +774,7 @@ class Parser {
                     title: createIconText({ text: titleText }),
                     image: image
                 }));
+                collectedIds.push(id);
             }
         }
         return tiles;

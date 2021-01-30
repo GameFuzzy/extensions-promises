@@ -313,7 +313,7 @@ const paperback_extensions_common_1 = require("paperback-extensions-common");
 const Parser_1 = require("./Parser");
 const MANGAPILL_DOMAIN = 'https://www.mangapill.com';
 exports.MangaPillInfo = {
-    version: '1.0.7',
+    version: '1.0.8',
     name: 'MangaPill',
     description: 'Extension that pulls manga from mangapill.com. It has a lot of officially translated manga but can sometimes miss manga notifications',
     author: 'GameFuzzy',
@@ -333,7 +333,9 @@ class MangaPill extends paperback_extensions_common_1.Source {
         super(...arguments);
         this.parser = new Parser_1.Parser();
     }
-    getMangaShareUrl(mangaId) { return `${MANGAPILL_DOMAIN}/manga/${mangaId}`; }
+    getMangaShareUrl(mangaId) {
+        return `${MANGAPILL_DOMAIN}/manga/${mangaId}`;
+    }
     getMangaDetails(mangaId) {
         return __awaiter(this, void 0, void 0, function* () {
             let request = createRequestObject({
@@ -397,7 +399,7 @@ class MangaPill extends paperback_extensions_common_1.Source {
             let page = (_a = metadata === null || metadata === void 0 ? void 0 : metadata.page) !== null && _a !== void 0 ? _a : 1;
             let genres = '&genre=' + ((_b = query.includeGenre) !== null && _b !== void 0 ? _b : []).join('&genre=');
             let format = '&type=' + ((_c = query.includeFormat) !== null && _c !== void 0 ? _c : '');
-            let status = '';
+            let status;
             switch (query.status) {
                 case 0:
                     status = '&status=2';
@@ -405,7 +407,8 @@ class MangaPill extends paperback_extensions_common_1.Source {
                 case 1:
                     status = '&status=1';
                     break;
-                default: status = '';
+                default:
+                    status = '';
             }
             let request = createRequestObject({
                 url: `${MANGAPILL_DOMAIN}/search`,
@@ -473,8 +476,7 @@ class MangaPill extends paperback_extensions_common_1.Source {
                 // Get the section data
                 promises.push(this.requestManager.schedule(section.request, 1).then(response => {
                     const $ = this.cheerio.load(response.data);
-                    const tiles = section.section.id === '1' ? this.parser.parseRecentUpdatesSection($) : this.parser.parsePopularSection($);
-                    section.section.items = tiles;
+                    section.section.items = section.section.id === '1' ? this.parser.parseRecentUpdatesSection($) : this.parser.parsePopularSection($);
                     sectionCallback(section.section);
                 }));
             }
@@ -512,7 +514,8 @@ class MangaPill extends paperback_extensions_common_1.Source {
                     }
                     break;
                 }
-                default: return Promise.resolve(null);
+                default:
+                    return Promise.resolve(null);
             }
             return createPagedResults({
                 results: manga,
@@ -534,17 +537,17 @@ exports.MangaPill = MangaPill;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Parser = void 0;
 const paperback_extensions_common_1 = require("paperback-extensions-common");
-const MANGAPILL_DOMAIN = 'https://www.mangapill.com';
 class Parser {
     parseMangaDetails($, mangaId) {
         var _a, _b, _c;
         let titles = [$('.font-bold.text-xl').text().trim()];
-        let altTitle = $('.text-color-text-secondary', $('div:nth-child(1)', $('.flex.flex-col'))).last().text().trim();
+        let descBox = $('.flex.flex-col');
+        let altTitle = $('.text-color-text-secondary', $('div:nth-child(1)', descBox)).last().text().trim();
         if (altTitle != 'Title') {
             titles.push(altTitle);
         }
         let image = $('.lazy').attr('src');
-        let summary = $('p', $('.my-3', $('.flex.flex-col'))).text().trim();
+        let summary = $('p', $('.my-3', descBox)).text().trim();
         let status = paperback_extensions_common_1.MangaStatus.ONGOING, released, rating = 0;
         let tagArray0 = [];
         let tagArray1 = [];
@@ -564,7 +567,12 @@ class Parser {
             switch (i) {
                 case 0: {
                     // Manga Type
-                    tagArray1 = [...tagArray1, createTag({ id: descObj.text().trim(), label: descObj.text().trim().replace(/^\w/, (c) => c.toUpperCase()) })];
+                    tagArray1 = [...tagArray1, createTag({
+                            id: descObj.text().trim(),
+                            label: descObj.text().trim().replace(/^\w/, (c) => c.toUpperCase())
+                        })];
+                    i++;
+                    continue;
                 }
                 case 1: {
                     // Manga Status

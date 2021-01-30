@@ -30273,7 +30273,7 @@ const paperback_extensions_common_1 = require("paperback-extensions-common");
 const Parser_1 = require("./Parser");
 const BATOTO_DOMAIN = 'https://bato.to';
 exports.BatoToInfo = {
-    version: '1.1.2',
+    version: '1.1.3',
     name: 'Bato.To',
     description: 'Extension that pulls western comics from bato.to',
     author: 'GameFuzzy',
@@ -30293,7 +30293,9 @@ class BatoTo extends paperback_extensions_common_1.Source {
         super(...arguments);
         this.parser = new Parser_1.Parser();
     }
-    getMangaShareUrl(mangaId) { return `${BATOTO_DOMAIN}/series/${mangaId}`; }
+    getMangaShareUrl(mangaId) {
+        return `${BATOTO_DOMAIN}/series/${mangaId}`;
+    }
     getMangaDetails(mangaId) {
         return __awaiter(this, void 0, void 0, function* () {
             let request = createRequestObject({
@@ -30436,8 +30438,7 @@ class BatoTo extends paperback_extensions_common_1.Source {
                 // Get the section data
                 promises.push(this.requestManager.schedule(section.request, 1).then(response => {
                     const $ = this.cheerio.load(response.data);
-                    const tiles = this.parser.parseHomePageSection($, this);
-                    section.section.items = tiles;
+                    section.section.items = this.parser.parseHomePageSection($, this);
                     sectionCallback(section.section);
                 }));
             }
@@ -30463,7 +30464,8 @@ class BatoTo extends paperback_extensions_common_1.Source {
                     webPage = `?sort=create&page=${page}`;
                     break;
                 }
-                default: return Promise.resolve(null);
+                default:
+                    return Promise.resolve(null);
             }
             let request = createRequestObject({
                 url: `${BATOTO_DOMAIN}/browse${webPage}`,
@@ -30485,6 +30487,12 @@ class BatoTo extends paperback_extensions_common_1.Source {
             });
         });
     }
+    cloudflareBypassRequest() {
+        return createRequestObject({
+            url: `${BATOTO_DOMAIN}`,
+            method: 'GET',
+        });
+    }
     convertTime(timeAgo) {
         var _a;
         let time;
@@ -30493,7 +30501,7 @@ class BatoTo extends paperback_extensions_common_1.Source {
         if (timeAgo.includes('sec') || timeAgo.includes('secs')) {
             time = new Date(Date.now() - trimmed * 1000);
         }
-        if (timeAgo.includes('min') || timeAgo.includes('mins')) {
+        else if (timeAgo.includes('min') || timeAgo.includes('mins')) {
             time = new Date(Date.now() - trimmed * 60000);
         }
         else if (timeAgo.includes('hour') || timeAgo.includes('hours')) {
@@ -30509,12 +30517,6 @@ class BatoTo extends paperback_extensions_common_1.Source {
             time = new Date(Date.now());
         }
         return time;
-    }
-    cloudflareBypassRequest() {
-        return createRequestObject({
-            url: `${BATOTO_DOMAIN}`,
-            method: 'GET',
-        });
     }
 }
 exports.BatoTo = BatoTo;
@@ -30573,7 +30575,6 @@ exports.Parser = void 0;
 const paperback_extensions_common_1 = require("paperback-extensions-common");
 const Languages_1 = require("./Languages");
 const CryptoJS = require('./external/crypto.min.js');
-const BATOTO_DOMAIN = 'https://www.bato.to';
 class Parser {
     parseMangaDetails($, mangaId) {
         var _a, _b, _c;
@@ -30597,7 +30598,10 @@ class Parser {
             let itemSpan = $('span', $(item));
             switch (i) {
                 case 0: {
+                    // Views
                     views = parseInt($(itemSpan).text().split('/')[1].trim());
+                    i++;
+                    continue;
                 }
                 case 1: {
                     // Author
@@ -30667,25 +30671,25 @@ class Parser {
         });
     }
     parseChapterList($, mangaId, source) {
-        var _a, _b, _c, _d, _e;
+        var _a, _b, _c, _d, _e, _f, _g;
         let chapters = [];
         for (let obj of $('.item', $('.main')).toArray()) {
             let chapterTile = $('a', $(obj));
             let chapterId = (_a = chapterTile.attr('href')) === null || _a === void 0 ? void 0 : _a.replace(`/chapter/`, '');
             let chapName = $('span', $(chapterTile)).first().text().replace(':', '').trim();
             let chapter = $('b', chapterTile).text().toLowerCase().split('volume');
-            let chapNum = chapter[0].replace('chapter', '').trim();
-            let volume = Number(chapter[1].replace('volume', '').trim());
+            let chapNum = (_b = chapter[0]) === null || _b === void 0 ? void 0 : _b.replace('chapter', '').trim();
+            let volume = Number((_c = chapter[1]) === null || _c === void 0 ? void 0 : _c.replace('volume', '').trim());
             // NaN check
             if (isNaN(Number(chapNum))) {
-                chapNum = `${(_b = chapNum.replace(/^\D+/, '')) !== null && _b !== void 0 ? _b : '0'}`.split(/^\D+/)[0];
+                chapNum = `${(_d = chapNum.replace(/^\D+/, '')) !== null && _d !== void 0 ? _d : '0'}`.split(/^\D+/)[0];
                 if (isNaN(Number(chapNum))) {
                     chapNum = '0';
                     chapName = $(chapterTile).text().trim().split('\n')[0];
                 }
             }
-            let chapGroup = (_c = $(chapterTile).text().trim().split('\n').pop()) === null || _c === void 0 ? void 0 : _c.trim();
-            let language = (_d = $('.emoji').attr('data-lang')) !== null && _d !== void 0 ? _d : 'gb';
+            let chapGroup = (_e = $(chapterTile).text().trim().split('\n').pop()) === null || _e === void 0 ? void 0 : _e.trim();
+            let language = (_f = $('.emoji').attr('data-lang')) !== null && _f !== void 0 ? _f : 'gb';
             let time = source.convertTime($('i', $(obj)).text());
             if (typeof chapterId === 'undefined')
                 continue;
@@ -30695,7 +30699,7 @@ class Parser {
                 volume: Number.isNaN(volume) ? 0 : volume,
                 chapNum: Number(chapNum),
                 group: chapGroup,
-                langCode: (_e = Languages_1.reverseLangCode[language]) !== null && _e !== void 0 ? _e : Languages_1.reverseLangCode['_unknown'],
+                langCode: (_g = Languages_1.reverseLangCode[language]) !== null && _g !== void 0 ? _g : Languages_1.reverseLangCode['_unknown'],
                 name: chapName,
                 time: new Date(time)
             }));
@@ -30734,7 +30738,7 @@ class Parser {
                 }
             }
             else if (script.includes("const server =")) {
-                let encryptedServer = ((_c = script.split('const server = ', 2)[1].split(";", 2)[0]) !== null && _c !== void 0 ? _c : '').replace(/\"/g, "");
+                let encryptedServer = ((_c = script.split('const server = ', 2)[1].split(";", 2)[0]) !== null && _c !== void 0 ? _c : '').replace(/"/g, "");
                 let batoJS = eval((_d = script.split('const batojs = ', 2)[1].split(";", 2)[0]) !== null && _d !== void 0 ? _d : '').toString();
                 let decryptScript = CryptoJS.AES.decrypt(encryptedServer, batoJS).toString(CryptoJS.enc.Utf8);
                 let server = decryptScript.toString().replace(/"/g, '');
@@ -30844,15 +30848,13 @@ class Parser {
                     primaryText: createIconText({ text: time.toDateString(), icon: 'clock.fill' }),
                     image: image
                 }));
+                collectedIds.push(id);
             }
         }
         return tiles;
     }
     isLastPage($) {
-        if (!$('.page-item').last().hasClass('disabled')) {
-            return false;
-        }
-        return true;
+        return $('.page-item').last().hasClass('disabled');
     }
 }
 exports.Parser = Parser;
