@@ -30578,10 +30578,10 @@ const CryptoJS = require('./external/crypto.min.js');
 class Parser {
     parseMangaDetails($, mangaId) {
         var _a, _b, _c;
-        let titles = [decodeHTMLEntity($('a', $('.item-title')).text().trim())];
+        let titles = [this.decodeHTMLEntity($('a', $('.item-title')).text().trim())];
         let altTitles = (_a = $('.alias-set').text().split('/').map(s => s.trim())) !== null && _a !== void 0 ? _a : '';
         for (let title of altTitles)
-            titles.push(decodeHTMLEntity(title));
+            titles.push(this.decodeHTMLEntity(title));
         let image = $('.shadow-6').attr('src');
         let summary = $('pre', $('.attr-main')).text().trim();
         // Doesn't work, assuming it's because they're created by some JS script
@@ -30662,9 +30662,9 @@ class Parser {
             titles: titles,
             image: image !== null && image !== void 0 ? image : '',
             status: status,
-            author: decodeHTMLEntity(author),
+            author: this.decodeHTMLEntity(author),
             tags: tagSections,
-            desc: decodeHTMLEntity(summary),
+            desc: this.decodeHTMLEntity(summary),
             lastUpdate: released,
             hentai: isHentai,
             views: views
@@ -30700,9 +30700,9 @@ class Parser {
                 mangaId: mangaId,
                 volume: Number.isNaN(volume) ? 0 : volume,
                 chapNum: Number(chapNum),
-                group: decodeHTMLEntity(chapGroup),
+                group: this.decodeHTMLEntity(chapGroup),
                 langCode: (_h = Languages_1.reverseLangCode[language]) !== null && _h !== void 0 ? _h : Languages_1.reverseLangCode['_unknown'],
-                name: decodeHTMLEntity(chapName),
+                name: this.decodeHTMLEntity(chapName),
                 time: new Date(time)
             }));
         }
@@ -30795,7 +30795,7 @@ class Parser {
         let collectedIds = [];
         for (let obj of $('.item', $('#series-list')).toArray()) {
             let id = (_b = (_a = $('.item-cover', obj).attr('href')) === null || _a === void 0 ? void 0 : _a.replace(`/series/`, '').trim().split('/')[0]) !== null && _b !== void 0 ? _b : '';
-            let titleText = decodeHTMLEntity($('.item-title', $(obj)).text());
+            let titleText = this.decodeHTMLEntity($('.item-title', $(obj)).text());
             let subtitle = $('.visited', $(obj)).text().trim();
             let time = source.convertTime($('i', $(obj)).text().trim());
             let image = $('img', $(obj)).attr('src');
@@ -30828,7 +30828,7 @@ class Parser {
         let collectedIds = [];
         for (let item of $('.item', $('#series-list')).toArray()) {
             let id = (_b = (_a = $('a', item).attr('href')) === null || _a === void 0 ? void 0 : _a.replace(`/series/`, '').trim().split('/')[0]) !== null && _b !== void 0 ? _b : '';
-            let titleText = decodeHTMLEntity($('.item-title', $(item)).text());
+            let titleText = this.decodeHTMLEntity($('.item-title', $(item)).text());
             let subtitle = $('.visited', $(item)).text().trim();
             let time = source.convertTime($('i', $(item)).text().trim());
             let image = $('img', $(item)).attr('src');
