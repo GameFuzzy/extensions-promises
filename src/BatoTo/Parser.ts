@@ -136,7 +136,7 @@ export class Parser {
                 group: this.decodeHTMLEntity(chapGroup ?? ''),
                 langCode: reverseLangCode[language] ?? reverseLangCode['_unknown'],
                 name: this.decodeHTMLEntity(chapName),
-                time: new Date(time)
+                time: time
             }))
         }
         return chapters
