@@ -30852,7 +30852,7 @@ class Parser {
     }
     decodeHTMLEntity(str) {
         return str === null || str === void 0 ? void 0 : str.replace(/&#(\d+);/g, function (match, dec) {
-            return String.fromCharCode(dec);
+            return String === null || String === void 0 ? void 0 : String.fromCharCode(dec);
         });
     }
 }
