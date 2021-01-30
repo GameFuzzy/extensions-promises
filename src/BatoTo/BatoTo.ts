@@ -17,7 +17,7 @@ import {Parser,} from './Parser'
 const BATOTO_DOMAIN = 'https://bato.to'
 
 export const BatoToInfo: SourceInfo = {
-    version: '1.1.4',
+    version: '1.1.5',
     name: 'Bato.To',
     description: 'Extension that pulls western comics from bato.to',
     author: 'GameFuzzy',
