@@ -17,7 +17,7 @@ import {Parser,} from './Parser'
 const COMICEXTRA_DOMAIN = 'https://www.comicextra.com'
 
 export const ComicExtraInfo: SourceInfo = {
-    version: '1.5.3',
+    version: '1.5.4',
     name: 'ComicExtra',
     description: 'Extension that pulls western comics from comicextra.com',
     author: 'GameFuzzy',

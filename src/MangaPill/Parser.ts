@@ -74,7 +74,7 @@ export class Parser {
             image: image ?? '',
             status: status,
             tags: tagSections,
-            desc: summary,
+            desc: this.decodeHTMLEntity(summary ?? ''),
             lastUpdate: released
         })
     }
@@ -105,7 +105,7 @@ export class Parser {
                 mangaId: mangaId,
                 chapNum: Number(chapNum),
                 langCode: LanguageCode.ENGLISH,
-                name: chapName
+                name: this.decodeHTMLEntity(chapName)
             }))
         }
         return chapters
@@ -163,12 +163,7 @@ export class Parser {
         let collectedIds: string[] = []
         for (let obj of $('div', $('.grid.gap-3')).toArray()) {
             let id = $('a', $(obj)).attr('href')?.replace(`/manga/`, '')
-            let encodedTitleText = $('a', $('div', $(obj))).text()
-
-            // Decode title
-            let titleText = encodedTitleText.replace(/&#(\d+);/g, function (match, dec) {
-                return String.fromCharCode(dec);
-            })
+            let titleText = this.decodeHTMLEntity($('a', $('div', $(obj))).text())
 
             let image = $('img', $('a', $(obj))).attr('data-src')
 
@@ -203,13 +198,8 @@ export class Parser {
         let collectedIds: string[] = []
         for (let obj of $('div', $('.grid.gap-3')).toArray()) {
             let id = $('a', $(obj)).attr('href')?.replace(`/manga/`, '')
-            let encodedTitleText = $('a', $('div', $(obj))).text()
-
-            // Decode title
-            let titleText = encodedTitleText.replace(/&#(\d+);/g, function (match, dec) {
-                return String.fromCharCode(dec);
-            })
-
+            let titleText = this.decodeHTMLEntity($('a', $('div', $(obj))).text())
+            
             let image = $('img', $('a', $(obj))).attr('data-src')
 
             if (typeof id === 'undefined' || typeof image === 'undefined') continue
@@ -262,12 +252,7 @@ export class Parser {
         for (let obj of $('.mb-2.rounded.border').toArray()) {
             let href = ($('a', $(obj)).attr('href') ?? '')
             let id = href.split('-')[0].split('/').pop() + '/' + href.split('/').pop()?.split('-chapter')[0].trim()
-            let encodedTitleText = $('a', $('.mb-2', $('.p-3', $(obj)))).text().split(' Chapter')[0]
-
-            // Decode title
-            let titleText = encodedTitleText.replace(/&#(\d+);/g, function (match, dec) {
-                return String.fromCharCode(dec);
-            })
+            let titleText = this.decodeHTMLEntity($('a', $('.mb-2', $('.p-3', $(obj)))).text().split(' Chapter')[0])
 
             let image = $('img', $('a', $(obj))).attr('data-src')
 
@@ -286,5 +271,11 @@ export class Parser {
 
     isLastPage($: CheerioSelector): boolean {
         return $('a:contains("Next")').length < 1
+    }
+    
+    decodeHTMLEntity(str: string): string {
+        return str.replace(/&#(\d+);/g, function (match, dec) {
+            return String.fromCharCode(dec);
+        })
     }
 }

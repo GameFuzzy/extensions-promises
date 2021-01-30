@@ -76,9 +76,9 @@ export class Parser {
         titles: titles,
         image: image ?? '',
         status: status,
-        author: author,
+        author: this.decodeHTMLEntity(author ?? ''),
         tags: tagSections,
-        desc: summary,
+        desc: this.decodeHTMLEntity(summary ?? ''),
         lastUpdate: released,
         relatedIds: relatedIds
       })
@@ -106,7 +106,7 @@ export class Parser {
             mangaId: mangaId,
             chapNum: Number(chapNum),
             langCode: LanguageCode.ENGLISH,
-            name: chapName,
+            name: this.decodeHTMLEntity(chapName),
             time: new Date(time)
         }))
     }
@@ -174,12 +174,7 @@ export class Parser {
         let collectedIds: string[] = []
         for(let obj of $('.cartoon-box').toArray()) {
             let id = $('a', $(obj)).attr('href')?.replace(`${COMICEXTRA_DOMAIN}/comic/`, '')
-            let encodedTitleText = $('h3', $(obj)).text()
-            // Decode title
-            let titleText = encodedTitleText.replace(/&#(\d+);/g, function(match, dec) {
-              return String.fromCharCode(dec);
-            })
-
+            let titleText = this.decodeHTMLEntity($('h3', $(obj)).text())
             let image = $('img', $(obj)).attr('src')
       
             if(titleText == "Not found") continue // If a search result has no data, the only cartoon-box object has "Not Found" as title. Ignore.
@@ -216,12 +211,7 @@ export class Parser {
         let collectedIds: string[] = []
         for(let obj of $('.cartoon-box').toArray()) {
             let id = $('a', $(obj)).attr('href')?.replace(`${COMICEXTRA_DOMAIN}/comic/`, '')
-            let encodedTitleText = $('h3', $(obj)).text().trim()
-            // Decode title
-            let titleText = encodedTitleText.replace(/&#(\d+);/g, function(match, dec) {
-              return String.fromCharCode(dec);
-            })
-
+            let titleText = this.decodeHTMLEntity($('h3', $(obj)).text().trim())
             let image = $('img', $(obj)).attr('src')
 
             if (typeof id === 'undefined' || typeof image === 'undefined') continue
@@ -243,5 +233,11 @@ export class Parser {
         }
       }
       return true
+    }
+    
+    decodeHTMLEntity(str: string): string {
+        return str.replace(/&#(\d+);/g, function (match, dec) {
+            return String.fromCharCode(dec);
+        })
     }
 }
