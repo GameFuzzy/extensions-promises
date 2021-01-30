@@ -313,7 +313,7 @@ const paperback_extensions_common_1 = require("paperback-extensions-common");
 const Parser_1 = require("./Parser");
 const COMICEXTRA_DOMAIN = 'https://www.comicextra.com';
 exports.ComicExtraInfo = {
-    version: '1.5.3',
+    version: '1.5.4',
     name: 'ComicExtra',
     description: 'Extension that pulls western comics from comicextra.com',
     author: 'GameFuzzy',
@@ -629,9 +629,9 @@ class Parser {
             titles: titles,
             image: image !== null && image !== void 0 ? image : '',
             status: status,
-            author: author,
+            author: this.decodeHTMLEntity(author !== null && author !== void 0 ? author : ''),
             tags: tagSections,
-            desc: summary,
+            desc: this.decodeHTMLEntity(summary !== null && summary !== void 0 ? summary : ''),
             lastUpdate: released,
             relatedIds: relatedIds
         });
@@ -657,7 +657,7 @@ class Parser {
                 mangaId: mangaId,
                 chapNum: Number(chapNum),
                 langCode: paperback_extensions_common_1.LanguageCode.ENGLISH,
-                name: chapName,
+                name: this.decodeHTMLEntity(chapName),
                 time: new Date(time)
             }));
         }
@@ -721,11 +721,7 @@ class Parser {
         let collectedIds = [];
         for (let obj of $('.cartoon-box').toArray()) {
             let id = (_a = $('a', $(obj)).attr('href')) === null || _a === void 0 ? void 0 : _a.replace(`${COMICEXTRA_DOMAIN}/comic/`, '');
-            let encodedTitleText = $('h3', $(obj)).text();
-            // Decode title
-            let titleText = encodedTitleText.replace(/&#(\d+);/g, function (match, dec) {
-                return String.fromCharCode(dec);
-            });
+            let titleText = this.decodeHTMLEntity($('h3', $(obj)).text());
             let image = $('img', $(obj)).attr('src');
             if (titleText == "Not found")
                 continue; // If a search result has no data, the only cartoon-box object has "Not Found" as title. Ignore.
@@ -760,11 +756,7 @@ class Parser {
         let collectedIds = [];
         for (let obj of $('.cartoon-box').toArray()) {
             let id = (_a = $('a', $(obj)).attr('href')) === null || _a === void 0 ? void 0 : _a.replace(`${COMICEXTRA_DOMAIN}/comic/`, '');
-            let encodedTitleText = $('h3', $(obj)).text().trim();
-            // Decode title
-            let titleText = encodedTitleText.replace(/&#(\d+);/g, function (match, dec) {
-                return String.fromCharCode(dec);
-            });
+            let titleText = this.decodeHTMLEntity($('h3', $(obj)).text().trim());
             let image = $('img', $(obj)).attr('src');
             if (typeof id === 'undefined' || typeof image === 'undefined')
                 continue;
@@ -786,6 +778,11 @@ class Parser {
             }
         }
         return true;
+    }
+    decodeHTMLEntity(str) {
+        return str.replace(/&#(\d+);/g, function (match, dec) {
+            return String.fromCharCode(dec);
+        });
     }
 }
 exports.Parser = Parser;

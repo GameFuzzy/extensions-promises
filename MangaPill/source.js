@@ -313,7 +313,7 @@ const paperback_extensions_common_1 = require("paperback-extensions-common");
 const Parser_1 = require("./Parser");
 const MANGAPILL_DOMAIN = 'https://www.mangapill.com';
 exports.MangaPillInfo = {
-    version: '1.0.8',
+    version: '1.0.9',
     name: 'MangaPill',
     description: 'Extension that pulls manga from mangapill.com. It has a lot of officially translated manga but can sometimes miss manga notifications',
     author: 'GameFuzzy',
@@ -609,7 +609,7 @@ class Parser {
             image: image !== null && image !== void 0 ? image : '',
             status: status,
             tags: tagSections,
-            desc: summary,
+            desc: this.decodeHTMLEntity(summary !== null && summary !== void 0 ? summary : ''),
             lastUpdate: released
         });
     }
@@ -637,7 +637,7 @@ class Parser {
                 mangaId: mangaId,
                 chapNum: Number(chapNum),
                 langCode: paperback_extensions_common_1.LanguageCode.ENGLISH,
-                name: chapName
+                name: this.decodeHTMLEntity(chapName)
             }));
         }
         return chapters;
@@ -694,11 +694,7 @@ class Parser {
         let collectedIds = [];
         for (let obj of $('div', $('.grid.gap-3')).toArray()) {
             let id = (_a = $('a', $(obj)).attr('href')) === null || _a === void 0 ? void 0 : _a.replace(`/manga/`, '');
-            let encodedTitleText = $('a', $('div', $(obj))).text();
-            // Decode title
-            let titleText = encodedTitleText.replace(/&#(\d+);/g, function (match, dec) {
-                return String.fromCharCode(dec);
-            });
+            let titleText = this.decodeHTMLEntity($('a', $('div', $(obj))).text());
             let image = $('img', $('a', $(obj))).attr('data-src');
             if (typeof id === 'undefined' || typeof image === 'undefined')
                 continue;
@@ -731,11 +727,7 @@ class Parser {
         let collectedIds = [];
         for (let obj of $('div', $('.grid.gap-3')).toArray()) {
             let id = (_a = $('a', $(obj)).attr('href')) === null || _a === void 0 ? void 0 : _a.replace(`/manga/`, '');
-            let encodedTitleText = $('a', $('div', $(obj))).text();
-            // Decode title
-            let titleText = encodedTitleText.replace(/&#(\d+);/g, function (match, dec) {
-                return String.fromCharCode(dec);
-            });
+            let titleText = this.decodeHTMLEntity($('a', $('div', $(obj))).text());
             let image = $('img', $('a', $(obj))).attr('data-src');
             if (typeof id === 'undefined' || typeof image === 'undefined')
                 continue;
@@ -787,11 +779,7 @@ class Parser {
         for (let obj of $('.mb-2.rounded.border').toArray()) {
             let href = ((_a = $('a', $(obj)).attr('href')) !== null && _a !== void 0 ? _a : '');
             let id = href.split('-')[0].split('/').pop() + '/' + ((_b = href.split('/').pop()) === null || _b === void 0 ? void 0 : _b.split('-chapter')[0].trim());
-            let encodedTitleText = $('a', $('.mb-2', $('.p-3', $(obj)))).text().split(' Chapter')[0];
-            // Decode title
-            let titleText = encodedTitleText.replace(/&#(\d+);/g, function (match, dec) {
-                return String.fromCharCode(dec);
-            });
+            let titleText = this.decodeHTMLEntity($('a', $('.mb-2', $('.p-3', $(obj)))).text().split(' Chapter')[0]);
             let image = $('img', $('a', $(obj))).attr('data-src');
             if (typeof id === 'undefined' || typeof image === 'undefined')
                 continue;
@@ -808,6 +796,11 @@ class Parser {
     }
     isLastPage($) {
         return $('a:contains("Next")').length < 1;
+    }
+    decodeHTMLEntity(str) {
+        return str.replace(/&#(\d+);/g, function (match, dec) {
+            return String.fromCharCode(dec);
+        });
     }
 }
 exports.Parser = Parser;
