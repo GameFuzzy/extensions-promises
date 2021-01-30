@@ -1,97 +1,100 @@
-import {Manga, MangaStatus, Tag, TagSection, LanguageCode, Chapter, MangaTile} from 'paperback-extensions-common'
-
-const MANGAPILL_DOMAIN = 'https://www.mangapill.com'
+import {Chapter, LanguageCode, Manga, MangaStatus, MangaTile, Tag, TagSection} from 'paperback-extensions-common'
 
 export class Parser {
 
-    
+
     parseMangaDetails($: CheerioSelector, mangaId: string): Manga {
-    
 
-    let titles = [$('.font-bold.text-xl').text().trim()]
-    let altTitle = $('.text-color-text-secondary', $('div:nth-child(1)', $('.flex.flex-col'))).last().text().trim()
-    if(altTitle != 'Title') {
-      titles.push(altTitle)
-    }
-    let image = $('.lazy').attr('src')
-    let summary = $('p', $('.my-3', $('.flex.flex-col'))).text().trim()
 
-    let status = MangaStatus.ONGOING, released, rating: number = 0
-    let tagArray0 : Tag[] = []
-    let tagArray1 : Tag[] = []
-    for(let obj of $('a[href*=genre]').toArray()){
-      let id = $(obj).attr('href')?.replace(`/search?genre=`, '').trim()
-      let label = $(obj).text().trim()
-      if (typeof id === 'undefined' || typeof label === 'undefined') continue
-      tagArray0 = [...tagArray0, createTag({id: id, label: $(obj).text().trim()})]
-    }
-    let i = 0
-    for (let item of $('div', $('.grid.gap-2')).toArray()) {
-      let descObj = $('div', $(item))
-      if(!descObj.html()) {
-        continue
-      }
-      switch (i) {
-        case 0: {
-          // Manga Type
-          tagArray1 = [...tagArray1, createTag({id: descObj.text().trim(), label: descObj.text().trim().replace(/^\w/, (c) => c.toUpperCase())})]
+        let titles = [$('.font-bold.text-xl').text().trim()]
+        let descBox = $('.flex.flex-col')
+        let altTitle = $('.text-color-text-secondary', $('div:nth-child(1)', descBox)).last().text().trim()
+        if (altTitle != 'Title') {
+            titles.push(altTitle)
         }
-        case 1: {
-          // Manga Status
-          if (descObj.text().trim().toLowerCase().includes("publishing")) {
-            status = MangaStatus.ONGOING
-          }
-          else {
-            status = MangaStatus.COMPLETED
-          }
-          i++
-          continue
+        let image = $('.lazy').attr('src')
+        let summary = $('p', $('.my-3', descBox)).text().trim()
+
+        let status = MangaStatus.ONGOING, released, rating: number = 0
+        let tagArray0: Tag[] = []
+        let tagArray1: Tag[] = []
+        for (let obj of $('a[href*=genre]').toArray()) {
+            let id = $(obj).attr('href')?.replace(`/search?genre=`, '').trim()
+            let label = $(obj).text().trim()
+            if (typeof id === 'undefined' || typeof label === 'undefined') continue
+            tagArray0 = [...tagArray0, createTag({id: id, label: $(obj).text().trim()})]
         }
-        case 2: {
-          // Date of release
-          released = descObj.text().trim() ?? undefined
-          i++
-          continue
+        let i = 0
+        for (let item of $('div', $('.grid.gap-2')).toArray()) {
+            let descObj = $('div', $(item))
+            if (!descObj.html()) {
+                continue
+            }
+            switch (i) {
+                case 0: {
+                    // Manga Type
+                    tagArray1 = [...tagArray1, createTag({
+                        id: descObj.text().trim(),
+                        label: descObj.text().trim().replace(/^\w/, (c) => c.toUpperCase())
+                    })]
+                    i++
+                    continue
+                }
+                case 1: {
+                    // Manga Status
+                    if (descObj.text().trim().toLowerCase().includes("publishing")) {
+                        status = MangaStatus.ONGOING
+                    } else {
+                        status = MangaStatus.COMPLETED
+                    }
+                    i++
+                    continue
+                }
+                case 2: {
+                    // Date of release
+                    released = descObj.text().trim() ?? undefined
+                    i++
+                    continue
+                }
+                case 3: {
+                    // Rating
+                    rating = Number(descObj.text().trim().replace(' / 10', '')) ?? undefined
+                    i++
+                    continue
+                }
+            }
+            i = 0
         }
-        case 3: {
-          // Rating
-          rating = Number(descObj.text().trim().replace(' / 10', '')) ?? undefined
-          i++
-          continue
-        }
-      }
-      i = 0
+        let tagSections: TagSection[] = [createTagSection({id: '0', label: 'genres', tags: tagArray0}),
+            createTagSection({id: '1', label: 'format', tags: tagArray1})]
+        return createManga({
+            id: mangaId,
+            rating: rating,
+            titles: titles,
+            image: image ?? '',
+            status: status,
+            tags: tagSections,
+            desc: summary,
+            lastUpdate: released
+        })
     }
-    let tagSections: TagSection[] = [createTagSection({ id: '0', label: 'genres', tags: tagArray0 }), 
-    createTagSection({ id: '1', label: 'format', tags: tagArray1 })]
-      return createManga({
-        id: mangaId,
-        rating: rating,
-        titles: titles,
-        image: image ?? '',
-        status: status,
-        tags: tagSections,
-        desc: summary,
-        lastUpdate: released
-      })
-    }
 
 
-    parseChapterList($: CheerioSelector, mangaId: string) : Chapter[] { 
-    
-    let chapters: Chapter[] = []
+    parseChapterList($: CheerioSelector, mangaId: string): Chapter[] {
 
-        for(let obj of $('option', $('select[name=view-chapter]')).toArray()) {
+        let chapters: Chapter[] = []
+
+        for (let obj of $('option', $('select[name=view-chapter]')).toArray()) {
             let chapterId = $(obj).attr('value')
-            if(chapterId == 'Read Chapters') {
+            if (chapterId == 'Read Chapters') {
                 continue
             }
             let chapNum = $(obj).text().trim()?.replace(`Chapter `, '')
             // NaN check
             let chapName = $(obj).text()
-            if(isNaN(Number(chapNum))){
-                chapNum = `${chapNum.replace( /^\D+/, '') ?? '0'}`.split(/^\D+/)[0]
-                if(isNaN(Number(chapNum))){
+            if (isNaN(Number(chapNum))) {
+                chapNum = `${chapNum.replace(/^\D+/, '') ?? '0'}`.split(/^\D+/)[0]
+                if (isNaN(Number(chapNum))) {
                     chapNum = '0'
                 }
             }
@@ -104,128 +107,126 @@ export class Parser {
                 langCode: LanguageCode.ENGLISH,
                 name: chapName
             }))
+        }
+        return chapters
     }
-    return chapters
-}
 
 
-    sortChapters(chapters: Chapter[]) : Chapter[] {
+    sortChapters(chapters: Chapter[]): Chapter[] {
         let sortedChapters: Chapter[] = []
         chapters.forEach((c) => {
             if (sortedChapters[sortedChapters.indexOf(c)]?.id !== c?.id) {
-              sortedChapters.push(c)
+                sortedChapters.push(c)
             }
-          })
-          sortedChapters.sort((a, b) => (a.id > b.id) ? 1 : -1)
-          return sortedChapters
+        })
+        sortedChapters.sort((a, b) => (a.id > b.id) ? 1 : -1)
+        return sortedChapters
     }
 
 
-    parseChapterDetails($: CheerioSelector) : string[] {
-      let pages: string[] = []
-      // Get all of the pages
-      for(let obj of $('img',$('picture')).toArray()) {
-        let page = $(obj).attr('data-src')
-        if(typeof page === 'undefined') continue
-        pages.push(page)
-      }
-      return pages
-  }
-
-    filterUpdatedManga($: CheerioSelector, time: Date, ids: string[] ) : {updates: string[], loadNextPage : boolean} {
-    let foundIds: string[] = []
-    let passedReferenceTime = false
-    for (let item of $('.font-medium.text-color-text-primary').toArray()) {
-      let href = ($(item).attr('href') ?? '')
-      let id = href.split('-')[0].split('/').pop() + '/' + href.split('/').pop()?.split('-chapter')[0].trim()
-      let mangaTime = new Date(time)
-      passedReferenceTime = mangaTime <= time
-      if (!passedReferenceTime) {
-        if (ids.includes(id)) {
-          foundIds.push(id)
+    parseChapterDetails($: CheerioSelector): string[] {
+        let pages: string[] = []
+        // Get all of the pages
+        for (let obj of $('img', $('picture')).toArray()) {
+            let page = $(obj).attr('data-src')
+            if (typeof page === 'undefined') continue
+            pages.push(page)
         }
-      }
-      else break
-    }
-    if(!passedReferenceTime) {
-        return {updates: foundIds, loadNextPage: true}
-    }
-    else {
-        return {updates: foundIds, loadNextPage: false}
+        return pages
     }
 
-    
-}
+    filterUpdatedManga($: CheerioSelector, time: Date, ids: string[]): { updates: string[], loadNextPage: boolean } {
+        let foundIds: string[] = []
+        let passedReferenceTime = false
+        for (let item of $('.font-medium.text-color-text-primary').toArray()) {
+            let href = ($(item).attr('href') ?? '')
+            let id = href.split('-')[0].split('/').pop() + '/' + href.split('/').pop()?.split('-chapter')[0].trim()
+            let mangaTime = new Date(time)
+            passedReferenceTime = mangaTime <= time
+            if (!passedReferenceTime) {
+                if (ids.includes(id)) {
+                    foundIds.push(id)
+                }
+            } else break
+        }
+        if (!passedReferenceTime) {
+            return {updates: foundIds, loadNextPage: true}
+        } else {
+            return {updates: foundIds, loadNextPage: false}
+        }
 
-    parseSearchResults($: CheerioSelector): MangaTile[] { 
-      let mangaTiles: MangaTile[] = []
-      let collectedIds: string[] = []
-      for(let obj of $('div', $('.grid.gap-3')).toArray()) {
-          let id = $('a', $(obj)).attr('href')?.replace(`/manga/`, '')
-          let encodedTitleText = $('a', $('div', $(obj))).text()
 
-          // Decode title
-          let titleText = encodedTitleText.replace(/&#(\d+);/g, function(match, dec) {
-            return String.fromCharCode(dec);
-          })
+    }
 
-          let image = $('img', $('a', $(obj))).attr('data-src')
+    parseSearchResults($: CheerioSelector): MangaTile[] {
+        let mangaTiles: MangaTile[] = []
+        let collectedIds: string[] = []
+        for (let obj of $('div', $('.grid.gap-3')).toArray()) {
+            let id = $('a', $(obj)).attr('href')?.replace(`/manga/`, '')
+            let encodedTitleText = $('a', $('div', $(obj))).text()
 
-          if (typeof id === 'undefined' || typeof image === 'undefined') continue
-          if(!collectedIds.includes(id)) {
-            mangaTiles.push(createMangaTile({
-              id: id,
-              title: createIconText({text: titleText}),
-              image: image
-          }))
-          collectedIds.push(id)
-          }
+            // Decode title
+            let titleText = encodedTitleText.replace(/&#(\d+);/g, function (match, dec) {
+                return String.fromCharCode(dec);
+            })
+
+            let image = $('img', $('a', $(obj))).attr('data-src')
+
+            if (typeof id === 'undefined' || typeof image === 'undefined') continue
+            if (!collectedIds.includes(id)) {
+                mangaTiles.push(createMangaTile({
+                    id: id,
+                    title: createIconText({text: titleText}),
+                    image: image
+                }))
+                collectedIds.push(id)
+            }
         }
         return mangaTiles
-      }
+    }
 
     parseTags($: CheerioSelector): TagSection[] {
-      let tagSections: TagSection[] = [createTagSection({ id: '0', label: 'genres', tags: [] }),
-      createTagSection({ id: '1', label: 'format', tags: [] })]
-  
-      for(let obj of $('Label', $('.gap-2')).toArray()) {
-        let genre = $(obj).text().trim()
-        let id = $('input', $(obj)).attr('value') ?? genre
-        tagSections[0].tags.push(createTag({id: id, label: genre}))
-      }
-      tagSections[1].tags.push(createTag({id: 'manga', label: 'Manga'}))
-      return tagSections
-  }
+        let tagSections: TagSection[] = [createTagSection({id: '0', label: 'genres', tags: []}),
+            createTagSection({id: '1', label: 'format', tags: []})]
 
-    parsePopularSection($ : CheerioSelector): MangaTile[]{
-      let mangaTiles: MangaTile[] = []
-      let collectedIds: string[] = []
-      for(let obj of $('div', $('.grid.gap-3')).toArray()) {
-          let id = $('a', $(obj)).attr('href')?.replace(`/manga/`, '')
-          let encodedTitleText = $('a', $('div', $(obj))).text()
+        for (let obj of $('Label', $('.gap-2')).toArray()) {
+            let genre = $(obj).text().trim()
+            let id = $('input', $(obj)).attr('value') ?? genre
+            tagSections[0].tags.push(createTag({id: id, label: genre}))
+        }
+        tagSections[1].tags.push(createTag({id: 'manga', label: 'Manga'}))
+        return tagSections
+    }
 
-          // Decode title
-          let titleText = encodedTitleText.replace(/&#(\d+);/g, function(match, dec) {
-            return String.fromCharCode(dec);
-          })
+    parsePopularSection($: CheerioSelector): MangaTile[] {
+        let mangaTiles: MangaTile[] = []
+        let collectedIds: string[] = []
+        for (let obj of $('div', $('.grid.gap-3')).toArray()) {
+            let id = $('a', $(obj)).attr('href')?.replace(`/manga/`, '')
+            let encodedTitleText = $('a', $('div', $(obj))).text()
 
-          let image = $('img', $('a', $(obj))).attr('data-src')
+            // Decode title
+            let titleText = encodedTitleText.replace(/&#(\d+);/g, function (match, dec) {
+                return String.fromCharCode(dec);
+            })
 
-          if (typeof id === 'undefined' || typeof image === 'undefined') continue
-          if(!collectedIds.includes(id)) {
-            mangaTiles.push(createMangaTile({
-              id: id,
-              title: createIconText({text: titleText}),
-              image: image
-          }))
-          collectedIds.push(id)
-          }
+            let image = $('img', $('a', $(obj))).attr('data-src')
+
+            if (typeof id === 'undefined' || typeof image === 'undefined') continue
+            if (!collectedIds.includes(id)) {
+                mangaTiles.push(createMangaTile({
+                    id: id,
+                    title: createIconText({text: titleText}),
+                    image: image
+                }))
+                collectedIds.push(id)
+            }
         }
         return mangaTiles
-      }
+    }
 
     // Add featured section back in whenever a section type for that comes around
-    
+
     /*
     parseFeaturedSection($ : CheerioSelector): MangaTile[]{
       let mangaTiles: MangaTile[] = []
@@ -255,35 +256,35 @@ export class Parser {
       return mangaTiles
     }
     */
-    parseRecentUpdatesSection($ : CheerioSelector): MangaTile[]{
-      let mangaTiles: MangaTile[] = []
-      let collectedIds: string[] = []
-      for(let obj of $('.mb-2.rounded.border').toArray()) {
-        let href = ($('a', $(obj)).attr('href') ?? '')
-        let id = href.split('-')[0].split('/').pop() + '/' + href.split('/').pop()?.split('-chapter')[0].trim()
-        let encodedTitleText = $('a', $('.mb-2', $('.p-3', $(obj)))).text().split(' Chapter')[0]
+    parseRecentUpdatesSection($: CheerioSelector): MangaTile[] {
+        let mangaTiles: MangaTile[] = []
+        let collectedIds: string[] = []
+        for (let obj of $('.mb-2.rounded.border').toArray()) {
+            let href = ($('a', $(obj)).attr('href') ?? '')
+            let id = href.split('-')[0].split('/').pop() + '/' + href.split('/').pop()?.split('-chapter')[0].trim()
+            let encodedTitleText = $('a', $('.mb-2', $('.p-3', $(obj)))).text().split(' Chapter')[0]
 
-        // Decode title
-        let titleText = encodedTitleText.replace(/&#(\d+);/g, function(match, dec) {
-          return String.fromCharCode(dec);
-        })
-        
-        let image = $('img', $('a', $(obj))).attr('data-src')
-        
-        if (typeof id === 'undefined' || typeof image === 'undefined') continue
-        if(!collectedIds.includes(id)) {
-          mangaTiles.push(createMangaTile({
-            id: id,
-            title: createIconText({text: titleText}),
-            image: image
-        }))
-        collectedIds.push(id)
+            // Decode title
+            let titleText = encodedTitleText.replace(/&#(\d+);/g, function (match, dec) {
+                return String.fromCharCode(dec);
+            })
+
+            let image = $('img', $('a', $(obj))).attr('data-src')
+
+            if (typeof id === 'undefined' || typeof image === 'undefined') continue
+            if (!collectedIds.includes(id)) {
+                mangaTiles.push(createMangaTile({
+                    id: id,
+                    title: createIconText({text: titleText}),
+                    image: image
+                }))
+                collectedIds.push(id)
+            }
         }
-      }
-      return mangaTiles
+        return mangaTiles
     }
 
     isLastPage($: CheerioSelector): boolean {
-      return $('a:contains("Next")').length < 1
+        return $('a:contains("Next")').length < 1
     }
 }

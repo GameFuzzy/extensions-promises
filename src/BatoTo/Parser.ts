@@ -1,17 +1,16 @@
-import {Manga, MangaStatus, Tag, TagSection, Chapter, MangaTile} from 'paperback-extensions-common'
+import {Chapter, Manga, MangaStatus, MangaTile, Tag, TagSection} from 'paperback-extensions-common'
 import {reverseLangCode} from "./Languages"
-const CryptoJS = require('./external/crypto.min.js')
 
-const BATOTO_DOMAIN = 'https://www.bato.to'
+const CryptoJS = require('./external/crypto.min.js')
 
 export class Parser {
 
-    
+
     parseMangaDetails($: CheerioSelector, mangaId: string): Manga {
 
         let titles = [$('a', $('.item-title')).text().trim()]
         let altTitles: string[] = $('.alias-set').text().split('/').map(s => s.trim()) ?? ''
-        for(let title of altTitles)
+        for (let title of altTitles)
             titles.push(title)
 
         let image = $('.shadow-6').attr('src')
@@ -27,13 +26,16 @@ export class Parser {
         */
 
         let status = MangaStatus.ONGOING, author, released, rating: number = 0, views: number = 0, isHentai = false
-        let tagArray0 : Tag[] = []
+        let tagArray0: Tag[] = []
         let i = 0
         for (let item of $('.attr-item').toArray()) {
             let itemSpan = $('span', $(item))
             switch (i) {
                 case 0: {
+                    // Views
                     views = parseInt($(itemSpan).text().split('/')[1].trim())
+                    i++
+                    continue
                 }
                 case 1: {
                     // Author
@@ -44,22 +46,27 @@ export class Parser {
                 }
                 case 2: {
                     // Genres
-                    for(let obj of $(itemSpan).children().toArray()){
+                    for (let obj of $(itemSpan).children().toArray()) {
                         let label = $(obj).text().trim()
-                        if (typeof label === 'undefined') {i++; continue}
+                        if (typeof label === 'undefined') {
+                            i++;
+                            continue
+                        }
                         tagArray0 = [...tagArray0, createTag({id: label, label: label})]
                     }
                     i++
                     continue
                 }
-                case 3: {i++; continue}
+                case 3: {
+                    i++;
+                    continue
+                }
                 case 4: {
                     // Status
                     if ($(itemSpan).text().toLowerCase().includes("ongoing")) {
-                      status = MangaStatus.ONGOING
-                    }
-                    else {
-                      status = MangaStatus.COMPLETED
+                        status = MangaStatus.ONGOING
+                    } else {
+                        status = MangaStatus.COMPLETED
                     }
                     i++
                     continue
@@ -72,50 +79,50 @@ export class Parser {
                 }
                 case 6: {
                     // Hentai
-                    if($(itemSpan).text()[0] == 'G') {
+                    if ($(itemSpan).text()[0] == 'G') {
                         isHentai = true
                     }
                     i++
                     continue
                 }
-          }
-          i = 0
+            }
+            i = 0
         }
-        let tagSections: TagSection[] = [createTagSection({ id: '0', label: 'genres', tags: tagArray0 })]
-            return createManga({
-                id: mangaId,
-                rating: rating,
-                titles: titles,
-                image: image ?? '',
-                status: status,
-                author: author,
-                tags: tagSections,
-                desc: summary,
-                lastUpdate: released,
-                hentai: isHentai,
-                views: views
-            })
-        }
+        let tagSections: TagSection[] = [createTagSection({id: '0', label: 'genres', tags: tagArray0})]
+        return createManga({
+            id: mangaId,
+            rating: rating,
+            titles: titles,
+            image: image ?? '',
+            status: status,
+            author: author,
+            tags: tagSections,
+            desc: summary,
+            lastUpdate: released,
+            hentai: isHentai,
+            views: views
+        })
+    }
 
 
-    parseChapterList($: CheerioSelector, mangaId: string, source: any) : Chapter[] {
+    parseChapterList($: CheerioSelector, mangaId: string, source: any): Chapter[] {
         let chapters: Chapter[] = []
 
-        for(let obj of $('.item', $('.main')).toArray()) {
+        for (let obj of $('.item', $('.main')).toArray()) {
             let chapterTile: Cheerio = $('a', $(obj))
             let chapterId = chapterTile.attr('href')?.replace(`/chapter/`, '')
             let chapName = $('span', $(chapterTile)).first().text().replace(':', '').trim()
             let chapter = $('b', chapterTile).text().toLowerCase().split('volume')
-            let chapNum = chapter[0].replace('chapter', '').trim()
-            let volume = Number(chapter[1].replace('volume', '').trim())
+            let chapNum = chapter[0]?.replace('chapter', '').trim()
+            let volume = Number(chapter[1]?.replace('volume', '').trim())
             // NaN check
-            if(isNaN(Number(chapNum))){
-                chapNum = `${chapNum.replace( /^\D+/, '') ?? '0'}`.split(/^\D+/)[0]
-                if(isNaN(Number(chapNum))){
+            if (isNaN(Number(chapNum))) {
+                chapNum = `${chapNum.replace(/^\D+/, '') ?? '0'}`.split(/^\D+/)[0]
+                if (isNaN(Number(chapNum))) {
                     chapNum = '0'
                     chapName = $(chapterTile).text().trim().split('\n')[0]
-                    }
                 }
+            }
             let chapGroup = $(chapterTile).text().trim().split('\n').pop()?.trim()
             let language = $('.emoji').attr('data-lang') ?? 'gb'
             let time = source.convertTime($('i', $(obj)).text())
@@ -132,27 +139,27 @@ export class Parser {
             }))
         }
         return chapters
-}
+    }
 
 
-    sortChapters(chapters: Chapter[]) : Chapter[] {
+    sortChapters(chapters: Chapter[]): Chapter[] {
         let sortedChapters: Chapter[] = []
         chapters.forEach((c) => {
             if (sortedChapters[sortedChapters.indexOf(c)]?.id !== c?.id) {
                 sortedChapters.push(c)
             }
         })
-            sortedChapters.sort((a, b) => (a.id > b.id) ? 1 : -1)
-            return sortedChapters
+        sortedChapters.sort((a, b) => (a.id > b.id) ? 1 : -1)
+        return sortedChapters
     }
 
 
-     parseChapterDetails($: CheerioSelector) : string[] {
+    parseChapterDetails($: CheerioSelector): string[] {
         let pages: string[] = []
         // Get all of the pages
 
         let scripts = $('script').toArray()
-        for(let scriptObj of scripts) {
+        for (let scriptObj of scripts) {
             let script = scriptObj.children[0]?.data
             if (typeof script === 'undefined') continue
             if (script.includes("var images =")) {
@@ -167,9 +174,8 @@ export class Parser {
                     }
                 }
 
-            }
-            else if(script.includes("const server =")) {
-                let encryptedServer = (script.split('const server = ', 2)[1].split(";", 2)[0] ?? '').replace(/\"/g, "")
+            } else if (script.includes("const server =")) {
+                let encryptedServer = (script.split('const server = ', 2)[1].split(";", 2)[0] ?? '').replace(/"/g, "")
                 let batoJS = eval(script.split('const batojs = ', 2)[1].split(";", 2)[0] ?? '').toString()
                 let decryptScript = CryptoJS.AES.decrypt(encryptedServer, batoJS).toString(CryptoJS.enc.Utf8)
                 let server = decryptScript.toString().replace(/"/g, '')
@@ -196,24 +202,22 @@ export class Parser {
         return pages
     }
 
-    filterUpdatedManga($: CheerioSelector, time: Date, ids: string[], source: any) : {updates: string[], loadNextPage : boolean} {
+    filterUpdatedManga($: CheerioSelector, time: Date, ids: string[], source: any): { updates: string[], loadNextPage: boolean } {
         let foundIds: string[] = []
         let passedReferenceTime = false
-        for(let item of $('.item', $('#series-list')).toArray()) {
-          let id = $('a', item).attr('href')?.replace(`/series/`, '')!.trim().split('/')[0] ?? ''
+        for (let item of $('.item', $('#series-list')).toArray()) {
+            let id = $('a', item).attr('href')?.replace(`/series/`, '')!.trim().split('/')[0] ?? ''
             let mangaTime = source.convertTime($('i', item).text().trim())
-             passedReferenceTime = mangaTime <= time
+            passedReferenceTime = mangaTime <= time
             if (!passedReferenceTime) {
                 if (ids.includes(id)) {
                     foundIds.push(id)
                 }
-            }
-          else break
+            } else break
         }
-        if(!passedReferenceTime) {
+        if (!passedReferenceTime) {
             return {updates: foundIds, loadNextPage: true}
-        }
-        else {
+        } else {
             return {updates: foundIds, loadNextPage: false}
         }
 
@@ -223,52 +227,52 @@ export class Parser {
     parseSearchResults($: CheerioSelector, source: any): MangaTile[] {
         let mangaTiles: MangaTile[] = []
         let collectedIds: string[] = []
-        for(let obj of $('.item', $('#series-list')).toArray()) {
+        for (let obj of $('.item', $('#series-list')).toArray()) {
             let id = $('.item-cover', obj).attr('href')?.replace(`/series/`, '')!.trim().split('/')[0] ?? ''
             let encodedTitleText = $('.item-title', $(obj)).text()
             // Decode title
-            let titleText = encodedTitleText.replace(/&#(\d+);/g, function(match, dec) {
-              return String.fromCharCode(dec);
+            let titleText = encodedTitleText.replace(/&#(\d+);/g, function (match, dec) {
+                return String.fromCharCode(dec);
             })
             let subtitle = $('.visited', $(obj)).text().trim()
             let time = source.convertTime($('i', $(obj)).text().trim())
             let image = $('img', $(obj)).attr('src')
 
             if (typeof id === 'undefined' || typeof image === 'undefined') continue
-            if(!collectedIds.includes(id)) {
-            mangaTiles.push(createMangaTile({
-                id: id,
-                title: createIconText({text: titleText}),
-                subtitleText: createIconText({ text: subtitle }),
-                primaryText: createIconText({ text: time.toDateString(), icon: 'clock.fill' }),
-                image: image
-            }))
-            collectedIds.push(id)
-          }
-    }
-    return mangaTiles
+            if (!collectedIds.includes(id)) {
+                mangaTiles.push(createMangaTile({
+                    id: id,
+                    title: createIconText({text: titleText}),
+                    subtitleText: createIconText({text: subtitle}),
+                    primaryText: createIconText({text: time.toDateString(), icon: 'clock.fill'}),
+                    image: image
+                }))
+                collectedIds.push(id)
+            }
+        }
+        return mangaTiles
     }
 
     parseTags($: CheerioSelector): TagSection[] {
-        
-        let tagSections: TagSection[] = [createTagSection({ id: '0', label: 'genres', tags: [] })]
-    
-        for(let obj of $('filter-item', $('.filter-items').first()).toArray()) {
-          let label = $('span', $(obj)).text().trim()
-          tagSections[0].tags.push(createTag({id: label, label: label}))
+
+        let tagSections: TagSection[] = [createTagSection({id: '0', label: 'genres', tags: []})]
+
+        for (let obj of $('filter-item', $('.filter-items').first()).toArray()) {
+            let label = $('span', $(obj)).text().trim()
+            tagSections[0].tags.push(createTag({id: label, label: label}))
         }
         return tagSections
     }
 
-    parseHomePageSection($ : CheerioSelector, source: any): MangaTile[]{
-        
+    parseHomePageSection($: CheerioSelector, source: any): MangaTile[] {
+
         let tiles: MangaTile[] = []
         let collectedIds: string[] = []
-        for(let item of $('.item', $('#series-list')).toArray()) {
+        for (let item of $('.item', $('#series-list')).toArray()) {
             let id = $('a', item).attr('href')?.replace(`/series/`, '')!.trim().split('/')[0] ?? ''
             let encodedTitleText = $('.item-title', $(item)).text()
             // Decode title
-            let titleText = encodedTitleText.replace(/&#(\d+);/g, function(match, dec) {
+            let titleText = encodedTitleText.replace(/&#(\d+);/g, function (match, dec) {
                 return String.fromCharCode(dec);
             })
             let subtitle = $('.visited', $(item)).text().trim()
@@ -277,25 +281,23 @@ export class Parser {
             let image = $('img', $(item)).attr('src')
 
             if (typeof id === 'undefined' || typeof image === 'undefined') continue
-            if(!collectedIds.includes(id)) {
-            tiles.push(createMangaTile({
-                id: id,
-                title: createIconText({text: titleText}),
-                subtitleText: createIconText({ text: subtitle }),
-                primaryText: createIconText({ text: time.toDateString(), icon: 'clock.fill' }),
-                image: image
-            }))
+            if (!collectedIds.includes(id)) {
+                tiles.push(createMangaTile({
+                    id: id,
+                    title: createIconText({text: titleText}),
+                    subtitleText: createIconText({text: subtitle}),
+                    primaryText: createIconText({text: time.toDateString(), icon: 'clock.fill'}),
+                    image: image
+                }))
+                collectedIds.push(id)
+            }
         }
-      }
         return tiles
     }
+
     isLastPage($: CheerioSelector): boolean {
+        return $('.page-item').last().hasClass('disabled');
 
-            if(!$('.page-item').last().hasClass('disabled')) {
-                return false
-
-        }
-        return true
     }
 
 }

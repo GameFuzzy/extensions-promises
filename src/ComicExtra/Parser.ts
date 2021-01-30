@@ -1,4 +1,4 @@
-import {Manga, MangaStatus, Tag, TagSection, LanguageCode, Chapter, ChapterDetails, MangaTile} from 'paperback-extensions-common'
+import {Chapter, LanguageCode, Manga, MangaStatus, MangaTile, Tag, TagSection} from 'paperback-extensions-common'
 
 const COMICEXTRA_DOMAIN = 'https://www.comicextra.com'
 
@@ -231,6 +231,7 @@ export class Parser {
                 title: createIconText({text: titleText}),
                 image: image
             }))
+            collectedIds.push(id)
         }
       }
         return tiles
