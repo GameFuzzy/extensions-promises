@@ -95,7 +95,7 @@ export class Parser {
             titles: titles,
             image: image ?? '',
             status: status,
-            author: decodeHTMLEntity(author)
+            author: decodeHTMLEntity(author),
             tags: tagSections,
             desc: decodeHTMLEntity(summary),
             lastUpdate: released,
