@@ -111,10 +111,12 @@ export class Parser {
         for (let obj of $('.item', $('.main')).toArray()) {
             let chapterTile: Cheerio = $('a', $(obj))
             let chapterId = chapterTile.attr('href')?.replace(`/chapter/`, '')
+            let chapGroup = $(chapterTile).text().trim().split('\n').pop()?.trim()
             let chapName = $('span', $(chapterTile)).first().text().replace(':', '').trim()
-            let chapter = $('b', chapterTile).text().toLowerCase().split('volume')
-            let chapNum = chapter[0]?.replace('chapter', '').trim()
-            let volume = Number(chapter[1]?.replace('volume', '').trim())
+            if(chapName == chapGroup) chapName = ''
+            let chapter = $('b', chapterTile).text().toLowerCase()?.split('chapter')
+            let chapNum = chapter[1]?.trim()
+            let volume = Number(chapter[0]?.replace('volume', '').trim())
             // NaN check
             if (isNaN(Number(chapNum))) {
                 chapNum = `${chapNum.replace(/^\D+/, '') ?? '0'}`.split(/^\D+/)[0]
@@ -123,7 +125,6 @@ export class Parser {
                     chapName = $(chapterTile).text().trim().split('\n')[0]
                 }
             }
-            let chapGroup = $(chapterTile).text().trim().split('\n').pop()?.trim()
             let language = $('.emoji').attr('data-lang') ?? 'gb'
             let time = source.convertTime($('i', $(obj)).text())
             if (typeof chapterId === 'undefined') continue
@@ -156,8 +157,8 @@ export class Parser {
 
     parseChapterDetails($: CheerioSelector): string[] {
         let pages: string[] = []
-        // Get all of the pages
 
+        // Get all of the pages
         let scripts = $('script').toArray()
         for (let scriptObj of scripts) {
             let script = scriptObj.children[0]?.data
@@ -277,7 +278,6 @@ export class Parser {
             })
             let subtitle = $('.visited', $(item)).text().trim()
             let time = source.convertTime($('i', $(item)).text().trim())
-
             let image = $('img', $(item)).attr('src')
 
             if (typeof id === 'undefined' || typeof image === 'undefined') continue
