@@ -30662,7 +30662,7 @@ class Parser {
             titles: titles,
             image: image !== null && image !== void 0 ? image : '',
             status: status,
-            author: this.decodeHTMLEntity(author),
+            author: this.decodeHTMLEntity(author !== null && author !== void 0 ? author : ''),
             tags: tagSections,
             desc: this.decodeHTMLEntity(summary),
             lastUpdate: released,
@@ -30700,7 +30700,7 @@ class Parser {
                 mangaId: mangaId,
                 volume: Number.isNaN(volume) ? 0 : volume,
                 chapNum: Number(chapNum),
-                group: this.decodeHTMLEntity(chapGroup),
+                group: this.decodeHTMLEntity(chapGroup !== null && chapGroup !== void 0 ? chapGroup : ''),
                 langCode: (_h = Languages_1.reverseLangCode[language]) !== null && _h !== void 0 ? _h : Languages_1.reverseLangCode['_unknown'],
                 name: this.decodeHTMLEntity(chapName),
                 time: new Date(time)
@@ -30851,8 +30851,8 @@ class Parser {
         return $('.page-item').last().hasClass('disabled');
     }
     decodeHTMLEntity(str) {
-        return str === null || str === void 0 ? void 0 : str.replace(/&#(\d+);/g, function (match, dec) {
-            return String === null || String === void 0 ? void 0 : String.fromCharCode(dec);
+        return str.replace(/&#(\d+);/g, function (match, dec) {
+            return String.fromCharCode(dec);
         });
     }
 }
