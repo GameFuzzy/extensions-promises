@@ -8,10 +8,10 @@ export class Parser {
 
     parseMangaDetails($: CheerioSelector, mangaId: string): Manga {
 
-        let titles = [$('a', $('.item-title')).text().trim()]
+        let titles = [decodeHTMLEntity($('a', $('.item-title')).text().trim())]
         let altTitles: string[] = $('.alias-set').text().split('/').map(s => s.trim()) ?? ''
         for (let title of altTitles)
-            titles.push(title)
+            titles.push(decodeHTMLEntity(title))
 
         let image = $('.shadow-6').attr('src')
 
@@ -95,9 +95,9 @@ export class Parser {
             titles: titles,
             image: image ?? '',
             status: status,
-            author: author,
+            author: decodeHTMLEntity(author)
             tags: tagSections,
-            desc: summary,
+            desc: decodeHTMLEntity(summary),
             lastUpdate: released,
             hentai: isHentai,
             views: views
@@ -133,9 +133,9 @@ export class Parser {
                 mangaId: mangaId,
                 volume: Number.isNaN(volume) ? 0 : volume,
                 chapNum: Number(chapNum),
-                group: chapGroup,
+                group: decodeHTMLEntity(chapGroup),
                 langCode: reverseLangCode[language] ?? reverseLangCode['_unknown'],
-                name: chapName,
+                name: decodeHTMLEntity(chapName),
                 time: new Date(time)
             }))
         }
@@ -230,11 +230,7 @@ export class Parser {
         let collectedIds: string[] = []
         for (let obj of $('.item', $('#series-list')).toArray()) {
             let id = $('.item-cover', obj).attr('href')?.replace(`/series/`, '')!.trim().split('/')[0] ?? ''
-            let encodedTitleText = $('.item-title', $(obj)).text()
-            // Decode title
-            let titleText = encodedTitleText.replace(/&#(\d+);/g, function (match, dec) {
-                return String.fromCharCode(dec);
-            })
+            let titleText = decodeHTMLEntity($('.item-title', $(obj)).text())
             let subtitle = $('.visited', $(obj)).text().trim()
             let time = source.convertTime($('i', $(obj)).text().trim())
             let image = $('img', $(obj)).attr('src')
@@ -271,11 +267,7 @@ export class Parser {
         let collectedIds: string[] = []
         for (let item of $('.item', $('#series-list')).toArray()) {
             let id = $('a', item).attr('href')?.replace(`/series/`, '')!.trim().split('/')[0] ?? ''
-            let encodedTitleText = $('.item-title', $(item)).text()
-            // Decode title
-            let titleText = encodedTitleText.replace(/&#(\d+);/g, function (match, dec) {
-                return String.fromCharCode(dec);
-            })
+            let titleText = decodeHTMLEntity($('.item-title', $(item)).text())
             let subtitle = $('.visited', $(item)).text().trim()
             let time = source.convertTime($('i', $(item)).text().trim())
             let image = $('img', $(item)).attr('src')
@@ -298,6 +290,12 @@ export class Parser {
     isLastPage($: CheerioSelector): boolean {
         return $('.page-item').last().hasClass('disabled');
 
+    }
+
+    decodeHTMLEntity(str: string): string {
+        return str.replace(/&#(\d+);/g, function (match, dec) {
+            return String.fromCharCode(dec);
+        })
     }
 
 }
