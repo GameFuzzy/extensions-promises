@@ -292,8 +292,8 @@ export class Parser {
 
     }
 
-    decodeHTMLEntity(str: string | undefined): string | undefined{
-        return str.replace(/&#(\d+);/g, function (match, dec) {
+    decodeHTMLEntity(str: string | undefined): string {
+        return str?.replace(/&#(\d+);/g, function (match, dec) {
             return String.fromCharCode(dec);
         })
     }
