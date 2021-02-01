@@ -145,7 +145,7 @@ export const parseUpdatedManga = ($: CheerioStatic, time: Date, ids: string[]): 
     }
 }
 
-export const parseHomeSections = ($: CheerioStatic, sections: any[], sectionCallback: (section: HomeSection) => void): void => {
+export const parseHomeSections = ($: CheerioStatic, sections: HomeSection[], sectionCallback: (section: HomeSection) => void): void => {
     for (const section of sections) sectionCallback(section)
     const topManga: MangaTile[] = []
     const updateManga: MangaTile[] = []

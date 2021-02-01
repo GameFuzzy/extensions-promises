@@ -18,7 +18,7 @@ const headers = { "content-type": "application/x-www-form-urlencoded" }
 const method = 'GET'
 
 export const MangaLifeInfo: SourceInfo = {
-  version: '2.0.0',
+  version: '2.1.0',
   name: 'Manga4Life',
   icon: 'icon.png',
   author: 'Daniel Kovalevich',
@@ -71,7 +71,7 @@ export class MangaLife extends Source {
     })
 
     const response = await this.requestManager.schedule(request, 1)
-    return parseChapterDetails(response, mangaId, chapterId);
+    return parseChapterDetails(response.data, mangaId, chapterId);
   }
 
   async filterUpdatedManga(mangaUpdatesFoundCallback: (updates: MangaUpdates) => void, time: Date, ids: string[]): Promise<void> {
@@ -89,15 +89,14 @@ export class MangaLife extends Source {
   async searchRequest(query: SearchRequest, _metadata: any): Promise<PagedResults> {
     const metadata = searchMetadata(query);
     const request = createRequestObject({
-      url: `${ML_DOMAIN}/search/`,
+      url: `${ML_DOMAIN}/directory/`,
       metadata,
       headers,
       method,
     })
 
     const response = await this.requestManager.schedule(request, 1)
-    const $ = this.cheerio.load(response.data)
-    return parseSearch($, response, metadata);
+    return parseSearch(response.data, metadata)
   }
 
   async getTags(): Promise<TagSection[] | null> {
@@ -108,7 +107,7 @@ export class MangaLife extends Source {
     })
 
     const response = await this.requestManager.schedule(request, 1)
-    return parseTags(response);
+    return parseTags(response.data);
   }
 
   async getHomePageSections(sectionCallback: (section: HomeSection) => void): Promise<void> {
@@ -119,7 +118,7 @@ export class MangaLife extends Source {
 
     const response = await this.requestManager.schedule(request, 1)
     const $ = this.cheerio.load(response.data)
-    parseHomeSections($, response, sectionCallback);
+    parseHomeSections($, response.data, sectionCallback);
   }
 
   async getViewMoreItems(homepageSectionId: string, _metadata: any): Promise<PagedResults | null> {
@@ -129,6 +128,6 @@ export class MangaLife extends Source {
     })
 
     const response = await this.requestManager.schedule(request, 1)
-    return parseViewMore(response, homepageSectionId);
+    return parseViewMore(response.data, homepageSectionId);
   }
 }

@@ -128,7 +128,6 @@ export class Manganelo extends Source {
   async searchRequest(query: SearchRequest, metadata: any): Promise<PagedResults> {
     let page : number = metadata?.page ?? 1
     const search = generateSearch(query)
-
     const request = createRequestObject({
       url: `${MN_DOMAIN}/advanced_search?`,
       method,
@@ -171,7 +170,7 @@ export class Manganelo extends Source {
     const request = createRequestObject({
       url: `${MN_DOMAIN}`,
       method,
-      param: param,
+      param,
     })
 
     const response = await this.requestManager.schedule(request, 1)
