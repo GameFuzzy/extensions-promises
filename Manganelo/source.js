@@ -749,7 +749,7 @@ class Manganelo extends paperback_extensions_common_1.Source {
             const request = createRequestObject({
                 url: `${MN_DOMAIN}`,
                 method,
-                param: param,
+                param,
             });
             const response = yield this.requestManager.schedule(request, 1);
             const $ = this.cheerio.load(response.data);
