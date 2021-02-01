@@ -221,7 +221,7 @@ export const parseHomeSections = ($: CheerioStatic, sections: HomeSection[], sec
 
     for (const section of sections) sectionCallback(section)
 }
- 
+
 export const parseViewMore = ($: CheerioStatic, homepageSectionId: string): MangaTile[] => {
     const manga: MangaTile[] = []
     if (homepageSectionId === 'popular_titles') {

@@ -1,15 +1,15 @@
-import { 
-	Source, 
-	Manga, 
-	Chapter, 
-	ChapterDetails, 
-	HomeSection, 
-	SearchRequest, 
-	TagSection, 
-	MangaUpdates, 
-	PagedResults, 
-	SourceInfo, 
-	TagType } 
+import {
+	Source,
+	Manga,
+	Chapter,
+	ChapterDetails,
+	HomeSection,
+	SearchRequest,
+	TagSection,
+	MangaUpdates,
+	PagedResults,
+	SourceInfo,
+	TagType }
 from "paperback-extensions-common"
 import { generateSearch, parseChapterDetails, parseChapters, parseHomeSections, parseMangaDetails, parseSearch, parseTags, parseUpdatedManga,  parseViewMore,  UpdatedManga } from "./MangaParkParser"
 

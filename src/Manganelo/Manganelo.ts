@@ -139,7 +139,7 @@ export class Manganelo extends Source {
     const $ = this.cheerio.load(response.data)
     const manga = parseSearch($)
     metadata = !isLastPage($) ? {page: page + 1} : undefined
-    
+
     return createPagedResults({
       results: manga,
       metadata
