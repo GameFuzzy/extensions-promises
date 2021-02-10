@@ -900,7 +900,7 @@ class Parser {
         });
     }
     parseChapterList($, mangaId) {
-        var _a, _b, _c;
+        var _a, _b;
         let chapters = [];
         for (let obj of $('option', $('select[name=view-chapter]')).toArray()) {
             let chapterId = $(obj).attr('value');
@@ -908,7 +908,7 @@ class Parser {
                 continue;
             }
             let chapName = $(obj).text();
-            let chapNum = (_c = (_b = (_a = $('a', $(obj)).first().attr('href')) === null || _a === void 0 ? void 0 : _a.toLowerCase()) === null || _b === void 0 ? void 0 : _b.match(/chapter-\D*(\d+.\d+)/)) !== null && _c !== void 0 ? _c : '';
+            let chapNum = (_b = (_a = chapterId === null || chapterId === void 0 ? void 0 : chapterId.toLowerCase()) === null || _a === void 0 ? void 0 : _a.match(/chapter-\D*(\d+.\d+)/)) !== null && _b !== void 0 ? _b : '';
             // NaN check
             if (isNaN(Number(chapNum))) {
                 chapNum = '0';
