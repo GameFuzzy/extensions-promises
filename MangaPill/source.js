@@ -900,21 +900,18 @@ class Parser {
         });
     }
     parseChapterList($, mangaId) {
-        var _a, _b;
+        var _a, _b, _c;
         let chapters = [];
         for (let obj of $('option', $('select[name=view-chapter]')).toArray()) {
             let chapterId = $(obj).attr('value');
             if (chapterId == 'Read Chapters') {
                 continue;
             }
-            let chapNum = (_a = $(obj).text().trim()) === null || _a === void 0 ? void 0 : _a.replace(`Chapter `, '');
-            // NaN check
             let chapName = $(obj).text();
+            let chapNum = (_c = (_b = (_a = $('a', $(obj)).first().attr('href')) === null || _a === void 0 ? void 0 : _a.toLowerCase()) === null || _b === void 0 ? void 0 : _b.match(/chapter-(\d*\.*\d*)/)) !== null && _c !== void 0 ? _c : '';
+            // NaN check
             if (isNaN(Number(chapNum))) {
-                chapNum = `${(_b = chapNum.replace(/^\D+/, '')) !== null && _b !== void 0 ? _b : '0'}`.split(/^\D+/)[0];
-                if (isNaN(Number(chapNum))) {
-                    chapNum = '0';
-                }
+                chapNum = '0';
             }
             if (typeof chapterId === 'undefined')
                 continue;
