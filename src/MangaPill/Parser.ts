@@ -89,14 +89,11 @@ export class Parser {
             if (chapterId == 'Read Chapters') {
                 continue
             }
-            let chapNum = $(obj).text().trim()?.replace(`Chapter `, '')
-            // NaN check
             let chapName = $(obj).text()
+            let chapNum = $('a', $(obj)).first().attr('href')?.toLowerCase()?.match(/chapter-(\d*\.*\d*)/) ?? ''
+            // NaN check
             if (isNaN(Number(chapNum))) {
-                chapNum = `${chapNum.replace(/^\D+/, '') ?? '0'}`.split(/^\D+/)[0]
-                if (isNaN(Number(chapNum))) {
-                    chapNum = '0'
-                }
+                chapNum = '0'
             }
 
             if (typeof chapterId === 'undefined') continue
