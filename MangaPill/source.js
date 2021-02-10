@@ -599,7 +599,7 @@ const paperback_extensions_common_1 = require("paperback-extensions-common");
 const Parser_1 = require("./Parser");
 const MANGAPILL_DOMAIN = 'https://www.mangapill.com';
 exports.MangaPillInfo = {
-    version: '1.1.0',
+    version: '1.1.2',
     name: 'MangaPill',
     description: 'Extension that pulls manga from mangapill.com. It has a lot of officially translated manga but can sometimes miss manga notifications',
     author: 'GameFuzzy',
@@ -900,7 +900,7 @@ class Parser {
         });
     }
     parseChapterList($, mangaId) {
-        var _a, _b;
+        var _a, _b, _c, _d;
         let chapters = [];
         for (let obj of $('option', $('select[name=view-chapter]')).toArray()) {
             let chapterId = $(obj).attr('value');
@@ -908,17 +908,15 @@ class Parser {
                 continue;
             }
             let chapName = $(obj).text();
-            let chapNum = (_b = (_a = chapterId === null || chapterId === void 0 ? void 0 : chapterId.toLowerCase()) === null || _a === void 0 ? void 0 : _a.match(/chapter-\D*(\d*\.?\d*)/)) !== null && _b !== void 0 ? _b : '';
-            // NaN check
-            if (isNaN(Number(chapNum))) {
-                chapNum = '0';
-            }
+            let chapVol = Number((_b = (_a = chapName === null || chapName === void 0 ? void 0 : chapName.toLowerCase()) === null || _a === void 0 ? void 0 : _a.match(/season \D*(\d*\.?\d*)/)) === null || _b === void 0 ? void 0 : _b.pop());
+            let chapNum = Number((_d = (_c = chapName === null || chapName === void 0 ? void 0 : chapName.toLowerCase()) === null || _c === void 0 ? void 0 : _c.match(/chapter \D*(\d*\.?\d*)/)) === null || _d === void 0 ? void 0 : _d.pop());
             if (typeof chapterId === 'undefined')
                 continue;
             chapters.push(createChapter({
                 id: chapterId,
                 mangaId: mangaId,
-                chapNum: Number(chapNum[1]),
+                chapNum: Number.isNaN(chapNum) ? 0 : chapNum,
+                volume: Number.isNaN(chapVol) ? 0 : chapVol,
                 langCode: paperback_extensions_common_1.LanguageCode.ENGLISH,
                 name: this.decodeHTMLEntity(chapName)
             }));
