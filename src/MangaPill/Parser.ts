@@ -114,6 +114,7 @@ export class Parser {
                 sortedChapters.push(c)
             }
         })
+        sortedChapters.sort((a, b) => (a.volume > b.volume) ? 1 : -1)
         sortedChapters.sort((a, b) => (a.id > b.id) ? 1 : -1)
         return sortedChapters
     }
