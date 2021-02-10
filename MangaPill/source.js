@@ -908,7 +908,7 @@ class Parser {
                 continue;
             }
             let chapName = $(obj).text();
-            let chapNum = (_b = (_a = chapterId === null || chapterId === void 0 ? void 0 : chapterId.toLowerCase()) === null || _a === void 0 ? void 0 : _a.match(/chapter-\D*(\d*.\d*)/)) !== null && _b !== void 0 ? _b : '';
+            let chapNum = (_b = (_a = chapterId === null || chapterId === void 0 ? void 0 : chapterId.toLowerCase()) === null || _a === void 0 ? void 0 : _a.match(/chapter-\D*(\d*\.?\d*)/)) !== null && _b !== void 0 ? _b : '';
             // NaN check
             if (isNaN(Number(chapNum))) {
                 chapNum = '0';
