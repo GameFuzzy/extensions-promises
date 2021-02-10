@@ -672,7 +672,7 @@ class Parser {
                 sortedChapters.push(c);
             }
         });
-        sortedChapters.sort((a, b) => { var _a, _b; return (((_a = a === null || a === void 0 ? void 0 : a.volume) !== null && _a !== void 0 ? _a : 0) > ((_b = b === null || b === void 0 ? void 0 : b.volume) !== null && _b !== void 0 ? _b : 0)) ? 1 : -1; });
+        sortedChapters.sort((a, b) => { var _a, _b; return (((_a = a === null || a === void 0 ? void 0 : a.volume) !== null && _a !== void 0 ? _a : 0) < ((_b = b === null || b === void 0 ? void 0 : b.volume) !== null && _b !== void 0 ? _b : 0)) ? 1 : -1; });
         sortedChapters.sort((a, b) => (a.id > b.id) ? 1 : -1);
         return sortedChapters;
     }
