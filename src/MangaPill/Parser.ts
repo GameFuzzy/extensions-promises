@@ -90,7 +90,7 @@ export class Parser {
                 continue
             }
             let chapName = $(obj).text()
-            let chapNum = chapterId?.toLowerCase()?.match(/chapter-\D*(\d+.\d+)/) ?? ''
+            let chapNum = chapterId?.toLowerCase()?.match(/chapter-\D*(\d*.\d*)/) ?? ''
             // NaN check
             if (isNaN(Number(chapNum))) {
                 chapNum = '0'
@@ -100,7 +100,7 @@ export class Parser {
             chapters.push(createChapter({
                 id: chapterId,
                 mangaId: mangaId,
-                chapNum: Number(chapNum),
+                chapNum: Number(chapNum[1]),
                 langCode: LanguageCode.ENGLISH,
                 name: this.decodeHTMLEntity(chapName)
             }))
