@@ -90,7 +90,7 @@ export class Parser {
                 continue
             }
             let chapName = $(obj).text()
-            let chapNum = $('a', $(obj)).first().attr('href')?.toLowerCase()?.match(/chapter-(\d*\.*\d*)/) ?? ''
+            let chapNum = $('a', $(obj)).first().attr('href')?.toLowerCase()?.match(/chapter-\D*(\d+.\d+)/) ?? ''
             // NaN check
             if (isNaN(Number(chapNum))) {
                 chapNum = '0'
