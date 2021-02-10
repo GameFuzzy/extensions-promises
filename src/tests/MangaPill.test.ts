@@ -84,9 +84,16 @@ describe('MangaPill Tests', function () {
         await Promise.all(promises)
     })
 
-     /*
     it("Testing Notifications", async () => {
-        await wrapper.filterUpdatedManga(source, new Date("2020-12-30"), [mangaId]);
+        let updates = await wrapper.filterUpdatedManga(source, new Date("2021-02-01"), [mangaId])
+        expect(updates, "No server response").to.exist
+        expect(updates, "Empty server response").to.not.be.empty
+        expect(updates[0], "No updates").to.not.be.empty;
     })
-    */
+
+    it("Get tags", async () => {
+        let tags = await wrapper.getTags(source)
+        expect(tags, "No server response").to.exist
+        expect(tags, "Empty server response").to.not.be.empty
+    })
 })
