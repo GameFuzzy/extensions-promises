@@ -931,7 +931,7 @@ class Parser {
                 sortedChapters.push(c);
             }
         });
-        sortedChapters.sort((a, b) => (a.volume > b.volume) ? 1 : -1);
+        sortedChapters.sort((a, b) => { var _a, _b; return ((_b = (_a = a.volume) !== null && _a !== void 0 ? _a : 0 > b.volume) !== null && _b !== void 0 ? _b : 0) ? 1 : -1; });
         sortedChapters.sort((a, b) => (a.id > b.id) ? 1 : -1);
         return sortedChapters;
     }
