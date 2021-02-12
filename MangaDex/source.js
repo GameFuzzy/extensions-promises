@@ -19,7 +19,6 @@ class Source {
             requestsPerSecond: 2.5,
             requestTimeout: 5000
         });
-        this.stateManager = createSourceStateManager({});
         this.cheerio = cheerio;
     }
     /**
@@ -178,7 +177,7 @@ __exportStar(require("./base"), exports);
 __exportStar(require("./models"), exports);
 __exportStar(require("./APIWrapper"), exports);
 
-},{"./APIWrapper":1,"./base":3,"./models":26}],5:[function(require,module,exports){
+},{"./APIWrapper":1,"./base":3,"./models":25}],5:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 
@@ -267,8 +266,6 @@ arguments[4][5][0].apply(exports,arguments)
 },{"dup":5}],20:[function(require,module,exports){
 arguments[4][5][0].apply(exports,arguments)
 },{"dup":5}],21:[function(require,module,exports){
-arguments[4][5][0].apply(exports,arguments)
-},{"dup":5}],22:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TagType = void 0;
@@ -286,13 +283,13 @@ var TagType;
     TagType["RED"] = "danger";
 })(TagType = exports.TagType || (exports.TagType = {}));
 
-},{}],23:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
+arguments[4][5][0].apply(exports,arguments)
+},{"dup":5}],23:[function(require,module,exports){
 arguments[4][5][0].apply(exports,arguments)
 },{"dup":5}],24:[function(require,module,exports){
 arguments[4][5][0].apply(exports,arguments)
 },{"dup":5}],25:[function(require,module,exports){
-arguments[4][5][0].apply(exports,arguments)
-},{"dup":5}],26:[function(require,module,exports){
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
@@ -325,9 +322,8 @@ __exportStar(require("./SourceInfo"), exports);
 __exportStar(require("./TrackObject"), exports);
 __exportStar(require("./OAuth"), exports);
 __exportStar(require("./UserForm"), exports);
-__exportStar(require("./SourceStateManager"), exports);
 
-},{"./Chapter":5,"./ChapterDetails":6,"./Constants":7,"./HomeSection":8,"./Languages":9,"./Manga":10,"./MangaTile":11,"./MangaUpdate":12,"./OAuth":13,"./PagedResults":14,"./RequestHeaders":15,"./RequestManager":16,"./RequestObject":17,"./ResponseObject":18,"./SearchRequest":19,"./SourceInfo":20,"./SourceStateManager":21,"./SourceTag":22,"./TagSection":23,"./TrackObject":24,"./UserForm":25}],27:[function(require,module,exports){
+},{"./Chapter":5,"./ChapterDetails":6,"./Constants":7,"./HomeSection":8,"./Languages":9,"./Manga":10,"./MangaTile":11,"./MangaUpdate":12,"./OAuth":13,"./PagedResults":14,"./RequestHeaders":15,"./RequestManager":16,"./RequestObject":17,"./ResponseObject":18,"./SearchRequest":19,"./SourceInfo":20,"./SourceTag":21,"./TagSection":22,"./TrackObject":23,"./UserForm":24}],26:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -583,7 +579,7 @@ class MangaDex extends paperback_extensions_common_1.Source {
 }
 exports.MangaDex = MangaDex;
 
-},{"./Parser":28,"paperback-extensions-common":4}],28:[function(require,module,exports){
+},{"./Parser":27,"paperback-extensions-common":4}],27:[function(require,module,exports){
 "use strict";
 /* eslint-disable camelcase, @typescript-eslint/explicit-module-boundary-types, radix, unicorn/filename-case */
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -750,5 +746,5 @@ class Parser {
 }
 exports.Parser = Parser;
 
-},{}]},{},[27])(27)
+},{}]},{},[26])(26)
 });
