@@ -2,6 +2,291 @@
 
 },{}],2:[function(require,module,exports){
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Madara = void 0;
+const _1 = require(".");
+const models_1 = require("../models");
+class Madara extends _1.Source {
+    constructor() {
+        super(...arguments);
+        /**
+         * The path that precedes a manga page not including the base URL.
+         * Eg. for https://www.webtoon.xyz/read/limit-breaker/ it would be 'read'.
+         * Used in all functions.
+         */
+        this.sourceTraversalPathName = 'manga';
+        /**
+         * By default, the homepage of a Madara is not its true homepage.
+         * Accessing the site directory and sorting by the latest title allows
+         * functions to step through the multiple pages easier, without a lot of custom
+         * logic for each source.
+         *
+         * This variable holds the latter half of the website path which is required to reach the
+         * directory page.
+         * Eg. 'webtoons' for https://www.webtoon.xyz/webtoons/?m_orderby=latest
+         */
+        this.homePage = 'manga';
+        /**
+         * Some Madara sources have a different selector which is required in order to parse
+         * out the popular manga. This defaults to the most common selector
+         * but can be overridden by other sources which need it.
+         */
+        this.popularMangaSelector = "div.page-item-detail";
+        /**
+         * Much like {@link popularMangaSelector} this will default to the most used CheerioJS
+         * selector to extract URLs from popular manga. This is available to be overridden.
+         */
+        this.popularMangaUrlSelector = "div.post-title a";
+        /**
+         * Different Madara sources might have a slightly different selector which is required to parse out
+         * each manga object while on a search result page. This is the selector
+         * which is looped over. This may be overridden if required.
+         */
+        this.searchMangaSelector = "div.c-tabs-item__content";
+    }
+    parseDate(dateString) {
+        // Primarily we see dates for the format: "1 day ago" or "16 Apr 2020"
+        let dateStringModified = dateString.replace('day', 'days').replace('month', 'months').replace('hour', 'hours');
+        return new Date(this.convertTime(dateStringModified));
+    }
+    getMangaDetails(mangaId) {
+        var _a;
+        return __awaiter(this, void 0, void 0, function* () {
+            const request = createRequestObject({
+                url: `${this.baseUrl}/${this.sourceTraversalPathName}/${mangaId}`,
+                method: 'GET'
+            });
+            let data = yield this.requestManager.schedule(request, 1);
+            let $ = this.cheerio.load(data.data);
+            let numericId = $('a.wp-manga-action-button').attr('data-post');
+            let title = $('div.post-title h1').first().text().replace(/NEW/, '').replace('\\n', '').trim();
+            let author = $('div.author-content').first().text().replace("\\n", '').trim();
+            let artist = $('div.artist-content').first().text().replace("\\n", '').trim();
+            let summary = $('p', $('div.description-summary')).text();
+            let image = (_a = $('div.summary_image img').first().attr('data-src')) !== null && _a !== void 0 ? _a : '';
+            let rating = $('span.total_votes').text().replace('Your Rating', '');
+            let isOngoing = $('div.summary-content').text().toLowerCase().trim() == "ongoing";
+            let genres = [];
+            for (let obj of $('div.genres-content a').toArray()) {
+                let genre = $(obj).text();
+                genres.push(createTag({ label: genre, id: genre }));
+            }
+            // If we cannot parse out the data-id for this title, we cannot complete subsequent requests
+            if (!numericId) {
+                throw (`Could not parse out the data-id for ${mangaId} - This method might need overridden in the implementing source`);
+            }
+            return createManga({
+                id: numericId,
+                titles: [title],
+                image: image,
+                author: author,
+                artist: artist,
+                desc: summary,
+                status: isOngoing ? models_1.MangaStatus.ONGOING : models_1.MangaStatus.COMPLETED,
+                rating: Number(rating)
+            });
+        });
+    }
+    getChapters(mangaId) {
+        var _a, _b;
+        return __awaiter(this, void 0, void 0, function* () {
+            const request = createRequestObject({
+                url: `${this.baseUrl}/wp-admin/admin-ajax.php`,
+                method: 'POST',
+                headers: {
+                    "content-type": "application/x-www-form-urlencoded; charset=UTF-8",
+                    "referer": this.baseUrl
+                },
+                data: `action=manga_get_chapters&manga=${mangaId}`
+            });
+            let data = yield this.requestManager.schedule(request, 1);
+            let $ = this.cheerio.load(data.data);
+            let chapters = [];
+            // Capture the manga title, as this differs from the ID which this function is fed
+            let realTitle = (_a = $('a', $('li.wp-manga-chapter  ').first()).attr('href')) === null || _a === void 0 ? void 0 : _a.replace(`${this.baseUrl}/${this.sourceTraversalPathName}/`, '').replace(/\/chapter.*/, '');
+            if (!realTitle) {
+                throw (`Failed to parse the human-readable title for ${mangaId}`);
+            }
+            // For each available chapter..
+            for (let obj of $('li.wp-manga-chapter  ').toArray()) {
+                let id = (_b = $('a', $(obj)).first().attr('href')) === null || _b === void 0 ? void 0 : _b.replace(`${this.baseUrl}/${this.sourceTraversalPathName}/${realTitle}/`, '').replace('/', '');
+                let chapNum = Number($('a', $(obj)).first().text().replace(/\D/g, ''));
+                let releaseDate = $('i', $(obj)).text();
+                if (!id) {
+                    throw (`Could not parse out ID when getting chapters for ${mangaId}`);
+                }
+                chapters.push({
+                    id: id,
+                    mangaId: realTitle,
+                    langCode: this.languageCode,
+                    chapNum: chapNum,
+                    time: this.parseDate(releaseDate)
+                });
+            }
+            return chapters;
+        });
+    }
+    getChapterDetails(mangaId, chapterId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const request = createRequestObject({
+                url: `${this.baseUrl}/${this.sourceTraversalPathName}/${mangaId}/${chapterId}`,
+                method: 'GET',
+                cookies: [createCookie({ name: 'wpmanga-adault', value: "1", domain: this.baseUrl })]
+            });
+            let data = yield this.requestManager.schedule(request, 1);
+            let $ = this.cheerio.load(data.data);
+            let pages = [];
+            for (let obj of $('div.page-break').toArray()) {
+                let page = $('img', $(obj)).attr('data-src');
+                if (!page) {
+                    throw (`Could not parse page for ${mangaId}/${chapterId}`);
+                }
+                pages.push(page.replace(/[\t|\n]/g, ''));
+            }
+            return createChapterDetails({
+                id: chapterId,
+                mangaId: mangaId,
+                pages: pages,
+                longStrip: false
+            });
+        });
+    }
+    searchRequest(query, metadata) {
+        var _a, _b, _c;
+        return __awaiter(this, void 0, void 0, function* () {
+            // If we're supplied a page that we should be on, set our internal reference to that page. Otherwise, we start from page 0.
+            let page = (_a = metadata.page) !== null && _a !== void 0 ? _a : 0;
+            const request = createRequestObject({
+                url: `${this.baseUrl}/page/${page}?s=${query.title}&post_type=wp-manga`,
+                method: 'GET',
+                cookies: [createCookie({ name: 'wpmanga-adault', value: "1", domain: this.baseUrl })]
+            });
+            let data = yield this.requestManager.schedule(request, 1);
+            let $ = this.cheerio.load(data.data);
+            let results = [];
+            for (let obj of $(this.searchMangaSelector).toArray()) {
+                let id = (_b = $('a', $(obj)).attr('href')) === null || _b === void 0 ? void 0 : _b.replace(`${this.baseUrl}/${this.sourceTraversalPathName}/`, '').replace('/', '');
+                let title = createIconText({ text: (_c = $('a', $(obj)).attr('title')) !== null && _c !== void 0 ? _c : '' });
+                let image = $('img', $(obj)).attr('data-src');
+                if (!id || !title.text || !image) {
+                    // Something went wrong with our parsing, return a detailed error
+                    throw (`Failed to parse searchResult for ${this.baseUrl} using ${this.searchMangaSelector} as a loop selector`);
+                }
+                results.push(createMangaTile({
+                    id: id,
+                    title: title,
+                    image: image
+                }));
+            }
+            // Check to see whether we need to navigate to the next page or not
+            if ($('div.wp-pagenavi')) {
+                // There ARE multiple pages available, now we must check if we've reached the last or not
+                let pageContext = $('span.pages').text().match(/(\d)/g);
+                if (!pageContext || !pageContext[0] || !pageContext[1]) {
+                    throw (`Failed to parse whether this search has more pages or not. This source may need to have it's searchRequest method overridden`);
+                }
+                // Because we used the \d regex, we can safely cast each capture to a numeric value
+                if (Number(pageContext[1]) != Number(pageContext[2])) {
+                    metadata.page = page + 1;
+                }
+                else {
+                    metadata.page = undefined;
+                }
+            }
+            return createPagedResults({
+                results: results,
+                metadata: metadata.page !== undefined ? metadata : undefined
+            });
+        });
+    }
+    /**
+     * It's hard to capture a default logic for homepages. So for madara sources,
+     * instead we've provided a homesection reader for the base_url/webtoons/ endpoint.
+     * This supports having paged views in almost all cases.
+     * @param sectionCallback
+     */
+    getHomePageSections(sectionCallback) {
+        var _a;
+        return __awaiter(this, void 0, void 0, function* () {
+            let section = createHomeSection({ id: "latest", title: "Latest Titles" });
+            sectionCallback(section);
+            // Parse all of the available data
+            const request = createRequestObject({
+                url: `${this.baseUrl}/${this.homePage}/?m_orderby=latest`,
+                method: 'GET',
+                cookies: [createCookie({ name: 'wpmanga-adault', value: "1", domain: this.baseUrl })]
+            });
+            let data = yield this.requestManager.schedule(request, 1);
+            let $ = this.cheerio.load(data.data);
+            let items = [];
+            for (let obj of $('div.manga').toArray()) {
+                let image = $('img', $(obj)).attr('data-src');
+                let title = $('a', $('h3.h5', $(obj))).text();
+                let id = (_a = $('a', $('h3.h5', $(obj))).attr('href')) === null || _a === void 0 ? void 0 : _a.replace(`${this.baseUrl}/${this.sourceTraversalPathName}/`, '').replace('/', '');
+                if (!id || !title || !image) {
+                    throw (`Failed to parse homepage sections for ${this.baseUrl}/${this.sourceTraversalPathName}/`);
+                }
+                items.push(createMangaTile({
+                    id: id,
+                    title: createIconText({ text: title }),
+                    image: image
+                }));
+            }
+            section.items = items;
+            sectionCallback(section);
+        });
+    }
+    getViewMoreItems(homepageSectionId, metadata) {
+        var _a, _b;
+        return __awaiter(this, void 0, void 0, function* () {
+            // We only have one homepage section ID, so we don't need to worry about handling that any
+            let page = (_a = metadata.page) !== null && _a !== void 0 ? _a : 0; // Default to page 0
+            const request = createRequestObject({
+                url: `${this.baseUrl}/${this.homePage}/page/${page}/?m_orderby=latest`,
+                method: 'GET',
+                cookies: [createCookie({ name: 'wpmanga-adault', value: "1", domain: this.baseUrl })]
+            });
+            let data = yield this.requestManager.schedule(request, 1);
+            let $ = this.cheerio.load(data.data);
+            let items = [];
+            for (let obj of $('div.manga').toArray()) {
+                let image = $('img', $(obj)).attr('data-src');
+                let title = $('a', $('h3.h5', $(obj))).text();
+                let id = (_b = $('a', $('h3.h5', $(obj))).attr('href')) === null || _b === void 0 ? void 0 : _b.replace(`${this.baseUrl}/${this.sourceTraversalPathName}/`, '').replace('/', '');
+                if (!id || !title || !image) {
+                    throw (`Failed to parse homepage sections for ${this.baseUrl}/${this.sourceTraversalPathName}`);
+                }
+                items.push(createMangaTile({
+                    id: id,
+                    title: createIconText({ text: title }),
+                    image: image
+                }));
+            }
+            // Set up to go to the next page. If we are on the last page, remove the logic.
+            metadata.page = page + 1;
+            if (!$('a.last')) {
+                metadata = undefined;
+            }
+            return createPagedResults({
+                results: items,
+                metadata: metadata
+            });
+        });
+    }
+}
+exports.Madara = Madara;
+
+},{".":4,"../models":25}],3:[function(require,module,exports){
+"use strict";
 /**
  * Request objects hold information for a particular source (see sources for example)
  * This allows us to to use a generic api to make the calls against any source
@@ -33,18 +318,6 @@ class Source {
      */
     globalRequestHeaders() { return {}; }
     globalRequestCookies() { return []; }
-    /**
-     * A stateful source may require user input.
-     * By supplying this value to the Source, the app will render your form to the user
-     * in the application settings.
-     */
-    getAppStatefulForm() { return createUserForm({ formElements: [] }); }
-    /**
-     * When the Advanced Search is rendered to the user, this skeleton defines what
-     * fields which will show up to the user, and returned back to the source
-     * when the request is made.
-     */
-    getAdvancedSearchForm() { return createUserForm({ formElements: [] }); }
     /**
      * (OPTIONAL METHOD) Given a manga ID, return a URL which Safari can open in a browser to display.
      * @param mangaId
@@ -130,22 +403,10 @@ class Source {
         }
         return time;
     }
-    /**
-     * When a function requires a POST body, it always should be defined as a JsonObject
-     * and then passed through this function to ensure that it's encoded properly.
-     * @param obj
-     */
-    urlEncodeObject(obj) {
-        let ret = {};
-        for (const entry of Object.entries(obj)) {
-            ret[encodeURIComponent(entry[0])] = encodeURIComponent(entry[1]);
-        }
-        return ret;
-    }
 }
 exports.Source = Source;
 
-},{}],3:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
@@ -159,8 +420,9 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 __exportStar(require("./Source"), exports);
+__exportStar(require("./Madara"), exports);
 
-},{"./Source":2}],4:[function(require,module,exports){
+},{"./Madara":2,"./Source":3}],5:[function(require,module,exports){
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
@@ -177,17 +439,17 @@ __exportStar(require("./base"), exports);
 __exportStar(require("./models"), exports);
 __exportStar(require("./APIWrapper"), exports);
 
-},{"./APIWrapper":1,"./base":3,"./models":25}],5:[function(require,module,exports){
+},{"./APIWrapper":1,"./base":4,"./models":25}],6:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 
-},{}],6:[function(require,module,exports){
-arguments[4][5][0].apply(exports,arguments)
-},{"dup":5}],7:[function(require,module,exports){
-arguments[4][5][0].apply(exports,arguments)
-},{"dup":5}],8:[function(require,module,exports){
-arguments[4][5][0].apply(exports,arguments)
-},{"dup":5}],9:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
+arguments[4][6][0].apply(exports,arguments)
+},{"dup":6}],8:[function(require,module,exports){
+arguments[4][6][0].apply(exports,arguments)
+},{"dup":6}],9:[function(require,module,exports){
+arguments[4][6][0].apply(exports,arguments)
+},{"dup":6}],10:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.LanguageCode = void 0;
@@ -235,7 +497,7 @@ var LanguageCode;
     LanguageCode["VIETNAMESE"] = "vn";
 })(LanguageCode = exports.LanguageCode || (exports.LanguageCode = {}));
 
-},{}],10:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MangaStatus = void 0;
@@ -245,27 +507,27 @@ var MangaStatus;
     MangaStatus[MangaStatus["COMPLETED"] = 0] = "COMPLETED";
 })(MangaStatus = exports.MangaStatus || (exports.MangaStatus = {}));
 
-},{}],11:[function(require,module,exports){
-arguments[4][5][0].apply(exports,arguments)
-},{"dup":5}],12:[function(require,module,exports){
-arguments[4][5][0].apply(exports,arguments)
-},{"dup":5}],13:[function(require,module,exports){
-arguments[4][5][0].apply(exports,arguments)
-},{"dup":5}],14:[function(require,module,exports){
-arguments[4][5][0].apply(exports,arguments)
-},{"dup":5}],15:[function(require,module,exports){
-arguments[4][5][0].apply(exports,arguments)
-},{"dup":5}],16:[function(require,module,exports){
-arguments[4][5][0].apply(exports,arguments)
-},{"dup":5}],17:[function(require,module,exports){
-arguments[4][5][0].apply(exports,arguments)
-},{"dup":5}],18:[function(require,module,exports){
-arguments[4][5][0].apply(exports,arguments)
-},{"dup":5}],19:[function(require,module,exports){
-arguments[4][5][0].apply(exports,arguments)
-},{"dup":5}],20:[function(require,module,exports){
-arguments[4][5][0].apply(exports,arguments)
-},{"dup":5}],21:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
+arguments[4][6][0].apply(exports,arguments)
+},{"dup":6}],13:[function(require,module,exports){
+arguments[4][6][0].apply(exports,arguments)
+},{"dup":6}],14:[function(require,module,exports){
+arguments[4][6][0].apply(exports,arguments)
+},{"dup":6}],15:[function(require,module,exports){
+arguments[4][6][0].apply(exports,arguments)
+},{"dup":6}],16:[function(require,module,exports){
+arguments[4][6][0].apply(exports,arguments)
+},{"dup":6}],17:[function(require,module,exports){
+arguments[4][6][0].apply(exports,arguments)
+},{"dup":6}],18:[function(require,module,exports){
+arguments[4][6][0].apply(exports,arguments)
+},{"dup":6}],19:[function(require,module,exports){
+arguments[4][6][0].apply(exports,arguments)
+},{"dup":6}],20:[function(require,module,exports){
+arguments[4][6][0].apply(exports,arguments)
+},{"dup":6}],21:[function(require,module,exports){
+arguments[4][6][0].apply(exports,arguments)
+},{"dup":6}],22:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TagType = void 0;
@@ -283,13 +545,11 @@ var TagType;
     TagType["RED"] = "danger";
 })(TagType = exports.TagType || (exports.TagType = {}));
 
-},{}],22:[function(require,module,exports){
-arguments[4][5][0].apply(exports,arguments)
-},{"dup":5}],23:[function(require,module,exports){
-arguments[4][5][0].apply(exports,arguments)
-},{"dup":5}],24:[function(require,module,exports){
-arguments[4][5][0].apply(exports,arguments)
-},{"dup":5}],25:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
+arguments[4][6][0].apply(exports,arguments)
+},{"dup":6}],24:[function(require,module,exports){
+arguments[4][6][0].apply(exports,arguments)
+},{"dup":6}],25:[function(require,module,exports){
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
@@ -321,9 +581,8 @@ __exportStar(require("./RequestHeaders"), exports);
 __exportStar(require("./SourceInfo"), exports);
 __exportStar(require("./TrackObject"), exports);
 __exportStar(require("./OAuth"), exports);
-__exportStar(require("./UserForm"), exports);
 
-},{"./Chapter":5,"./ChapterDetails":6,"./Constants":7,"./HomeSection":8,"./Languages":9,"./Manga":10,"./MangaTile":11,"./MangaUpdate":12,"./OAuth":13,"./PagedResults":14,"./RequestHeaders":15,"./RequestManager":16,"./RequestObject":17,"./ResponseObject":18,"./SearchRequest":19,"./SourceInfo":20,"./SourceTag":21,"./TagSection":22,"./TrackObject":23,"./UserForm":24}],26:[function(require,module,exports){
+},{"./Chapter":6,"./ChapterDetails":7,"./Constants":8,"./HomeSection":9,"./Languages":10,"./Manga":11,"./MangaTile":12,"./MangaUpdate":13,"./OAuth":14,"./PagedResults":15,"./RequestHeaders":16,"./RequestManager":17,"./RequestObject":18,"./ResponseObject":19,"./SearchRequest":20,"./SourceInfo":21,"./SourceTag":22,"./TagSection":23,"./TrackObject":24}],26:[function(require,module,exports){
 "use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -579,7 +838,7 @@ class MangaDex extends paperback_extensions_common_1.Source {
 }
 exports.MangaDex = MangaDex;
 
-},{"./Parser":27,"paperback-extensions-common":4}],27:[function(require,module,exports){
+},{"./Parser":27,"paperback-extensions-common":5}],27:[function(require,module,exports){
 "use strict";
 /* eslint-disable camelcase, @typescript-eslint/explicit-module-boundary-types, radix, unicorn/filename-case */
 Object.defineProperty(exports, "__esModule", { value: true });
